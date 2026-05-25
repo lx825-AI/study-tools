@@ -1,4 +1,4 @@
-import { useEffect, useRef, memo } from 'react';
+import { useEffect, useRef, useState, memo } from 'react';
 import type { Formula, Level } from '../data/types';
 import { renderFormula } from '../utils/katex';
 import { highlightText } from '../utils/highlight';
@@ -14,7 +14,6 @@ interface FormulaCardProps {
   onToggleFavorite: () => void;
   onCopy: () => void;
   highlightQuery?: string;
-  isGridView?: boolean;
 }
 
 const LEVEL_LABELS: Record<Level, string> = {
@@ -35,7 +34,7 @@ function FormulaCardInner({
   highlightQuery,
 }: FormulaCardProps) {
   const latexRef = useRef<HTMLDivElement>(null);
-  const copyTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (latexRef.current) {
@@ -46,7 +45,8 @@ function FormulaCardInner({
   const handleCopy = (e: React.MouseEvent) => {
     e.stopPropagation();
     onCopy();
-    copyTimerRef.current = setTimeout(() => copyTimerRef.current = undefined, 1500);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
   };
 
   const handleFav = (e: React.MouseEvent) => {
@@ -86,7 +86,7 @@ function FormulaCardInner({
         data-action="copy"
         onClick={handleCopy}
       >
-        <span aria-hidden="true">{copyTimerRef.current ? '✓' : '📋'}</span>
+        <span aria-hidden="true">{copied ? '✓' : '📋'}</span>
       </button>
       <button
         className={`favorite-btn${isFavorited ? ' favorited' : ''}`}

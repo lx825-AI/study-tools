@@ -1,6 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { ThemeMode } from '../data/types';
 
+export const THEME_LABELS: Record<ThemeMode, string> = {
+  auto: '自动模式',
+  dark: '暗色模式',
+  light: '亮色模式',
+};
+
 const STORAGE_KEY = 'math-theme';
 
 function getStoredTheme(): ThemeMode {
@@ -55,7 +61,5 @@ export default function useTheme() {
     return () => mq.removeEventListener('change', handler);
   }, []);
 
-  const themeLabel = { auto: '自动模式', dark: '暗色模式', light: '亮色模式' };
-
-  return { theme, cycleTheme, themeLabel };
+  return { theme, cycleTheme, themeLabel: THEME_LABELS };
 }

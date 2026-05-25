@@ -1,21 +1,24 @@
 /* ===== 侧边栏 ===== */
 .sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
   width: 260px;
-  flex-shrink: 0;
   background: var(--surface);
   border-right: 1px solid var(--border);
-  padding: 24px 16px;
-  position: sticky;
-  top: 0;
-  height: 100vh;
+  padding: 32px 16px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  z-index: 50;
 }
 
-.sidebar.mobile-collapsed {
-  display: none;
+@media (max-width: 768px) {
+  .sidebar.mobile-collapsed {
+    display: none;
+  }
 }
 
 .sidebar-title {
@@ -96,7 +99,7 @@
 
 /* 主内容区 */
 .main {
-  flex: 1;
+  margin-left: 260px;
   padding: 32px 40px;
   max-width: 960px;
 }

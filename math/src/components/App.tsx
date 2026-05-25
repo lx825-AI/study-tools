@@ -37,19 +37,37 @@ function AppInner() {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
+  const [searchExpandedCards, setSearchExpandedCards] = useState<Set<string>>(new Set());
   const [isGridView, setIsGridView] = useState(false);
 
-  const handleToggleCard = useCallback((index: number) => {
+  const handleToggleCard = useCallback((sectionId: string, index: number) => {
+    const isExpanding = !expandedCards.has(index);
     setExpandedCards(prev => {
       const next = new Set(prev);
-      if (next.has(index)) {
-        next.delete(index);
-      } else {
-        next.add(index);
-      }
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
       return next;
     });
-  }, []);
+    if (isExpanding) {
+      addRecent(sectionId, index);
+      markViewed(sectionId, index);
+    }
+  }, [expandedCards, addRecent, markViewed]);
+
+  const handleSearchToggleCard = useCallback((sectionId: string, index: number) => {
+    const key = `${sectionId}:${index}`;
+    const isExpanding = !searchExpandedCards.has(key);
+    setSearchExpandedCards(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+    if (isExpanding) {
+      addRecent(sectionId, index);
+      markViewed(sectionId, index);
+    }
+  }, [searchExpandedCards, addRecent, markViewed]);
 
   const handleFav = useCallback(
     (sectionId: string, index: number) => {
@@ -79,6 +97,7 @@ function AppInner() {
   const handleNavigate = useCallback(
     (sectionId: string) => {
       setExpandedCards(new Set());
+      setSearchExpandedCards(new Set());
       search.setQuery('');
       navigate(sectionId);
     },
@@ -182,7 +201,7 @@ function AppInner() {
         onResetProgress={handleResetProgress}
       />
       <MobileSidebarToggle />
-      <main className="main" aria-live="polite">
+      <main className="main">
         <div className="main-header">
           <h1>AI 数学公式速查表</h1>
           <ThemeToggle theme={theme} onToggle={() => cycleTheme()} />
@@ -203,25 +222,34 @@ function AppInner() {
 
         <div id="formulaContainer">
           {search.isSearching ? (
-            search.results.length === 0 ? (
-              <div className="no-result" style={{ display: 'block' }}>
-                没有找到匹配的公式
-              </div>
-            ) : (
-              searchSections.map(sec => (
-                <FormulaGrid
-                  key={sec.id}
-                  section={sec}
-                  expandedCards={new Set()}
-                  onToggleCard={() => {}}
-                  favorites={favorites}
-                  onToggleFavorite={handleFav}
-                  onCopy={handleCopy}
-                  highlightQuery={search.query}
-                  isGridView={isGridView}
-                />
-              ))
-            )
+            <div aria-live="polite">
+              {search.results.length === 0 ? (
+                <div className="no-result" style={{ display: 'block' }}>
+                  没有找到匹配的公式
+                </div>
+              ) : (
+                searchSections.map(sec => {
+                const secExpanded = new Set<number>();
+                searchExpandedCards.forEach(key => {
+                  const [s, i] = key.split(':');
+                  if (s === sec.id) secExpanded.add(Number(i));
+                });
+                return (
+                  <FormulaGrid
+                    key={sec.id}
+                    section={sec}
+                    expandedCards={secExpanded}
+                    onToggleCard={handleSearchToggleCard}
+                    favorites={favorites}
+                    onToggleFavorite={handleFav}
+                    onCopy={handleCopy}
+                    highlightQuery={search.query}
+                    isGridView={isGridView}
+                  />
+                );
+              })
+              )}
+            </div>
           ) : displaySection ? (
             <FormulaGrid
               section={displaySection}
@@ -263,7 +291,6 @@ function AppInner() {
                       isFavorited={favorites.has(key)}
                       onToggleFavorite={() => handleFav(item.sectionId, item.formulaIndex)}
                       onCopy={() => handleCopy(item.sectionId, item.formulaIndex)}
-                      isGridView={isGridView}
                     />
                   );
                 })}

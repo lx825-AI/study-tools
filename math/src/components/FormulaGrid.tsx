@@ -5,7 +5,7 @@ import '../styles/formula-card.css';
 interface FormulaGridProps {
   section: Section;
   expandedCards: Set<number>;
-  onToggleCard: (index: number) => void;
+  onToggleCard: (sectionId: string, index: number) => void;
   favorites: Set<string>;
   onToggleFavorite: (sectionId: string, index: number) => void;
   onCopy: (sectionId: string, index: number) => void;
@@ -40,12 +40,11 @@ export default function FormulaGrid({
             sectionId={section.id}
             index={i}
             isExpanded={expandedCards.has(i)}
-            onToggle={() => onToggleCard(i)}
+            onToggle={() => onToggleCard(section.id, i)}
             isFavorited={favorites.has(favKey(section.id, i))}
             onToggleFavorite={() => onToggleFavorite(section.id, i)}
             onCopy={() => onCopy(section.id, i)}
             highlightQuery={highlightQuery}
-            isGridView={isGridView}
           />
         ))}
       </div>

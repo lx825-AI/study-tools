@@ -25,13 +25,5 @@ export default function useProgress() {
     setItem(KEY, {});
   }, []);
 
-  const getSectionProgress = useCallback(
-    (sectionId: string) => {
-      const viewed = (progress[sectionId] || []).length;
-      return { viewed };
-    },
-    [progress],
-  );
-
-  return { progress, markViewed, reset, getSectionProgress };
+  return { progress, markViewed, reset };
 }

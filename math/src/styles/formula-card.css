@@ -141,11 +141,6 @@
   border-color: var(--primary-border);
 }
 
-.copy-btn.copied {
-  background: var(--copy-copied-bg);
-  border-color: var(--copy-copied-border);
-}
-
 /* 收藏按钮 */
 .favorite-btn {
   position: absolute;
