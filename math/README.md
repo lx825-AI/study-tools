@@ -28,6 +28,6 @@ npm test         # 运行测试
 
 ## 部署
 
-推送 `master` 分支自动通过 GitHub Actions 部署到 GitHub Pages。
+推送 `main` 分支自动通过 GitHub Actions 部署到 GitHub Pages。
 
-在线地址: **[lx825-ai.github.io/math-reference](https://lx825-ai.github.io/math-reference/)**
+在线地址: **[lx825-ai.github.io/study-tools/math/](https://lx825-ai.github.io/study-tools/math/)**
