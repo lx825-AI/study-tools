@@ -3,32 +3,80 @@ var FlashcardApp = window.FlashcardApp || {};
 (function (App) {
   'use strict';
 
-  /* ========== 演示数据 ========== */
+  /* ========== 演示数据（富格式：展���卡背各数据段） ========== */
   App.seedDemoData = function () {
     if (App.state.decks.length > 0) return;
-    var words = [
-      ['abandon','放弃；遗弃'],['ability','能力；才能'],['abroad','在国外；到国外'],
-      ['absence','缺席；不在'],['absolute','绝对的；完全的'],['absorb','吸收；吸引'],
-      ['abstract','抽象的；摘要'],['abundant','丰富的；充裕的'],['academic','学术的；学院的'],
-      ['accelerate','加速；促进'],['access','进入；通道；访问'],['accompany','陪伴；伴随'],
-      ['accomplish','完成；实现'],['account','账户；解释；占比'],['accurate','准确的；精确的'],
-      ['achieve','达到；取得'],['acknowledge','承认；感谢'],['acquire','获得；习得'],
-      ['adapt','适应；改编'],['adequate','足够的；适当的'],['adjust','调整；适应'],
-      ['adopt','采用；收养'],['advance','前进；进步'],['affair','事务；事件'],
-      ['abolish','废除；取消'],['absurd','荒谬的；荒唐的'],['adhere','坚持；黏附'],
-      ['adjacent','邻近的；毗连的'],['administer','管理；执行'],['adolescent','青少年'],
-      ['adverse','不利的；有害的'],['advocate','提倡；倡导者'],['aesthetic','美学的；审美的'],
-      ['affiliate','使附属；分支机构'],['aggravate','加重；恶化'],['aggregate','总计；集合体'],
-      ['agony','极度的痛苦'],['alienate','疏远；使隔离'],['allege','断言；声称'],
-      ['alleviate','减轻；缓解'],['allocate','分配；拨出'],['alternate','交替；轮流'],
-      ['ambiguous','模棱两可的'],['amend','修改；修订'],['analogy','类比；比喻'],
-      ['anonymous','匿名的'],['apparatus','仪器；设备'],['abuse','滥用；虐待'],
-      ['acquaint','使认识；使了解'],['blunder','大错；犯错'],
+    var cet4Words = [
+      { front: 'abandon', back: '丢弃；放弃，抛弃', word: 'abandon', phonetic: '/əˈbændən/', pos: 'v.',
+        definitions: ['丢弃；放弃，抛弃', '沉溺于，放纵'],
+        phrases: [{ en: 'abandon oneself to', zh: '沉溺于，纵情于' }, { en: 'abandon hope', zh: '放弃希望' }],
+        sentences: [{ en: 'They had to abandon the sinking ship.', zh: '他们不得不放弃正在下沉的船。' }],
+        synonyms: ['desert', 'forsake', 'give up'], antonyms: ['keep', 'retain', 'maintain'],
+        confused: ['abundant'] },
+      { front: 'ability', back: '能力；才能', word: 'ability', phonetic: '/əˈbɪləti/', pos: 'n.',
+        definitions: ['能力；本领', '才能，才智'],
+        phrases: [{ en: 'to the best of ones ability', zh: '尽某人最大努力' }, { en: 'ability test', zh: '能力测试' }],
+        sentences: [{ en: 'She has the ability to learn languages quickly.', zh: '她有快速学习语言的能力。' }],
+        synonyms: ['capability', 'capacity', 'talent'], antonyms: ['inability', 'incapacity'],
+        confused: [] },
+      { front: 'absorb', back: '吸收；吸引……的注意', word: 'absorb', phonetic: '/əbˈzɔːrb/', pos: 'v.',
+        definitions: ['吸收（液体、气体等）', '吸引……的注意，使全神贯注'],
+        phrases: [{ en: 'be absorbed in', zh: '全神贯注于，专心于' }],
+        sentences: [{ en: 'Plants absorb carbon dioxide from the air.', zh: '植物从空气中吸收二氧化碳。' }, { en: 'He was completely absorbed in his book.', zh: '他完全沉浸在书中。' }],
+        synonyms: ['soak up', 'take in', 'engage'], antonyms: ['emit', 'release'],
+        confused: ['absolute'] },
+      { front: 'accomplish', back: '完成；实现', word: 'accomplish', phonetic: '/əˈkɑːmplɪʃ/', pos: 'v.',
+        definitions: ['完成（任务、目标）', '实现，达成'],
+        phrases: [{ en: 'accomplish a task', zh: '完成任务' }, { en: 'mission accomplished', zh: '使命达成' }],
+        sentences: [{ en: 'We accomplished our goal ahead of schedule.', zh: '我们提前完成了目标。' }],
+        synonyms: ['achieve', 'fulfill', 'complete'], antonyms: ['fail'],
+        confused: ['achieve'] },
+      { front: 'acquire', back: '获得；习得', word: 'acquire', phonetic: '/əˈkwaɪər/', pos: 'v.',
+        definitions: ['获得，取得', '习得（知识、技能）'],
+        phrases: [{ en: 'acquire knowledge', zh: '获取知识' }, { en: 'acquire a reputation', zh: '获得声誉' }],
+        sentences: [{ en: 'She acquired a good knowledge of English.', zh: '她习得了良好的英语知识。' }],
+        synonyms: ['obtain', 'gain', 'attain'], antonyms: ['lose', 'forfeit'],
+        confused: ['inquire', 'require'] }
     ];
-    var mid = Math.floor(words.length / 2);
+    var cet6Words = [
+      { front: 'abolish', back: '废除；取消', word: 'abolish', phonetic: '/əˈbɑːlɪʃ/', pos: 'v.',
+        definitions: ['废除，废止（法律、制度、习俗等）'],
+        phrases: [{ en: 'abolish slavery', zh: '废除奴隶制' }, { en: 'abolish a law', zh: '废止一项法律' }],
+        sentences: [{ en: 'Many countries have abolished the death penalty.', zh: '许多国家已废除了死刑。' }],
+        synonyms: ['eliminate', 'terminate', 'repeal'], antonyms: ['establish', 'institute'],
+        confused: ['polish', 'admonish'] },
+      { front: 'adhere', back: '黏附；坚持，遵守', word: 'adhere', phonetic: '/ədˈhɪr/', pos: 'v.',
+        definitions: ['黏附，附着', '坚持，遵守（原则、规则等）'],
+        phrases: [{ en: 'adhere to', zh: '遵守，坚持，黏附于' }],
+        sentences: [{ en: 'We must adhere to the safety regulations.', zh: '我们必须遵守安全规定。' }, { en: 'The paint adheres to the wall well.', zh: '油漆很好地附着在墙上。' }],
+        synonyms: ['stick', 'cling', 'comply'], antonyms: ['disobey', 'ignore'],
+        confused: ['cohere'] },
+      { front: 'advocate', back: '提倡；倡导者', word: 'advocate', phonetic: '/ˈædvəkeɪt/', pos: 'v./n.',
+        definitions: ['提倡，主张 (v.)', '倡导者，拥护者 (n.)'],
+        phrases: [{ en: 'advocate for', zh: '为……倡导' }, { en: 'a strong advocate', zh: '坚定的倡导者' }],
+        sentences: [{ en: 'He advocates reducing plastic waste.', zh: '他提倡减少塑料垃圾。' }],
+        synonyms: ['champion', 'support', 'promote'], antonyms: ['oppose', 'reject'],
+        confused: ['adverse'] },
+      { front: 'ambiguous', back: '模棱两可的；含糊的', word: 'ambiguous', phonetic: '/æmˈbɪɡjuəs/', pos: 'adj.',
+        definitions: ['模棱两可的，含糊不清的', '引起歧义的'],
+        phrases: [{ en: 'ambiguous statement', zh: '含糊的陈述' }, { en: 'highly ambiguous', zh: '非常模棱两可' }],
+        sentences: [{ en: 'The contract contains some ambiguous terms.', zh: '合同中包含一些模棱两可的条款。' }],
+        synonyms: ['vague', 'unclear', 'obscure'], antonyms: ['clear', 'explicit', 'unambiguous'],
+        confused: ['ambitious'] },
+      { front: 'allocate', back: '分配；拨出', word: 'allocate', phonetic: '/ˈæləkeɪt/', pos: 'v.',
+        definitions: ['分配，分派', '拨出（资金、资源）'],
+        phrases: [{ en: 'allocate resources', zh: '分配资源' }, { en: 'allocate funds', zh: '拨出资金' }],
+        sentences: [{ en: 'The government allocated funds for education.', zh: '政府为教育拨出了资金。' }],
+        synonyms: ['assign', 'distribute', 'allot'], antonyms: ['withhold', 'withdraw'],
+        confused: ['locate', 'alleviate'] }
+    ];
     App.state.decks = [
-      { id: App.genId(), name: '四级高频词汇（演示）', cards: words.slice(0, mid).map(function (pair) { return { id: App.genId(), front: pair[0], back: pair[1], difficulty: Math.floor(Math.random() * 5) + 1 }; }) },
-      { id: App.genId(), name: '六级高频词汇（演示）', cards: words.slice(mid).map(function (pair) { return { id: App.genId(), front: pair[0], back: pair[1], difficulty: Math.floor(Math.random() * 5) + 1 }; }) },
+      { id: App.genId(), name: '四级高频词汇（演示）', cards: cet4Words.map(function (w) {
+          return Object.assign({ id: App.genId(), difficulty: Math.floor(Math.random() * 5) + 1 }, w);
+      })},
+      { id: App.genId(), name: '六级高频词汇（演示）', cards: cet6Words.map(function (w) {
+          return Object.assign({ id: App.genId(), difficulty: Math.floor(Math.random() * 5) + 1 }, w);
+      })},
     ];
     App.state.currentDeckId = null;
     App.saveData();
