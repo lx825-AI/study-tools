@@ -14,6 +14,7 @@ import SearchBar from './SearchBar';
 import SearchFilters from './SearchFilters';
 import FormulaGrid from './FormulaGrid';
 import FormulaCard from './FormulaCard';
+import PracticePanel from './PracticePanel';
 import ThemeToggle from './ThemeToggle';
 import BackToTop from './BackToTop';
 import OfflineBanner from './OfflineBanner';
@@ -21,6 +22,7 @@ import MobileSidebarToggle from './MobileSidebarToggle';
 import { ToastProvider, useToast } from './Toast';
 import '../styles/sidebar.css';
 import '../styles/search.css';
+import '../styles/practice.css';
 import '../styles/responsive.css';
 
 const VALID_SECTIONS = new Set(SECTION_ORDER);
@@ -149,7 +151,7 @@ function AppInner() {
 
   const displaySection = useMemo(() => {
     if (search.isSearching) return null;
-    if (currentSection === '__favorites__' || currentSection === '__recent__')
+    if (currentSection === '__favorites__' || currentSection === '__recent__' || currentSection === '__practice__')
       return null;
     return formulaData[currentSection] || null;
   }, [currentSection, search.isSearching]);
@@ -219,6 +221,15 @@ function AppInner() {
               {search.sortBySection ? '🔤 按章节排序' : '🔢 按匹配排序'}
             </button>
           </div>
+        )}
+
+        {currentSection === '__practice__' && (
+          <PracticePanel
+            favorites={favorites}
+            onFav={handleFav}
+            onCopy={handleCopy}
+            onClose={() => handleNavigate('calc-limit')}
+          />
         )}
 
         <div id="formulaContainer">

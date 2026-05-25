@@ -53,6 +53,9 @@ export default function Sidebar({
       </div>
 
       <div className="sidebar-tools">
+        <button onClick={() => onNavigate('__practice__')} title="公式测验">
+          ✏️ 测验
+        </button>
         <button onClick={() => onNavigate('__favorites__')} title="我的收藏 (Alt+F)">
           ⭐ 收藏
         </button>
@@ -74,6 +77,13 @@ export default function Sidebar({
         </button>
       </div>
 
+      <button
+        className={`sub${isActive('__practice__') ? ' active' : ''}`}
+        onClick={() => handleClick('__practice__')}
+        aria-current={isActive('__practice__') ? 'true' : undefined}
+      >
+        ✏️ 公式测验
+      </button>
       {favoritesCount > 0 && (
         <button
           className={`sub${isActive('__favorites__') ? ' active' : ''}`}

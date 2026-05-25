@@ -3,11 +3,13 @@ import { useState, useEffect, useCallback } from 'react';
 const HASH_MAP: Record<string, string> = {
   favorites: '__favorites__',
   recent: '__recent__',
+  practice: '__practice__',
 };
 
 const REVERSE_MAP: Record<string, string> = {
   __favorites__: 'favorites',
   __recent__: 'recent',
+  __practice__: 'practice',
 };
 
 function hashToSection(hash: string): string {
