@@ -71,9 +71,10 @@ function AppInner() {
 
   const handleFav = useCallback(
     (sectionId: string, index: number) => {
+      const key = `${sectionId}:${index}`;
+      const wasFav = favorites.has(key);
       toggleFavorite(sectionId, index);
-      const isFav = favorites.has(`${sectionId}:${index}`);
-      toast.show(isFav ? '已取消收藏' : '⭐ 已收藏');
+      toast.show(wasFav ? '已取消收藏' : '⭐ 已收藏');
     },
     [toggleFavorite, favorites, toast],
   );

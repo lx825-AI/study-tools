@@ -162,8 +162,7 @@ var FlashcardApp = window.FlashcardApp || {};
       '<div class="section-title" style="margin-top:24px;">📅 最近 30 天</div>' +
       '<div class="heatmap">' + App._renderHeatmap(log) + '</div>';
 
-    /* 绑定每日目标保存事件 */
-    setTimeout(function () {
+    /* 绑定每日目标保存事件（innerHTML 同步赋值后 DOM 已可用） */
       var goalInput = document.getElementById('dailyGoalInput');
       var saveBtn = document.getElementById('btnSaveGoal');
       if (goalInput && saveBtn) {
@@ -175,7 +174,6 @@ var FlashcardApp = window.FlashcardApp || {};
           }
         });
       }
-    }, 0);
   };
 
   App._renderHeatmap = function (log) {
