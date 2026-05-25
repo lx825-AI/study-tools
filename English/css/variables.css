@@ -1,0 +1,80 @@
+/* CSS 自定义属性 —— 亮色主题（默认） */
+:root {
+  --bg: #f0f4f8;
+  --surface: #fff;
+  --surface-hover: #f8fafc;
+  --surface-secondary: #f1f5f9;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --border: #e2e8f0;
+  --border-light: #f1f5f9;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-bg: #eef2ff;
+  --primary-border: #c7d2fe;
+  --danger: #ef4444;
+  --danger-text: #dc2626;
+  --danger-bg: #fef2f2;
+  --danger-border: #fecaca;
+  --danger-hover: #fee2e2;
+  --success: #16a34a;
+  --success-bg: #f0fdf4;
+  --success-border: #bbf7d0;
+  --success-hover: #dcfce7;
+  --warning: #f59e0b;
+  --tab-bg: #e2e8f0;
+  --tab-text: #64748b;
+  --tab-text-hover: #334155;
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+  --shadow-lg: 0 4px 24px rgba(0,0,0,0.08);
+  --shadow-xl: 0 16px 48px rgba(0,0,0,0.15);
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-word: Georgia, "Noto Serif", "Times New Roman", serif;
+}
+
+/* 暗色主题 */
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --surface-hover: #334155;
+  --surface-secondary: #334155;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border: #334155;
+  --border-light: #1e293b;
+  --primary: #818cf8;
+  --primary-hover: #6366f1;
+  --primary-bg: #1e1b4b;
+  --primary-border: #4338ca;
+  --danger: #f87171;
+  --danger-text: #fca5a5;
+  --danger-bg: #450a0a;
+  --danger-border: #7f1d1d;
+  --danger-hover: #7f1d1d;
+  --success: #4ade80;
+  --success-bg: #052e16;
+  --success-border: #166534;
+  --success-hover: #14532d;
+  --warning: #fbbf24;
+  --tab-bg: #1e293b;
+  --tab-text: #94a3b8;
+  --tab-text-hover: #cbd5e1;
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 4px 24px rgba(0,0,0,0.4);
+  --shadow-xl: 0 16px 48px rgba(0,0,0,0.5);
+}
+
+/* 移动端安全区 */
+:root {
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}

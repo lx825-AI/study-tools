@@ -1,0 +1,13 @@
+{
+  "name": "english-flashcard-pwa",
+  "version": "1.0.0",
+  "description": "基于间隔重复的英语单词学习 PWA，支持 CET-4/CET-6 词书",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build.js",
+    "dev": "npx serve dist/"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}

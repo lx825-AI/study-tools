@@ -1,0 +1,57 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # 构建 English
+      - name: Build English
+        run: |
+          cd English
+          npm install
+          node scripts/build.js
+
+      # 运行 Math 测试
+      - name: Test Math
+        run: |
+          cd math
+          npm ci
+          npm test
+
+      # 构建 Math
+      - name: Build Math
+        run: |
+          cd math
+          npm run build
+
+      # 合并产物
+      - name: Merge dist
+        run: |
+          mkdir -p dist
+          cp -r English/dist dist/english
+          cp -r math/dist dist/math
+
+      - uses: actions/configure-pages@v4
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+      - id: deployment
+        uses: actions/deploy-pages@v4

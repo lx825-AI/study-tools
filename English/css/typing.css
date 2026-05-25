@@ -1,0 +1,75 @@
+/* 打字模式 */
+.typing-area {
+  text-align: center;
+}
+.typing-word {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-family: var(--font-word);
+}
+.typing-phonetic {
+  display: block;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  font-family: "Lucida Sans Unicode", "Arial Unicode MS", sans-serif;
+  margin-top: 4px;
+}
+.typing-pos-tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 10px;
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--primary-border);
+  margin-top: 6px;
+  margin-bottom: 16px;
+}
+.typing-input-row {
+  display: flex;
+  gap: 10px;
+  max-width: 480px;
+  margin: 0 auto 12px;
+}
+.typing-input-row input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+  background: var(--surface);
+  color: var(--text-primary);
+}
+.typing-input-row input:focus { border-color: var(--primary); }
+.typing-input-row input.correct { border-color: var(--success); background: var(--success-bg); }
+.typing-input-row input.wrong { border-color: var(--danger); background: var(--danger-bg); }
+
+.typing-feedback {
+  font-size: 15px;
+  min-height: 24px;
+  margin-bottom: 16px;
+}
+.typing-feedback.correct { color: var(--success); }
+.typing-feedback.wrong { color: var(--danger-text); }
+
+.typing-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+.typing-score {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 16px;
+  font-size: 15px;
+}
+.typing-score .correct-count { color: var(--success); }
+.typing-score .wrong-count { color: var(--danger-text); }

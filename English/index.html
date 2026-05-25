@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#4f46e5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Flashcard 抽认卡</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/deck.css">
+<link rel="stylesheet" href="css/study.css">
+<link rel="stylesheet" href="css/typing.css">
+<link rel="stylesheet" href="css/preview.css">
+<link rel="stylesheet" href="css/stats.css">
+<style>
+/* 全局搜索栏 */
+.global-search-wrap {
+  margin-bottom: 16px;
+  position: relative;
+}
+.global-search-wrap input {
+  width: 100%;
+  padding: 10px 16px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 15px;
+  outline: none;
+  background: var(--surface);
+  color: var(--text-primary);
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+.global-search-wrap input:focus { border-color: var(--primary); }
+.global-search-results {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  z-index: 50;
+  max-height: 320px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
+.gsr-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border-light);
+  transition: background 0.15s;
+}
+.gsr-item:last-child { border-bottom: none; }
+.gsr-item:hover { background: var(--surface-hover); }
+.gsr-word { font-weight: 600; min-width: 90px; }
+.gsr-phonetic { font-size: 11px; color: var(--text-muted); margin-left: 4px; font-family: "Lucida Sans Unicode","Arial Unicode MS",sans-serif; }
+.gsr-pos { display: inline-block; padding: 1px 6px; border-radius: 4px; background: var(--primary-bg); color: var(--primary); font-size: 11px; font-weight: 600; margin: 0 6px; white-space: nowrap; }
+.gsr-def { color: var(--text-secondary); flex: 1; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gsr-deck { color: var(--text-muted); font-size: 12px; white-space: nowrap; }
+.gsr-empty { padding: 20px; text-align: center; color: var(--text-muted); font-size: 14px; }
+
+/* 移动端响应式 */
+@media (max-width: 480px) {
+  #app { padding: 12px 12px 32px; }
+  header h1 { font-size: 22px; }
+  nav button { font-size: 12px; padding: 8px 10px; }
+  .deck-actions .btn { font-size: 12px; padding: 4px 10px; }
+  .deck-card { flex-wrap: wrap; }
+  .deck-actions { width: 100%; justify-content: flex-end; margin-top: 4px; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header>
+    <h1>📚 Flashcard 抽认卡</h1>
+    <button class="theme-toggle" id="themeToggle" title="切换暗色模式">🌙</button>
+  </header>
+
+  <!-- 全局搜索 -->
+  <div class="global-search-wrap">
+    <input type="search" id="globalSearch" placeholder="🔍 搜索所有牌组中的单词..." autocomplete="off">
+    <div class="global-search-results" id="globalSearchResults"></div>
+  </div>
+
+  <div class="deck-selector">
+    <select id="deckSelect">
+      <option value="">-- 请选择牌组 --</option>
+    </select>
+    <button class="btn btn-outline btn-sm" id="btnStudyNow">开始学习</button>
+  </div>
+
+  <nav>
+    <button data-tab="decks" class="active">📦 牌组</button>
+    <button data-tab="study">🔄 翻卡</button>
+    <button data-tab="typing">⌨️ 打字</button>
+    <button data-tab="preview">📖 预览</button>
+    <button data-tab="cards">✏️ 卡片</button>
+    <button data-tab="stats">📊 统计</button>
+  </nav>
+
+  <!-- 牌组管理面板 -->
+  <div id="panelDecks" class="panel visible">
+    <div class="add-deck-form">
+      <input id="deckNameInput" type="text" placeholder="输入牌组名称，例如「四级单词」" maxlength="30">
+      <button class="btn btn-primary" id="btnAddDeck">创建</button>
+    </div>
+    <div class="import-area">
+      <button class="btn btn-outline btn-sm" id="btnImportBook">📥 导入词书</button>
+    </div>
+    <div id="deckGrid" class="deck-grid"></div>
+    <div id="decksEmpty" class="empty-state" style="display:none">
+      <div class="icon">📭</div>
+      <p>还没有牌组<br>在上方输入名称创建一个吧</p>
+    </div>
+  </div>
+
+  <!-- 学习面板 -->
+  <div id="panelStudy" class="panel">
+    <div id="studyNoDeck" class="empty-state">
+      <div class="icon">👆</div>
+      <p>请先在顶部选择一个牌组</p>
+    </div>
+    <div id="studyContent" style="display:none">
+      <div class="study-header">
+        <div class="study-deck-name" id="studyDeckName"></div>
+        <button class="order-toggle" id="btnStudyOrder" title="切换排序方式">📊 难度</button>
+        <div class="study-progress" id="studyProgress"></div>
+        <div class="progress-bar"><div class="progress-bar-fill" id="progressFill"></div></div>
+      </div>
+      <div class="shortcut-hint">
+        <span><kbd>Space</kbd> 翻转</span>
+        <span><kbd>←</kbd> 不会</span>
+        <span><kbd>→</kbd> 会了</span>
+        <span><kbd>?</kbd> 全部快捷键</span>
+      </div>
+      <div class="card-scene">
+        <div class="flashcard" id="flashcard">
+          <div class="card-face card-front">
+            <div class="card-label">问题</div>
+            <div class="card-text" id="cardFrontText"></div>
+            <button class="speak-btn" id="btnSpeak" title="朗读">🔊</button>
+            <div class="card-hint">👆 点击卡片翻转查看答案</div>
+          </div>
+          <div class="card-face card-back">
+            <div class="card-label">答案</div>
+            <div class="card-text" id="cardBackText"></div>
+            <div class="card-hint">👆 点击卡片翻回问题</div>
+          </div>
+        </div>
+      </div>
+      <div class="study-actions">
+        <button class="btn btn-fail" id="btnFail">✗ 不会</button>
+        <button class="btn btn-pass" id="btnPass">✓ 会了</button>
+      </div>
+    </div>
+    <div id="studyComplete" style="display:none">
+      <div class="study-complete">
+        <div class="icon">🎉</div>
+        <h2 id="completeTitle"></h2>
+        <p id="completeStats"></p>
+        <button class="btn btn-primary" id="btnRestart">再来一轮</button>
+      </div>
+    </div>
+    <div id="studyEmpty" class="empty-state" style="display:none">
+      <div class="icon">📝</div>
+      <p>这个牌组还没有卡片<br>切换到「卡片」标签页添加一些吧</p>
+    </div>
+  </div>
+
+  <!-- 打字模式面板 -->
+  <div id="panelTyping" class="panel">
+    <div id="typingNoDeck" class="empty-state">
+      <div class="icon">👆</div>
+      <p>请先在顶部选择一个牌组</p>
+    </div>
+    <div id="typingContent" style="display:none">
+      <div class="study-header">
+        <div class="study-deck-name" id="typingDeckName"></div>
+        <button class="order-toggle" id="btnTypingOrder" title="切换排序方式">📊 难度</button>
+        <div class="typing-score">
+          <span>✅ <span class="correct-count" id="typingCorrect">0</span></span>
+          <span>❌ <span class="wrong-count" id="typingWrong">0</span></span>
+        </div>
+        <div class="progress-bar"><div class="progress-bar-fill" id="typingProgressFill"></div></div>
+      </div>
+      <div class="typing-area">
+        <div class="typing-word" id="typingWord"></div>
+        <div class="typing-input-row">
+          <input type="text" id="typingInput" placeholder="输入英文单词..." autocomplete="off">
+          <button class="btn btn-primary" id="btnTypingSubmit">确认</button>
+        </div>
+        <div class="typing-feedback" id="typingFeedback"></div>
+        <button class="btn btn-primary" id="btnTypingNext" style="display:none">下一题 →</button>
+      </div>
+    </div>
+    <div id="typingComplete" style="display:none">
+      <div class="study-complete">
+        <div class="icon">🏆</div>
+        <h2 id="typingCompleteTitle"></h2>
+        <p id="typingCompleteStats"></p>
+        <button class="btn btn-primary" id="btnTypingRestart">再来一轮</button>
+      </div>
+    </div>
+    <div id="typingEmpty" class="empty-state" style="display:none">
+      <div class="icon">📝</div>
+      <p>这个牌组还没有卡片<br>切换到「卡片」标签页添加一些吧</p>
+    </div>
+  </div>
+
+  <!-- 预览模式面板 -->
+  <div id="panelPreview" class="panel">
+    <div id="previewNoDeck" class="empty-state">
+      <div class="icon">👆</div>
+      <p>请先在顶部选择一个牌组</p>
+    </div>
+    <div id="previewContent" style="display:none">
+      <div class="study-header">
+        <div class="study-deck-name" id="previewDeckName"></div>
+        <div class="study-progress">共 <span id="previewCount">0</span> 个单词</div>
+      </div>
+      <div class="preview-controls">
+        <input type="text" id="previewSearch" placeholder="搜索单词...">
+        <button class="btn btn-outline btn-sm" id="btnToggleAnswer">🙈 隐藏释义</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="preview-table">
+          <thead>
+            <tr><th class="col-idx">#</th><th class="col-front">英文</th><th class="col-back">释义</th></tr>
+          </thead>
+          <tbody id="previewTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 卡片编辑面板 -->
+  <div id="panelCards" class="panel">
+    <div id="cardsNoDeck" class="empty-state">
+      <div class="icon">👆</div>
+      <p>请先在顶部选择一个牌组</p>
+    </div>
+    <div id="cardsContent" style="display:none">
+      <div class="section-title" id="cardsCountTitle">卡片列表</div>
+      <div class="cards-toolbar" id="cardsToolbar">
+        <button class="btn btn-outline btn-sm" id="btnBatchMode">☐ 批量模式</button>
+        <div class="batch-actions" id="batchActions" style="display:none">
+          <button class="btn btn-outline btn-sm" id="btnSelectAll">全选</button>
+          <button class="btn btn-outline btn-sm" id="btnDeselectAll">取消</button>
+          <button class="btn btn-danger btn-sm" id="btnBatchDelete">删除选中</button>
+        </div>
+      </div>
+      <div id="cardList" class="card-list"></div>
+      <div class="add-card-form">
+        <h3>添加新卡片</h3>
+        <input id="cardFrontInput" type="text" placeholder="正面（问题/单词）" maxlength="200">
+        <input id="cardBackInput" type="text" placeholder="反面（答案/释义）" maxlength="500">
+        <button class="btn btn-primary btn-block" id="btnAddCard">添加卡片</button>
+        <div class="batch-import-area" style="margin-top:12px;">
+          <details>
+            <summary style="cursor:pointer;font-size:13px;color:var(--text-secondary);">📋 批量粘贴导入</summary>
+            <textarea id="batchImportText" rows="5" placeholder="每行一个单词，格式：&#10;abandon 放弃；遗弃&#10;ability 能力；才能&#10;..." style="width:100%;margin-top:8px;padding:10px;border:2px solid var(--border);border-radius:var(--radius);font-size:14px;resize:vertical;background:var(--surface);color:var(--text-primary);"></textarea>
+            <button class="btn btn-primary btn-block" id="btnBatchImport" style="margin-top:8px;">批量导入</button>
+          </details>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 统计面板 -->
+  <div id="panelStats" class="panel">
+    <div class="empty-state" style="padding:24px 20px">
+      <p>统计数据将在学习中自动累积</p>
+    </div>
+  </div>
+
+  <!-- 导入词书弹窗 -->
+  <div class="import-modal-overlay" id="importModal" style="display:none">
+    <div class="import-modal" style="max-width:400px">
+      <h3>📥 导入词书</h3>
+      <p>选择词书自动创建牌组，已导入的不会重复添加</p>
+      <div class="modal-options" id="importBookList"></div>
+      <p id="importStatus" style="font-size:13px;margin-bottom:12px;min-height:20px;"></p>
+      <button class="btn btn-outline btn-sm btn-block" id="btnImportFile" style="margin-bottom:8px;">📁 从文件导入 (JSON/TXT/CSV)</button>
+      <input type="file" id="importFileInput" accept=".json,.txt,.csv,.text" style="display:none">
+      <button class="modal-cancel" id="btnModalCancel">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- JS 加载顺序：依赖关系 -->
+<script src="js/storage.js"></script>
+<script src="js/state.js"></script>
+<script src="js/models.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/deck-panel.js"></script>
+<script src="js/study-panel.js"></script>
+<script src="js/typing-panel.js"></script>
+<script src="js/preview-panel.js"></script>
+<script src="js/cards-panel.js"></script>
+<script src="js/import.js"></script>
+<script src="js/stats-panel.js"></script>
+<script src="data/word-schema.js"></script>
+<script src="js/app.js"></script>
+<script>
+/* 注册 Service Worker */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(function () {});
+}
+
+/* 朗读按钮点击 */
+document.getElementById('btnSpeak').addEventListener('click', function (e) {
+  e.stopPropagation();
+  var text = document.getElementById('cardFrontText').textContent;
+  if (text) FlashcardApp.speak(text);
+});
+/* 启动应用 */
+FlashcardApp.init();
+</script>
+
+</body>
+</html>

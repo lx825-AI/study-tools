@@ -1,0 +1,100 @@
+/* 牌组选择器 */
+.deck-selector {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.deck-selector select {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-family: inherit;
+  background: var(--surface);
+  color: var(--text-primary);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.deck-selector select:focus { border-color: var(--primary); }
+
+/* 牌组网格 */
+.deck-grid {
+  display: grid;
+  gap: 12px;
+}
+.deck-card {
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s;
+  gap: 12px;
+}
+.deck-card:hover { box-shadow: var(--shadow-md); }
+.deck-info {
+  flex: 1;
+  min-width: 0;
+}
+.deck-name {
+  font-size: 16px;
+  font-weight: 600;
+}
+.deck-count {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.deck-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* 难度指示器 */
+.deck-difficulty {
+  display: flex;
+  gap: 2px;
+  margin-top: 6px;
+}
+.deck-difficulty span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+}
+.deck-difficulty span.active { background: var(--warning); }
+
+/* 新建牌组 */
+.add-deck-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.add-deck-form input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+  background: var(--surface);
+  color: var(--text-primary);
+}
+.add-deck-form input:focus { border-color: var(--primary); }
+
+/* 导入区域 */
+.import-area {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
