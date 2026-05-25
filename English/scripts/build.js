@@ -101,5 +101,7 @@ fs.copyFileSync(path.join(ROOT, 'manifest.json'), path.join(DIST, 'manifest.json
 console.log('✓ manifest.json copied');
 fs.copyFileSync(path.join(ROOT, 'sw.js'), path.join(DIST, 'sw.js'));
 console.log('✓ sw.js copied');
+fs.copyFileSync(path.join(ROOT, 'icon.svg'), path.join(DIST, 'icon.svg'));
+console.log('✓ icon.svg copied');
 
 console.log('\n✓ Build complete. Output: ' + DIST);

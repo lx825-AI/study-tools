@@ -1,9 +1,12 @@
-// Service Worker v2 — 数学公式速查表
-const CACHE_NAME = 'math-formulas-v2';
+// Service Worker v3 — 数学公式速查表
+const CACHE_NAME = 'math-formulas-v3';
 
 const ASSETS = [
   './',
   './index.html',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png',
 ];
 
 self.addEventListener('install', (event) => {
