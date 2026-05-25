@@ -160,7 +160,43 @@ var FlashcardApp = window.FlashcardApp || {};
 
       /* 热力图 */
       '<div class="section-title" style="margin-top:24px;">📅 最近 30 天</div>' +
-      '<div class="heatmap">' + App._renderHeatmap(log) + '</div>';
+      '<div class="heatmap">' + App._renderHeatmap(log) + '</div>' +
+
+      /* 数据备份 */
+      '<div class="section-title" style="margin-top:24px;">💾 数据备份</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+        '<button id="btnExportAll" class="btn btn-outline btn-sm">📥 导出全部数据</button>' +
+        '<button id="btnImportAll" class="btn btn-outline btn-sm">📤 导入数据恢复</button>' +
+        '<input type="file" id="importFileInput" accept=".json" style="display:none;">' +
+      '</div>' +
+      '<div style="font-size:12px;color:var(--text-muted);margin-top:4px;">导出包含所有牌组、学习进度和偏好设置。导入将<strong>替换</strong>当前全部数据。</div>';
+
+    /* 绑定导出按钮 */
+    let btnExport = document.getElementById('btnExportAll');
+    if (btnExport) {
+      btnExport.addEventListener('click', App.exportAllData);
+    }
+
+    /* 绑定导入按钮 → 触发文件选择 */
+    let btnImport = document.getElementById('btnImportAll');
+    let importInput = document.getElementById('importFileInput');
+    if (btnImport && importInput) {
+      btnImport.addEventListener('click', function () { importInput.click(); });
+      importInput.addEventListener('change', function () {
+        let file = importInput.files && importInput.files[0];
+        if (!file) return;
+        let reader = new FileReader();
+        reader.onload = function () {
+          try {
+            App.importAllData(reader.result);
+          } catch (e) {
+            App.showToast('导入失败：文件格式不正确', 'error');
+          }
+          importInput.value = '';
+        };
+        reader.readAsText(file);
+      });
+    }
 
     /* 绑定每日目标保存事件（innerHTML 同步赋值后 DOM 已可用） */
       let goalInput = document.getElementById('dailyGoalInput');
@@ -190,6 +226,58 @@ var FlashcardApp = window.FlashcardApp || {};
       cells += '<div class="heat-cell heat-level-' + level + '" title="' + title + '"></div>';
     }
     return cells;
+  };
+
+  /* 导出全部数据为 JSON 文件下载 */
+  App.exportAllData = function () {
+    let backup = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      decks: App.state.decks,
+      currentDeckId: App.state.currentDeckId,
+      learningLog: App.loadLearningLog(),
+      dailyGoal: parseInt(localStorage.getItem('flashcard-daily-goal') || '20', 10),
+      theme: localStorage.getItem('flashcard-theme') || 'auto',
+    };
+    let json = JSON.stringify(backup, null, 2);
+    let blob = new Blob(['﻿' + json], { type: 'application/json;charset=utf-8' });
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = url;
+    a.download = 'flashcard-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    App.showToast('数据已导出', 'success');
+  };
+
+  /* 从 JSON 文件导入恢复全部数据 */
+  App.importAllData = function (raw) {
+    let backup = JSON.parse(raw);
+    if (!backup.version || !Array.isArray(backup.decks)) {
+      throw new Error('Invalid backup format');
+    }
+    if (!confirm(
+      '即将导入备份数据（' + backup.decks.length + ' 个牌组，共 ' +
+      backup.decks.reduce(function (s, d) { return s + d.cards.length; }, 0) + ' 张卡片）。\n\n' +
+      '导入将替换当前全部数据，是否继续？'
+    )) return;
+
+    App.state.decks = backup.decks;
+    App.state.currentDeckId = backup.currentDeckId || null;
+    App.saveData();
+
+    if (backup.learningLog) {
+      try { localStorage.setItem(App.LEARNING_LOG_KEY, JSON.stringify(backup.learningLog)); } catch (e) {}
+    }
+    if (backup.dailyGoal) {
+      localStorage.setItem('flashcard-daily-goal', String(backup.dailyGoal));
+    }
+    if (backup.theme) {
+      localStorage.setItem('flashcard-theme', backup.theme);
+    }
+
+    App.renderAll();
+    App.showToast('数据已恢复', 'success');
   };
 
 })(FlashcardApp);
