@@ -5,9 +5,13 @@
   "private": true,
   "scripts": {
     "build": "node scripts/build.js",
-    "dev": "npx serve dist/"
+    "dev": "npx serve dist/",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
-    "esbuild": "^0.25.0"
+    "esbuild": "^0.25.0",
+    "jsdom": "^29.1.1",
+    "vitest": "^4.1.7"
   }
 }
