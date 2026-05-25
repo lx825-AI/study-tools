@@ -6,7 +6,7 @@ var FlashcardApp = window.FlashcardApp || {};
   App.previewAnswersVisible = true;
 
   App.renderPreviewPanel = function () {
-    var deck = App.getCurrentDeck();
+    let deck = App.getCurrentDeck();
     document.getElementById('previewNoDeck').style.display = 'none';
     document.getElementById('previewContent').style.display = 'none';
 
@@ -16,22 +16,22 @@ var FlashcardApp = window.FlashcardApp || {};
     document.getElementById('previewCount').textContent = deck.cards.length;
     document.getElementById('previewSearch').value = '';
 
-    var btnToggle = document.getElementById('btnToggleAnswer');
+    let btnToggle = document.getElementById('btnToggleAnswer');
     btnToggle.textContent = App.previewAnswersVisible ? '🙈 隐藏释义' : '👁️ 显示释义';
 
     /* 判断是否有词性数据来决定是否显示词性列 */
-    var hasPos = deck.cards.some(function (c) { return c.pos; });
+    let hasPos = deck.cards.some(function (c) { return c.pos; });
     App._hasPosColumn = hasPos;
     App._renderPreviewTable(deck.cards);
   };
 
   App._renderPreviewTable = function (cards, highlightWord) {
-    var tbody = document.getElementById('previewTbody');
-    var cls = App.previewAnswersVisible ? '' : ' hidden-answer';
-    var showPos = App._hasPosColumn;
+    let tbody = document.getElementById('previewTbody');
+    let cls = App.previewAnswersVisible ? '' : ' hidden-answer';
+    let showPos = App._hasPosColumn;
 
     /* 动态更新表头 */
-    var thead = document.querySelector('.preview-table thead tr');
+    let thead = document.querySelector('.preview-table thead tr');
     if (thead) {
       thead.innerHTML = '<th class="col-idx">#</th>' +
         '<th class="col-front">英文</th>' +
@@ -40,11 +40,11 @@ var FlashcardApp = window.FlashcardApp || {};
     }
 
     tbody.innerHTML = cards.map(function (c, i) {
-      var front = c.front || c.word || '';
-      var back = c.back || (c.definitions || [''])[0];
-      var pos = c.pos || '';
-      var frontHtml = App.escHtml(front);
-      var backHtml = App.escHtml(back);
+      let front = c.front || c.word || '';
+      let back = c.back || (c.definitions || [''])[0];
+      let pos = c.pos || '';
+      let frontHtml = App.escHtml(front);
+      let backHtml = App.escHtml(back);
       if (highlightWord && front.toLowerCase() === highlightWord.toLowerCase()) {
         frontHtml = '<mark>' + frontHtml + '</mark>';
       }

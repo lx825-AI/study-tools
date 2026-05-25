@@ -10,7 +10,7 @@ var FlashcardApp = window.FlashcardApp || {};
   App.typingDone = false;
 
   App.renderTypingPanel = function () {
-    var deck = App.getCurrentDeck();
+    let deck = App.getCurrentDeck();
     document.getElementById('typingNoDeck').style.display = 'none';
     document.getElementById('typingContent').style.display = 'none';
     document.getElementById('typingComplete').style.display = 'none';
@@ -22,8 +22,8 @@ var FlashcardApp = window.FlashcardApp || {};
     if (App.typingQueue.length === 0 || App.typingIndex >= App.typingQueue.length) {
       if (App.typingDone) {
         document.getElementById('typingComplete').style.display = 'block';
-        var total = App.typingCorrect + App.typingWrong;
-        var rate = total > 0 ? Math.round(App.typingCorrect / total * 100) : 0;
+        let total = App.typingCorrect + App.typingWrong;
+        let rate = total > 0 ? Math.round(App.typingCorrect / total * 100) : 0;
         document.getElementById('typingCompleteTitle').textContent =
           rate >= 90 ? '🏆 太棒了！' : rate >= 60 ? '👍 继续加油！' : '💪 多多练习！';
         document.getElementById('typingCompleteStats').textContent =
@@ -34,11 +34,11 @@ var FlashcardApp = window.FlashcardApp || {};
     }
 
     document.getElementById('typingContent').style.display = 'block';
-    var card = App.typingQueue[App.typingIndex];
+    let card = App.typingQueue[App.typingIndex];
     document.getElementById('typingDeckName').textContent = deck.name;
 
     /* 释义 + 可选音标/词性提示 */
-    var wordHtml = App.escHtml(card.back || (card.definitions || [''])[0]);
+    let wordHtml = App.escHtml(card.back || (card.definitions || [''])[0]);
     if (card.phonetic) {
       wordHtml += ' <span class="typing-phonetic">' + App.escHtml(card.phonetic) + '</span>';
     }
@@ -61,7 +61,7 @@ var FlashcardApp = window.FlashcardApp || {};
   };
 
   App.startTyping = function () {
-    var deck = App.getCurrentDeck();
+    let deck = App.getCurrentDeck();
     if (!deck || deck.cards.length === 0) return;
     App.typingQueue = App.buildStudyQueue(deck);
     App.typingIndex = 0;
@@ -73,15 +73,15 @@ var FlashcardApp = window.FlashcardApp || {};
 
   App.submitTyping = function () {
     if (App.typingQueue.length === 0 || App.typingIndex >= App.typingQueue.length) return;
-    var input = document.getElementById('typingInput').value.trim();
+    let input = document.getElementById('typingInput').value.trim();
     if (!input) return;
-    var card = App.typingQueue[App.typingIndex];
-    var correctAnswer = (card.front || card.word || '').replace(/\s+/g, '').toLowerCase();
-    var userInput = input.replace(/\s+/g, '').toLowerCase();
-    var isCorrect = correctAnswer === userInput;
+    let card = App.typingQueue[App.typingIndex];
+    let correctAnswer = (card.front || card.word || '').replace(/\s+/g, '').toLowerCase();
+    let userInput = input.replace(/\s+/g, '').toLowerCase();
+    let isCorrect = correctAnswer === userInput;
 
-    var feedback = document.getElementById('typingFeedback');
-    var inputEl = document.getElementById('typingInput');
+    let feedback = document.getElementById('typingFeedback');
+    let inputEl = document.getElementById('typingInput');
     document.getElementById('btnTypingSubmit').style.display = 'none';
 
     if (isCorrect) {
@@ -89,8 +89,8 @@ var FlashcardApp = window.FlashcardApp || {};
       inputEl.className = 'correct';
       feedback.textContent = '✅ 正确！';
       feedback.className = 'typing-feedback correct';
-      var deck = App.getCurrentDeck();
-      var deckCard = deck.cards.find(function (c) { return c.id === card.id; });
+      let deck = App.getCurrentDeck();
+      let deckCard = deck.cards.find(function (c) { return c.id === card.id; });
       if (deckCard) App.applySM2(deckCard, true);
       App.trackLearning(1);
       App.saveData();
@@ -107,8 +107,8 @@ var FlashcardApp = window.FlashcardApp || {};
       inputEl.className = 'wrong';
       feedback.innerHTML = '❌ 错误！正确答案：<strong>' + App.escHtml(card.front || card.word) + '</strong>';
       feedback.className = 'typing-feedback wrong';
-      var d = App.getCurrentDeck();
-      var dc = d.cards.find(function (c) { return c.id === card.id; });
+      let d = App.getCurrentDeck();
+      let dc = d.cards.find(function (c) { return c.id === card.id; });
       if (dc) App.applySM2(dc, false);
       App.trackLearning(0);
       App.updateNavBadges();

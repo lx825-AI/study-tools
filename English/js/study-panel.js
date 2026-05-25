@@ -31,7 +31,7 @@ var FlashcardApp = window.FlashcardApp || {};
       card.easeFactor = Math.max(1.3, card.easeFactor - 0.2);
     }
 
-    var next = new Date();
+    let next = new Date();
     next.setDate(next.getDate() + card.interval);
     card.nextReview = next.toISOString().slice(0, 10);
 
@@ -40,18 +40,18 @@ var FlashcardApp = window.FlashcardApp || {};
   };
 
   App.buildStudyQueue = function (deck) {
-    var cards = deck.cards.map(function (c) { return Object.assign({}, c); });
+    let cards = deck.cards.map(function (c) { return Object.assign({}, c); });
     if (App.studyOrder === 'random') {
-      for (var i = cards.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var tmp = cards[i]; cards[i] = cards[j]; cards[j] = tmp;
+      for (let i = cards.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        let tmp = cards[i]; cards[i] = cards[j]; cards[j] = tmp;
       }
     } else if (App.studyOrder === 'difficulty') {
       /* SM-2 模式：到期卡片优先，按难度系数升序（难的在前） */
-      var today = new Date().toISOString().slice(0, 10);
+      let today = new Date().toISOString().slice(0, 10);
       cards.sort(function (a, b) {
-        var aDue = !a.nextReview || a.nextReview <= today;
-        var bDue = !b.nextReview || b.nextReview <= today;
+        let aDue = !a.nextReview || a.nextReview <= today;
+        let bDue = !b.nextReview || b.nextReview <= today;
         if (aDue && !bDue) return -1;
         if (!aDue && bDue) return 1;
         return (a.easeFactor || 2.5) - (b.easeFactor || 2.5);
@@ -61,7 +61,7 @@ var FlashcardApp = window.FlashcardApp || {};
   };
 
   App.startStudy = function () {
-    var deck = App.getCurrentDeck();
+    let deck = App.getCurrentDeck();
     if (!deck || deck.cards.length === 0) return;
     App.studyQueue = App.buildStudyQueue(deck);
     App.studyIndex = 0;
@@ -72,11 +72,11 @@ var FlashcardApp = window.FlashcardApp || {};
   };
 
   App.renderStudyPanel = function () {
-    var deck = App.getCurrentDeck();
-    var noDeck = document.getElementById('studyNoDeck');
-    var content = document.getElementById('studyContent');
-    var complete = document.getElementById('studyComplete');
-    var empty = document.getElementById('studyEmpty');
+    let deck = App.getCurrentDeck();
+    let noDeck = document.getElementById('studyNoDeck');
+    let content = document.getElementById('studyContent');
+    let complete = document.getElementById('studyComplete');
+    let empty = document.getElementById('studyEmpty');
 
     noDeck.style.display = 'none';
     content.style.display = 'none';
@@ -88,7 +88,7 @@ var FlashcardApp = window.FlashcardApp || {};
 
     if (App.studyQueue.length === 0 || App.studyIndex >= App.studyQueue.length) {
       complete.style.display = 'block';
-      var total = App.studyPassed + App.studyFailed;
+      let total = App.studyPassed + App.studyFailed;
       document.getElementById('completeTitle').textContent =
         App.studyFailed === 0 ? '完美通关！' : App.studyFailed <= total / 3 ? '不错哦！' : '继续加油！';
       document.getElementById('completeStats').textContent =
@@ -101,7 +101,7 @@ var FlashcardApp = window.FlashcardApp || {};
 
     content.style.display = 'block';
 
-    var card = App.studyQueue[App.studyIndex];
+    let card = App.studyQueue[App.studyIndex];
     document.getElementById('studyDeckName').textContent = deck.name;
     document.getElementById('studyProgress').textContent =
       '第 ' + (App.studyIndex + 1) + ' / ' + App.studyQueue.length + ' 张';
@@ -109,18 +109,18 @@ var FlashcardApp = window.FlashcardApp || {};
       ((App.studyIndex / App.studyQueue.length) * 100) + '%';
 
     /* 卡片正面：单词 + 音标 */
-    var frontHtml = App.escHtml(card.front || card.word);
+    let frontHtml = App.escHtml(card.front || card.word);
     if (card.phonetic) {
       frontHtml += ' <span class="card-front-phonetic">' + App.escHtml(card.phonetic) + '</span>';
     }
     document.getElementById('cardFrontText').innerHTML = frontHtml;
 
     /* 卡片背面：丰富数据 + SM-2 状态 */
-    var parts = [];
-    var defs = card.definitions || [card.back || ''];
+    let parts = [];
+    let defs = card.definitions || [card.back || ''];
     if (!Array.isArray(defs)) defs = [defs];
-    var phonetic = card.phonetic || '';
-    var pos = card.pos || '';
+    let phonetic = card.phonetic || '';
+    let pos = card.pos || '';
 
     /* 音标 + 词性 */
     if (phonetic || pos) {
@@ -136,7 +136,7 @@ var FlashcardApp = window.FlashcardApp || {};
     }).join('') + '</div>');
 
     /* 词组搭配 */
-    var phrases = card.phrases || [];
+    let phrases = card.phrases || [];
     if (phrases.length > 0) {
       parts.push('<div class="card-section"><div class="card-section-title">词组搭配</div>' +
         phrases.map(function (p) {
@@ -145,7 +145,7 @@ var FlashcardApp = window.FlashcardApp || {};
     }
 
     /* 例句 */
-    var sentences = card.sentences || [];
+    let sentences = card.sentences || [];
     if (sentences.length > 0) {
       parts.push('<div class="card-section"><div class="card-section-title">例句</div>' +
         sentences.map(function (s) {
@@ -155,17 +155,17 @@ var FlashcardApp = window.FlashcardApp || {};
     }
 
     /* 同义词/反义词 */
-    var synonyms = card.synonyms || [];
-    var antonyms = card.antonyms || [];
+    let synonyms = card.synonyms || [];
+    let antonyms = card.antonyms || [];
     if (synonyms.length > 0 || antonyms.length > 0) {
-      var synAnt = '';
+      let synAnt = '';
       if (synonyms.length > 0) synAnt += '<div class="card-syn-ant"><span class="syn-ant-label">同:</span> ' + App.escHtml(synonyms.join(', ')) + '</div>';
       if (antonyms.length > 0) synAnt += '<div class="card-syn-ant"><span class="syn-ant-label">反:</span> ' + App.escHtml(antonyms.join(', ')) + '</div>';
       parts.push('<div class="card-section">' + synAnt + '</div>');
     }
 
     /* 易混淆词 */
-    var confused = card.confused || [];
+    let confused = card.confused || [];
     if (confused.length > 0) {
       parts.push('<div class="card-section"><div class="card-confused"><span class="syn-ant-label">易混淆:</span> ' + App.escHtml(confused.join(', ')) + '</div></div>');
     }
@@ -179,7 +179,7 @@ var FlashcardApp = window.FlashcardApp || {};
 
     document.getElementById('cardBackText').innerHTML = parts.join('');
 
-    var el = document.getElementById('flashcard');
+    let el = document.getElementById('flashcard');
     el.classList.remove('flipped');
     App.isFlipped = false;
   };
@@ -191,9 +191,9 @@ var FlashcardApp = window.FlashcardApp || {};
       return;
     }
 
-    var card = App.studyQueue[App.studyIndex];
-    var deck = App.getCurrentDeck();
-    var deckCard = deck.cards.find(function (c) { return c.id === card.id; });
+    let card = App.studyQueue[App.studyIndex];
+    let deck = App.getCurrentDeck();
+    let deckCard = deck.cards.find(function (c) { return c.id === card.id; });
     if (deckCard) {
       App.applySM2(deckCard, passed);
       if (passed) { App.studyPassed++; }
@@ -210,11 +210,11 @@ var FlashcardApp = window.FlashcardApp || {};
       App.renderDeckSelect();
     } else {
       if (App.studyIndex >= App.studyQueue.length - 3) {
-        var remaining = App.studyQueue.slice(App.studyIndex);
-        var today = new Date().toISOString().slice(0, 10);
+        let remaining = App.studyQueue.slice(App.studyIndex);
+        let today = new Date().toISOString().slice(0, 10);
         remaining.sort(function (a, b) {
-          var aDue = !a.nextReview || a.nextReview <= today;
-          var bDue = !b.nextReview || b.nextReview <= today;
+          let aDue = !a.nextReview || a.nextReview <= today;
+          let bDue = !b.nextReview || b.nextReview <= today;
           if (aDue && !bDue) return -1;
           if (!aDue && bDue) return 1;
           return (a.easeFactor || 2.5) - (b.easeFactor || 2.5);
@@ -226,14 +226,14 @@ var FlashcardApp = window.FlashcardApp || {};
   };
 
   App.cycleOrder = function () {
-    var orderCycle = { difficulty: 'random', random: 'sequential', sequential: 'difficulty' };
+    let orderCycle = { difficulty: 'random', random: 'sequential', sequential: 'difficulty' };
     App.studyOrder = orderCycle[App.studyOrder];
-    var labels = { difficulty: '📊 难度', random: '🔀 乱序', sequential: '📋 正序' };
-    var label = labels[App.studyOrder];
+    let labels = { difficulty: '📊 难度', random: '🔀 乱序', sequential: '📋 正序' };
+    let label = labels[App.studyOrder];
     document.getElementById('btnStudyOrder').textContent = label;
     document.getElementById('btnTypingOrder').textContent = label;
 
-    var deck = App.getCurrentDeck();
+    let deck = App.getCurrentDeck();
     if (!deck) return;
     App.studyQueue = App.buildStudyQueue(deck);
     App.studyIndex = 0;

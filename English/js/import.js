@@ -25,11 +25,11 @@ var FlashcardApp = window.FlashcardApp || {};
       return App._wordbookFetching[bookInfo.key];
     }
     App._wordbookFetching[bookInfo.key] = new Promise(function (resolve, reject) {
-      var script = document.createElement('script');
+      let script = document.createElement('script');
       script.src = bookInfo.file;
       script.onload = function () {
         delete App._wordbookFetching[bookInfo.key];
-        var data = window.__VOCAB_REGISTRY__[bookInfo.key];
+        let data = window.__VOCAB_REGISTRY__[bookInfo.key];
         if (data) {
           resolve(data);
         } else {
@@ -59,18 +59,18 @@ var FlashcardApp = window.FlashcardApp || {};
   };
 
   App.isWordbookImported = function (bookInfo) {
-    var data = window.__VOCAB_REGISTRY__[bookInfo.key];
+    let data = window.__VOCAB_REGISTRY__[bookInfo.key];
     if (!data) return false;
     return !!App.state.decks.find(function (d) { return d.name === data.name; });
   };
 
   App.importWordbookFromRegistry = function (bookKey) {
-    var data = window.__VOCAB_REGISTRY__[bookKey];
+    let data = window.__VOCAB_REGISTRY__[bookKey];
     if (!data) { App.showToast('词书数据未加载，请先加载词书', 'error'); return; }
 
-    var deck = App.state.decks.find(function (d) { return d.name === data.name; });
-    var existingWords = deck ? new Set(deck.cards.map(function (c) { return (c.front || c.word || '').toLowerCase(); })) : new Set();
-    var added = 0;
+    let deck = App.state.decks.find(function (d) { return d.name === data.name; });
+    let existingWords = deck ? new Set(deck.cards.map(function (c) { return (c.front || c.word || '').toLowerCase(); })) : new Set();
+    let added = 0;
 
     if (!deck) {
       deck = { id: App.genId(), name: data.name, cards: [] };
@@ -78,10 +78,10 @@ var FlashcardApp = window.FlashcardApp || {};
     }
 
     data.words.forEach(function (item) {
-      var front = Array.isArray(item) ? item[0] : item.word;
-      var back = Array.isArray(item) ? item[1] : (item.definitions || [''])[0];
+      let front = Array.isArray(item) ? item[0] : item.word;
+      let back = Array.isArray(item) ? item[1] : (item.definitions || [''])[0];
       if (!existingWords.has(front.toLowerCase())) {
-        var card = Array.isArray(item)
+        let card = Array.isArray(item)
           ? { id: App.genId(), front: front, back: back, difficulty: Math.floor(Math.random() * 5) + 1 }
           : { id: App.genId(), front: front, back: back, word: item.word, phonetic: item.phonetic || '', pos: item.pos || '', definitions: item.definitions || [back], phrases: item.phrases || [], sentences: item.sentences || [], synonyms: item.synonyms || [], antonyms: item.antonyms || [], confused: item.confused || [], difficulty: Math.floor(Math.random() * 5) + 1 };
         deck.cards.push(card);
@@ -97,7 +97,7 @@ var FlashcardApp = window.FlashcardApp || {};
   };
 
   App.loadAndImportWordbook = async function (bookInfo) {
-    var statusEl = document.getElementById('importStatus');
+    let statusEl = document.getElementById('importStatus');
     try {
       statusEl.innerHTML = '<span class="spinner"></span>加载中...';
       statusEl.style.color = '#64748b';
@@ -111,17 +111,17 @@ var FlashcardApp = window.FlashcardApp || {};
   };
 
   App.handleFileImport = function (file) {
-    var reader = new FileReader();
+    let reader = new FileReader();
     reader.onload = function (e) {
       try {
-        var text = e.target.result;
-        var words = [];
-        var deckName = '';
+        let text = e.target.result;
+        let words = [];
+        let deckName = '';
 
         if (file.name.endsWith('.json')) {
-          var data = JSON.parse(text);
+          let data = JSON.parse(text);
           deckName = data.name || file.name.replace('.json', '');
-          var rawWords = data.words || data;
+          let rawWords = data.words || data;
           if (Array.isArray(rawWords)) {
             rawWords.forEach(function (item) {
               if (Array.isArray(item) && item.length >= 2) {
@@ -133,18 +133,18 @@ var FlashcardApp = window.FlashcardApp || {};
           }
         } else if (file.name.endsWith('.csv')) {
           deckName = file.name.replace('.csv', '');
-          var lines = text.split(/[\r\n]+/).filter(Boolean);
+          let lines = text.split(/[\r\n]+/).filter(Boolean);
           lines.forEach(function (line) {
-            var cols = App.parseCSVLine(line);
+            let cols = App.parseCSVLine(line);
             if (cols.length >= 2 && cols[0].trim() && cols[1].trim()) {
               words.push([cols[0].trim(), cols[1].trim()]);
             }
           });
         } else {
           deckName = file.name.replace(/\.(txt|text)$/, '');
-          var txtLines = text.split(/[\r\n]+/).filter(Boolean);
+          let txtLines = text.split(/[\r\n]+/).filter(Boolean);
           txtLines.forEach(function (line) {
-            var parts = line.split(/\t|\s{2,}/);
+            let parts = line.split(/\t|\s{2,}/);
             if (parts.length >= 2 && parts[0].trim() && parts[1].trim()) {
               words.push([parts[0].trim(), parts[1].trim()]);
             }
@@ -153,7 +153,7 @@ var FlashcardApp = window.FlashcardApp || {};
 
         if (words.length === 0) { App.showToast('未能解析到有效单词，请检查文件格式', 'error'); return; }
 
-        var key = 'custom-' + Date.now();
+        let key = 'custom-' + Date.now();
         window.__VOCAB_REGISTRY__[key] = { name: deckName, description: '从文件导入 (' + words.length + '词)', words: words };
         App.importWordbookFromRegistry(key);
         delete window.__VOCAB_REGISTRY__[key];
@@ -165,14 +165,14 @@ var FlashcardApp = window.FlashcardApp || {};
   };
 
   App.renderImportModal = function () {
-    var bookList = document.getElementById('importBookList');
-    var statusEl = document.getElementById('importStatus');
+    let bookList = document.getElementById('importBookList');
+    let statusEl = document.getElementById('importStatus');
 
     statusEl.textContent = '';
-    var books = App.getRegisteredWordbooks();
+    let books = App.getRegisteredWordbooks();
 
     bookList.innerHTML = books.map(function (b) {
-      var imported = App.isWordbookImported(b);
+      let imported = App.isWordbookImported(b);
       return '<button data-book="' + b.key + '"' + (imported ? ' disabled' : '') + '>' +
         (imported ? '✅' : '📥') + ' ' + b.name +
         '<span style="color:#94a3b8;font-size:12px;">— ' + (b.loaded ? b.count + ' 词' : b.desc) + '</span>' +

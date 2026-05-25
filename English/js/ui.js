@@ -5,11 +5,11 @@ var FlashcardApp = window.FlashcardApp || {};
 
   /* 牌组选择器 */
   App.renderDeckSelect = function () {
-    var sel = document.getElementById('deckSelect');
-    var currentVal = sel.value;
+    let sel = document.getElementById('deckSelect');
+    let currentVal = sel.value;
     sel.innerHTML = '<option value="">-- 请选择牌组 --</option>';
     App.state.decks.forEach(function (d) {
-      var opt = document.createElement('option');
+      let opt = document.createElement('option');
       opt.value = d.id;
       opt.textContent = d.name + ' (' + d.cards.length + '张)';
       sel.appendChild(opt);
@@ -19,8 +19,8 @@ var FlashcardApp = window.FlashcardApp || {};
 
   /* 牌组面板 */
   App.renderDeckPanel = function () {
-    var grid = document.getElementById('deckGrid');
-    var empty = document.getElementById('decksEmpty');
+    let grid = document.getElementById('deckGrid');
+    let empty = document.getElementById('decksEmpty');
 
     if (App.state.decks.length === 0) {
       grid.innerHTML = '';
@@ -29,10 +29,10 @@ var FlashcardApp = window.FlashcardApp || {};
     }
     empty.style.display = 'none';
     grid.innerHTML = App.state.decks.map(function (d) {
-      var diffHtml = '';
+      let diffHtml = '';
       if (d.cards.length > 0) {
-        var avg = App.avgDifficulty(d);
-        var level = Math.ceil(avg / (App.DIFFICULTY_MAX / 5));
+        let avg = App.avgDifficulty(d);
+        let level = Math.ceil(avg / (App.DIFFICULTY_MAX / 5));
         diffHtml = Array.from({ length: 5 }, function (_, i) {
           return '<span' + (i < level ? ' class="active"' : '') + '></span>';
         }).join('');
@@ -56,21 +56,21 @@ var FlashcardApp = window.FlashcardApp || {};
   /* Tab 切换 */
   App.switchTab = function (tab) {
     document.querySelectorAll('nav button').forEach(function (b) { b.classList.remove('active'); });
-    var tabBtn = document.querySelector('nav button[data-tab="' + tab + '"]');
+    let tabBtn = document.querySelector('nav button[data-tab="' + tab + '"]');
     if (tabBtn) tabBtn.classList.add('active');
 
     document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('visible'); });
-    var panelMap = { decks: 'panelDecks', study: 'panelStudy', typing: 'panelTyping', preview: 'panelPreview', cards: 'panelCards', stats: 'panelStats' };
-    var panelId = panelMap[tab];
+    let panelMap = { decks: 'panelDecks', study: 'panelStudy', typing: 'panelTyping', preview: 'panelPreview', cards: 'panelCards', stats: 'panelStats' };
+    let panelId = panelMap[tab];
     if (panelId) document.getElementById(panelId).classList.add('visible');
 
     if (tab === 'study') {
-      var deck = App.getCurrentDeck();
+      let deck = App.getCurrentDeck();
       if (deck && deck.cards.length > 0) App.startStudy();
       else App.renderStudyPanel();
     }
     if (tab === 'typing') {
-      var d = App.getCurrentDeck();
+      let d = App.getCurrentDeck();
       if (d && d.cards.length > 0) App.startTyping();
       else App.renderTypingPanel();
     }
@@ -81,20 +81,20 @@ var FlashcardApp = window.FlashcardApp || {};
 
   /* 更新导航标签上的待复习角标 */
   App.updateNavBadges = function () {
-    var today = new Date().toISOString().slice(0, 10);
-    var dueCount = 0;
+    let today = new Date().toISOString().slice(0, 10);
+    let dueCount = 0;
     App.state.decks.forEach(function (d) {
       d.cards.forEach(function (c) {
         if (c.nextReview && c.nextReview <= today) dueCount++;
       });
     });
 
-    var studyBtn = document.querySelector('nav button[data-tab="study"]');
+    let studyBtn = document.querySelector('nav button[data-tab="study"]');
     if (studyBtn) {
-      var existing = studyBtn.querySelector('.nav-badge');
+      let existing = studyBtn.querySelector('.nav-badge');
       if (existing) existing.remove();
       if (dueCount > 0) {
-        var badge = document.createElement('span');
+        let badge = document.createElement('span');
         badge.className = 'nav-badge';
         badge.textContent = dueCount > 99 ? '99+' : dueCount;
         studyBtn.appendChild(badge);

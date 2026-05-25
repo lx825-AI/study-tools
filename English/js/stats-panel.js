@@ -9,15 +9,15 @@ var FlashcardApp = window.FlashcardApp || {};
   /* 加载学习日志: { 'YYYY-MM-DD': { correct: N, wrong: N } } */
   App.loadLearningLog = function () {
     try {
-      var raw = localStorage.getItem(App.LEARNING_LOG_KEY);
+      let raw = localStorage.getItem(App.LEARNING_LOG_KEY);
       return raw ? JSON.parse(raw) : {};
     } catch (e) { return {}; }
   };
 
   /* 记录一次学习（correct: 1=对, 0=错） */
   App.trackLearning = function (correct) {
-    var today = new Date().toISOString().slice(0, 10);
-    var log = App.loadLearningLog();
+    let today = new Date().toISOString().slice(0, 10);
+    let log = App.loadLearningLog();
     if (!log[today]) log[today] = { correct: 0, wrong: 0 };
     if (correct) log[today].correct++;
     else log[today].wrong++;
@@ -26,11 +26,11 @@ var FlashcardApp = window.FlashcardApp || {};
 
   /* 计算连续打卡天数 */
   App.calcStreak = function (log) {
-    var streak = 0;
-    var d = new Date();
+    let streak = 0;
+    let d = new Date();
     d.setDate(d.getDate()); // today
     while (true) {
-      var key = d.toISOString().slice(0, 10);
+      let key = d.toISOString().slice(0, 10);
       if (log[key]) { streak++; d.setDate(d.getDate() - 1); }
       else break;
     }
@@ -39,52 +39,52 @@ var FlashcardApp = window.FlashcardApp || {};
 
   /* 渲染统计面板 */
   App.renderStatsPanel = function () {
-    var panel = document.getElementById('panelStats');
+    let panel = document.getElementById('panelStats');
     if (!panel) return;
 
-    var log = App.loadLearningLog();
-    var now = new Date();
-    var todayKey = now.toISOString().slice(0, 10);
-    var todayData = log[todayKey] || { correct: 0, wrong: 0 };
-    var tomorrow = new Date(now);
+    let log = App.loadLearningLog();
+    let now = new Date();
+    let todayKey = now.toISOString().slice(0, 10);
+    let todayData = log[todayKey] || { correct: 0, wrong: 0 };
+    let tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    var tomorrowKey = tomorrow.toISOString().slice(0, 10);
+    let tomorrowKey = tomorrow.toISOString().slice(0, 10);
 
     /* 总词汇量/已掌握 */
-    var allCards = [];
+    let allCards = [];
     App.state.decks.forEach(function (d) { allCards = allCards.concat(d.cards); });
-    var totalCards = allCards.length;
-    var masteredCount = allCards.filter(function (c) { return (c.easeFactor || 2.5) >= 2.8; }).length;
+    let totalCards = allCards.length;
+    let masteredCount = allCards.filter(function (c) { return (c.easeFactor || 2.5) >= 2.8; }).length;
 
     /* SM-2 统计 */
-    var dueToday = allCards.filter(function (c) {
+    let dueToday = allCards.filter(function (c) {
       return c.nextReview && c.nextReview <= todayKey;
     }).length;
-    var dueTomorrow = allCards.filter(function (c) {
+    let dueTomorrow = allCards.filter(function (c) {
       return c.nextReview && c.nextReview === tomorrowKey;
     }).length;
-    var avgEF = allCards.length > 0
+    let avgEF = allCards.length > 0
       ? (allCards.reduce(function (s, c) { return s + (c.easeFactor || 2.5); }, 0) / allCards.length).toFixed(1)
       : '2.5';
 
     /* 连续打卡 */
-    var streak = App.calcStreak(log);
+    let streak = App.calcStreak(log);
 
     /* 每日目标 */
-    var dailyGoal = parseInt(localStorage.getItem('flashcard-daily-goal') || '20', 10);
-    var todayTotal = todayData.correct + todayData.wrong;
-    var goalPercent = Math.min(100, Math.round(todayTotal / dailyGoal * 100));
+    let dailyGoal = parseInt(localStorage.getItem('flashcard-daily-goal') || '20', 10);
+    let todayTotal = todayData.correct + todayData.wrong;
+    let goalPercent = Math.min(100, Math.round(todayTotal / dailyGoal * 100));
 
     /* 本周统计 */
-    var weekStats = [];
-    for (var i = 6; i >= 0; i--) {
-      var d = new Date(now);
+    let weekStats = [];
+    for (let i = 6; i >= 0; i--) {
+      let d = new Date(now);
       d.setDate(d.getDate() - i);
-      var key = d.toISOString().slice(0, 10);
-      var dayData = log[key] || { correct: 0, wrong: 0 };
+      let key = d.toISOString().slice(0, 10);
+      let dayData = log[key] || { correct: 0, wrong: 0 };
       weekStats.push({ label: d.getDate() + '日', correct: dayData.correct, wrong: dayData.wrong, total: dayData.correct + dayData.wrong });
     }
-    var maxTotal = Math.max.apply(null, weekStats.map(function (s) { return s.total; }).concat([1]));
+    let maxTotal = Math.max.apply(null, weekStats.map(function (s) { return s.total; }).concat([1]));
 
     panel.innerHTML =
       '<div class="stats-grid">' +
@@ -149,7 +149,7 @@ var FlashcardApp = window.FlashcardApp || {};
       '<div class="section-title" style="margin-top:24px;">📊 本周学习量</div>' +
       '<div class="week-chart">' +
         weekStats.map(function (s) {
-          var height = maxTotal > 0 ? Math.max(4, Math.round((s.total / maxTotal) * 100)) : 0;
+          let height = maxTotal > 0 ? Math.max(4, Math.round((s.total / maxTotal) * 100)) : 0;
           return '<div class="week-bar-col">' +
             '<div class="week-bar" style="height:' + height + 'px"></div>' +
             '<div class="week-bar-label">' + s.label + '</div>' +
@@ -163,11 +163,11 @@ var FlashcardApp = window.FlashcardApp || {};
       '<div class="heatmap">' + App._renderHeatmap(log) + '</div>';
 
     /* 绑定每日目标保存事件（innerHTML 同步赋值后 DOM 已可用） */
-      var goalInput = document.getElementById('dailyGoalInput');
-      var saveBtn = document.getElementById('btnSaveGoal');
+      let goalInput = document.getElementById('dailyGoalInput');
+      let saveBtn = document.getElementById('btnSaveGoal');
       if (goalInput && saveBtn) {
         saveBtn.addEventListener('click', function () {
-          var v = parseInt(goalInput.value, 10);
+          let v = parseInt(goalInput.value, 10);
           if (v >= 5 && v <= 200) {
             localStorage.setItem('flashcard-daily-goal', v);
             App.renderStatsPanel();
@@ -177,16 +177,16 @@ var FlashcardApp = window.FlashcardApp || {};
   };
 
   App._renderHeatmap = function (log) {
-    var cells = '';
-    var now = new Date();
-    for (var i = 29; i >= 0; i--) {
-      var d = new Date(now);
+    let cells = '';
+    let now = new Date();
+    for (let i = 29; i >= 0; i--) {
+      let d = new Date(now);
       d.setDate(d.getDate() - i);
-      var key = d.toISOString().slice(0, 10);
-      var dayData = log[key] || { correct: 0, wrong: 0 };
-      var total = dayData.correct + dayData.wrong;
-      var level = total === 0 ? 0 : total < 10 ? 1 : total < 30 ? 2 : total < 60 ? 3 : 4;
-      var title = key + ': ' + total + ' 次学习';
+      let key = d.toISOString().slice(0, 10);
+      let dayData = log[key] || { correct: 0, wrong: 0 };
+      let total = dayData.correct + dayData.wrong;
+      let level = total === 0 ? 0 : total < 10 ? 1 : total < 30 ? 2 : total < 60 ? 3 : 4;
+      let title = key + ': ' + total + ' 次学习';
       cells += '<div class="heat-cell heat-level-' + level + '" title="' + title + '"></div>';
     }
     return cells;

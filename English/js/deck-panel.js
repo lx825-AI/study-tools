@@ -34,22 +34,22 @@ var FlashcardApp = window.FlashcardApp || {};
 
   /* 导出牌组 */
   App.exportDeck = function (deckId, format) {
-    var deck = App.getDeck(deckId);
+    let deck = App.getDeck(deckId);
     if (!deck) return;
     format = format || 'json';
 
-    var content, filename, mimeType;
+    let content, filename, mimeType;
     if (format === 'csv') {
-      var rows = deck.cards.map(function (c) {
-        var front = (c.front || c.word || '').replace(/"/g, '""');
-        var back = (c.back || (c.definitions || [''])[0]).replace(/"/g, '""');
+      let rows = deck.cards.map(function (c) {
+        let front = (c.front || c.word || '').replace(/"/g, '""');
+        let back = (c.back || (c.definitions || [''])[0]).replace(/"/g, '""');
         return '"' + front + '","' + back + '"';
       });
       content = 'front,back\n' + rows.join('\n');
       filename = deck.name + '.csv';
       mimeType = 'text/csv;charset=utf-8';
     } else {
-      var exportData = {
+      let exportData = {
         name: deck.name,
         exportedAt: new Date().toISOString(),
         cards: deck.cards.map(function (c) {
@@ -78,9 +78,9 @@ var FlashcardApp = window.FlashcardApp || {};
       mimeType = 'application/json';
     }
 
-    var blob = new Blob(['﻿' + content], { type: mimeType }); // BOM for Chinese charset
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
+    let blob = new Blob(['﻿' + content], { type: mimeType }); // BOM for Chinese charset
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement('a');
     a.href = url;
     a.download = filename;
     document.body.appendChild(a);

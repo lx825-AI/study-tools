@@ -6,11 +6,11 @@ var FlashcardApp = window.FlashcardApp || {};
   App.cardsBatchMode = false;
 
   App.renderCardsPanel = function () {
-    var deck = App.getCurrentDeck();
-    var content = document.getElementById('cardsContent');
-    var noDeck = document.getElementById('cardsNoDeck');
-    var list = document.getElementById('cardList');
-    var countTitle = document.getElementById('cardsCountTitle');
+    let deck = App.getCurrentDeck();
+    let content = document.getElementById('cardsContent');
+    let noDeck = document.getElementById('cardsNoDeck');
+    let list = document.getElementById('cardList');
+    let countTitle = document.getElementById('cardsCountTitle');
 
     if (!deck) {
       content.style.display = 'none';
@@ -22,8 +22,8 @@ var FlashcardApp = window.FlashcardApp || {};
     countTitle.textContent = '卡片列表 (' + deck.cards.length + ' 张)';
 
     /* 批量模式按钮状态 */
-    var btnBatchMode = document.getElementById('btnBatchMode');
-    var batchActions = document.getElementById('batchActions');
+    let btnBatchMode = document.getElementById('btnBatchMode');
+    let batchActions = document.getElementById('batchActions');
     if (btnBatchMode) {
       btnBatchMode.textContent = App.cardsBatchMode ? '☑ 退出批量' : '☐ 批量模式';
     }
@@ -37,12 +37,12 @@ var FlashcardApp = window.FlashcardApp || {};
     }
 
     list.innerHTML = deck.cards.map(function (c, i) {
-      var front = c.front || c.word || '';
-      var back = c.back || (c.definitions || [''])[0];
-      var checkboxHtml = App.cardsBatchMode
+      let front = c.front || c.word || '';
+      let back = c.back || (c.definitions || [''])[0];
+      let checkboxHtml = App.cardsBatchMode
         ? '<input type="checkbox" class="edit-card-checkbox" data-index="' + i + '">'
         : '';
-      var deleteHtml = App.cardsBatchMode
+      let deleteHtml = App.cardsBatchMode
         ? ''
         : '<button class="btn btn-danger btn-sm" data-action="deleteCard" data-index="' + i + '">删除</button>';
       return '<div class="edit-card-item">' +
@@ -60,9 +60,9 @@ var FlashcardApp = window.FlashcardApp || {};
   };
 
   App.handleCardDelete = function (index) {
-    var deck = App.getCurrentDeck();
+    let deck = App.getCurrentDeck();
     if (!deck) return;
-    var front = deck.cards[index].front || deck.cards[index].word;
+    let front = deck.cards[index].front || deck.cards[index].word;
     if (confirm('确定删除卡片「' + front + '」？')) {
       deck.cards.splice(index, 1);
       App.saveData();
@@ -78,26 +78,26 @@ var FlashcardApp = window.FlashcardApp || {};
 
   /* 全选 */
   App.selectAllCards = function () {
-    var checkboxes = document.querySelectorAll('#cardList .edit-card-checkbox');
+    let checkboxes = document.querySelectorAll('#cardList .edit-card-checkbox');
     checkboxes.forEach(function (cb) { cb.checked = true; });
   };
 
   /* 取消全选 */
   App.deselectAllCards = function () {
-    var checkboxes = document.querySelectorAll('#cardList .edit-card-checkbox');
+    let checkboxes = document.querySelectorAll('#cardList .edit-card-checkbox');
     checkboxes.forEach(function (cb) { cb.checked = false; });
   };
 
   /* 批量删除选中的卡片 */
   App.batchDeleteCards = function () {
-    var deck = App.getCurrentDeck();
+    let deck = App.getCurrentDeck();
     if (!deck) return;
-    var checkboxes = document.querySelectorAll('#cardList .edit-card-checkbox:checked');
+    let checkboxes = document.querySelectorAll('#cardList .edit-card-checkbox:checked');
     if (checkboxes.length === 0) { App.showToast('请先勾选要删除的卡片', 'warn'); return; }
     if (!confirm('确定删除选中的 ' + checkboxes.length + ' 张卡片？此操作不可撤销。')) return;
 
     /* 从后往前删，索引不漂移 */
-    var indices = [];
+    let indices = [];
     checkboxes.forEach(function (cb) { indices.push(parseInt(cb.dataset.index)); });
     indices.sort(function (a, b) { return b - a; });
     indices.forEach(function (idx) { deck.cards.splice(idx, 1); });
@@ -108,18 +108,18 @@ var FlashcardApp = window.FlashcardApp || {};
 
   /* 批量粘贴导入 */
   App.batchImportCards = function () {
-    var deck = App.getCurrentDeck();
+    let deck = App.getCurrentDeck();
     if (!deck) { App.showToast('请先选择一个牌组', 'warn'); return; }
-    var text = document.getElementById('batchImportText').value.trim();
+    let text = document.getElementById('batchImportText').value.trim();
     if (!text) { App.showToast('请粘贴单词数据', 'warn'); return; }
 
-    var lines = text.split(/[\r\n]+/).filter(Boolean);
-    var added = 0;
-    var existingWords = new Set(deck.cards.map(function (c) { return (c.front || c.word || '').toLowerCase(); }));
+    let lines = text.split(/[\r\n]+/).filter(Boolean);
+    let added = 0;
+    let existingWords = new Set(deck.cards.map(function (c) { return (c.front || c.word || '').toLowerCase(); }));
 
     lines.forEach(function (line) {
       /* 支持: word  definition (空格/制表符分隔) 或 word,definition (逗号分隔) */
-      var parts;
+      let parts;
       if (line.indexOf('\t') !== -1) {
         parts = line.split('\t');
       } else if (line.indexOf(',') !== -1) {
@@ -129,13 +129,13 @@ var FlashcardApp = window.FlashcardApp || {};
         if (parts.length < 2) parts = line.split(/\s+/);
         /* 如果第一个词后面有空格，尝试拆分为 [word, rest] */
         if (parts.length < 2) {
-          var match = line.match(/^(\S+)\s+(.+)$/);
+          let match = line.match(/^(\S+)\s+(.+)$/);
           if (match) parts = [match[1], match[2]];
         }
       }
       if (parts.length >= 2) {
-        var word = parts[0].trim();
-        var def = parts.slice(1).join(',').trim();
+        let word = parts[0].trim();
+        let def = parts.slice(1).join(',').trim();
         if (word && def && !existingWords.has(word.toLowerCase())) {
           deck.cards.push({ id: App.genId(), front: word, back: def, difficulty: 3 });
           existingWords.add(word.toLowerCase());

@@ -11,7 +11,7 @@ var FlashcardApp = window.FlashcardApp || {};
 
   App.avgDifficulty = function (deck) {
     if (deck.cards.length === 0) return 0;
-    var sum = deck.cards.reduce(function (s, c) { return s + (c.difficulty || 0); }, 0);
+    let sum = deck.cards.reduce(function (s, c) { return s + (c.difficulty || 0); }, 0);
     return sum / deck.cards.length;
   };
 

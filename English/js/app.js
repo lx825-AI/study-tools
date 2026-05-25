@@ -6,7 +6,7 @@ var FlashcardApp = window.FlashcardApp || {};
   /* ========== 演示数据（富格式：展���卡背各数据段） ========== */
   App.seedDemoData = function () {
     if (App.state.decks.length > 0) return;
-    var cet4Words = [
+    let cet4Words = [
       { front: 'abandon', back: '丢弃；放弃，抛弃', word: 'abandon', phonetic: '/əˈbændən/', pos: 'v.',
         definitions: ['丢弃；放弃，抛弃', '沉溺于，放纵'],
         phrases: [{ en: 'abandon oneself to', zh: '沉溺于，纵情于' }, { en: 'abandon hope', zh: '放弃希望' }],
@@ -38,7 +38,7 @@ var FlashcardApp = window.FlashcardApp || {};
         synonyms: ['obtain', 'gain', 'attain'], antonyms: ['lose', 'forfeit'],
         confused: ['inquire', 'require'] }
     ];
-    var cet6Words = [
+    let cet6Words = [
       { front: 'abolish', back: '废除；取消', word: 'abolish', phonetic: '/əˈbɑːlɪʃ/', pos: 'v.',
         definitions: ['废除，废止（法律、制度、习俗等）'],
         phrases: [{ en: 'abolish slavery', zh: '废除奴隶制' }, { en: 'abolish a law', zh: '废止一项法律' }],
@@ -86,9 +86,9 @@ var FlashcardApp = window.FlashcardApp || {};
   App._filterPreviewCards = function (deck, query) {
     if (!query) return deck.cards;
     return deck.cards.filter(function (c) {
-      var front = (c.front || c.word || '').toLowerCase();
-      var back = (c.back || (c.definitions || [''])[0] || '').toLowerCase();
-      var pos = (c.pos || '').toLowerCase();
+      let front = (c.front || c.word || '').toLowerCase();
+      let back = (c.back || (c.definitions || [''])[0] || '').toLowerCase();
+      let pos = (c.pos || '').toLowerCase();
       return App.fuzzyMatch(query, front) || back.indexOf(query) !== -1 || pos.indexOf(query) !== -1;
     });
   };
@@ -97,7 +97,7 @@ var FlashcardApp = window.FlashcardApp || {};
   App.showToast = function (message, type, duration) {
     type = type || 'info';
     duration = duration || 2500;
-    var toast = document.createElement('div');
+    let toast = document.createElement('div');
     toast.className = 'toast toast-' + type;
     toast.textContent = message;
     document.body.appendChild(toast);
@@ -109,9 +109,9 @@ var FlashcardApp = window.FlashcardApp || {};
 
   /* debounce 工具 */
   App.debounce = function (fn, delay) {
-    var timer;
+    let timer;
     return function () {
-      var ctx = this, args = arguments;
+      let ctx = this, args = arguments;
       clearTimeout(timer);
       timer = setTimeout(function () { fn.apply(ctx, args); }, delay);
     };
@@ -121,8 +121,8 @@ var FlashcardApp = window.FlashcardApp || {};
   App.init = function () {
     /* 创建牌组 */
     document.getElementById('btnAddDeck').addEventListener('click', function () {
-      var input = document.getElementById('deckNameInput');
-      var name = input.value.trim();
+      let input = document.getElementById('deckNameInput');
+      let name = input.value.trim();
       if (!name) return;
       App.state.decks.push({ id: App.genId(), name: name, cards: [] });
       App.saveData();
@@ -143,7 +143,7 @@ var FlashcardApp = window.FlashcardApp || {};
 
     /* 开始学习按钮 */
     document.getElementById('btnStudyNow').addEventListener('click', function () {
-      var deck = App.getCurrentDeck();
+      let deck = App.getCurrentDeck();
       if (!deck) { App.showToast('请先选择一个牌组', 'warn'); return; }
       if (deck.cards.length === 0) { App.showToast('该牌组还没有卡片，请先添加', 'warn'); return; }
       App.startStudy();
@@ -157,24 +157,24 @@ var FlashcardApp = window.FlashcardApp || {};
 
     /* 牌组卡片操作 */
     document.getElementById('deckGrid').addEventListener('click', function (e) {
-      var btn = e.target.closest('button[data-action]');
+      let btn = e.target.closest('button[data-action]');
       if (!btn) return;
       App.handleDeckAction(btn.dataset.action, btn.dataset.deck);
     });
 
     /* 卡片列表操作 */
     document.getElementById('cardList').addEventListener('click', function (e) {
-      var delBtn = e.target.closest('button[data-action="deleteCard"]');
+      let delBtn = e.target.closest('button[data-action="deleteCard"]');
       if (delBtn) {
         App.handleCardDelete(parseInt(delBtn.dataset.index));
         return;
       }
-      var speakBtn = e.target.closest('.speak-card-btn');
+      let speakBtn = e.target.closest('.speak-card-btn');
       if (!speakBtn) return;
       e.stopPropagation();
-      var frontDiv = speakBtn.closest('.edit-card-front');
+      let frontDiv = speakBtn.closest('.edit-card-front');
       if (!frontDiv) return;
-      var text = (frontDiv.textContent || '').replace(/🔊\s*$/, '').trim();
+      let text = (frontDiv.textContent || '').replace(/🔊\s*$/, '').trim();
       if (text) App.speak(text);
     });
 
@@ -187,10 +187,10 @@ var FlashcardApp = window.FlashcardApp || {};
 
     /* 添加卡片 */
     document.getElementById('btnAddCard').addEventListener('click', function () {
-      var deck = App.getCurrentDeck();
+      let deck = App.getCurrentDeck();
       if (!deck) return;
-      var front = document.getElementById('cardFrontInput').value.trim();
-      var back = document.getElementById('cardBackInput').value.trim();
+      let front = document.getElementById('cardFrontInput').value.trim();
+      let back = document.getElementById('cardBackInput').value.trim();
       if (!front || !back) { App.showToast('请填写正面和反面内容', 'warn'); return; }
       deck.cards.push({ id: App.genId(), front: front, back: back, difficulty: 3 });
       App.saveData();
@@ -209,22 +209,22 @@ var FlashcardApp = window.FlashcardApp || {};
 
     /* 移动端滑动翻卡 */
     (function () {
-      var card = document.getElementById('flashcard');
-      var startX = 0, startY = 0, moved = false;
+      let card = document.getElementById('flashcard');
+      let startX = 0, startY = 0, moved = false;
 
       card.addEventListener('touchstart', function (e) {
         if (App.studyQueue.length === 0 || App.studyIndex >= App.studyQueue.length) return;
-        var t = e.touches[0];
+        let t = e.touches[0];
         startX = t.clientX;
         startY = t.clientY;
         moved = false;
       }, { passive: true });
 
       card.addEventListener('touchmove', function (e) {
-        var t = e.touches[0];
+        let t = e.touches[0];
         if (!t) return;
-        var dx = t.clientX - startX;
-        var dy = t.clientY - startY;
+        let dx = t.clientX - startX;
+        let dy = t.clientY - startY;
         if (Math.abs(dx) > 5 && Math.abs(dx) > Math.abs(dy)) {
           moved = true;
           card.style.transform = 'translateX(' + dx + 'px) rotateY(' + (App.isFlipped ? 180 : 0) + 'deg)';
@@ -235,8 +235,8 @@ var FlashcardApp = window.FlashcardApp || {};
       card.addEventListener('touchend', function (e) {
         card.style.transition = 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
         card.style.transform = App.isFlipped ? 'rotateY(180deg)' : '';
-        var ct = e.changedTouches[0];
-        var dx = ct ? ct.clientX - startX : 0;
+        let ct = e.changedTouches[0];
+        let dx = ct ? ct.clientX - startX : 0;
         if (moved && Math.abs(dx) > 60) {
           if (App.isFlipped) {
             App.answerStudy(dx > 0);
@@ -292,46 +292,46 @@ var FlashcardApp = window.FlashcardApp || {};
     /* 预览模式 */
     document.getElementById('btnToggleAnswer').addEventListener('click', function () {
       App.previewAnswersVisible = !App.previewAnswersVisible;
-      var deck = App.getCurrentDeck();
+      let deck = App.getCurrentDeck();
       if (deck) {
-        var query = document.getElementById('previewSearch').value.trim().toLowerCase();
+        let query = document.getElementById('previewSearch').value.trim().toLowerCase();
         App._renderPreviewTable(App._filterPreviewCards(deck, query));
       }
       document.getElementById('btnToggleAnswer').textContent =
         App.previewAnswersVisible ? '🙈 隐藏释义' : '👁️ 显示释义';
     });
     document.getElementById('previewSearch').addEventListener('input', App.debounce(function () {
-      var deck = App.getCurrentDeck();
+      let deck = App.getCurrentDeck();
       if (!deck) return;
-      var query = this.value.trim().toLowerCase();
+      let query = this.value.trim().toLowerCase();
       App._renderPreviewTable(App._filterPreviewCards(deck, query));
     }, 150));
 
     /* 预览表格朗读按钮 */
     document.getElementById('previewTbody').addEventListener('click', function (e) {
-      var btn = e.target.closest('.speak-preview-btn');
+      let btn = e.target.closest('.speak-preview-btn');
       if (!btn) return;
       e.stopPropagation();
-      var td = btn.closest('td');
+      let td = btn.closest('td');
       if (!td) return;
-      var text = (td.textContent || '').replace(/🔊\s*$/, '').trim();
+      let text = (td.textContent || '').replace(/🔊\s*$/, '').trim();
       if (text) App.speak(text);
     });
 
     /* 全局搜索 */
     document.getElementById('globalSearch').addEventListener('input', App.debounce(function () {
-      var query = this.value.trim().toLowerCase();
-      var results = document.getElementById('globalSearchResults');
+      let query = this.value.trim().toLowerCase();
+      let results = document.getElementById('globalSearchResults');
       if (!query || query.length < 1) { results.style.display = 'none'; return; }
 
-      var hits = [];
-      var seen = new Set();
+      let hits = [];
+      let seen = new Set();
       App.state.decks.forEach(function (deck) {
         deck.cards.forEach(function (c) {
-          var front = (c.front || c.word || '').toLowerCase();
-          var back = (c.back || (c.definitions || [''])[0] || '').toLowerCase();
-          var pos = (c.pos || '').toLowerCase();
-          var key = front + '|' + deck.id;
+          let front = (c.front || c.word || '').toLowerCase();
+          let back = (c.back || (c.definitions || [''])[0] || '').toLowerCase();
+          let pos = (c.pos || '').toLowerCase();
+          let key = front + '|' + deck.id;
           if (seen.has(key)) return;
           if (App.fuzzyMatch(query, front) || back.indexOf(query) !== -1 || pos.indexOf(query) !== -1) {
             hits.push({ deckName: deck.name, deckId: deck.id, card: c });
@@ -344,11 +344,11 @@ var FlashcardApp = window.FlashcardApp || {};
         results.innerHTML = '<div class="gsr-empty">未找到匹配单词</div>';
       } else {
         results.innerHTML = hits.slice(0, 20).map(function (h) {
-          var c = h.card;
-          var front = App.escHtml(c.front || c.word);
-          var back = App.escHtml(c.back || (c.definitions || [''])[0]);
-          var posBadge = c.pos ? '<span class="gsr-pos">' + App.escHtml(c.pos) + '</span>' : '';
-          var phonetic = c.phonetic ? '<span class="gsr-phonetic">' + App.escHtml(c.phonetic) + '</span>' : '';
+          let c = h.card;
+          let front = App.escHtml(c.front || c.word);
+          let back = App.escHtml(c.back || (c.definitions || [''])[0]);
+          let posBadge = c.pos ? '<span class="gsr-pos">' + App.escHtml(c.pos) + '</span>' : '';
+          let phonetic = c.phonetic ? '<span class="gsr-phonetic">' + App.escHtml(c.phonetic) + '</span>' : '';
           return '<div class="gsr-item" data-deck="' + h.deckId + '" data-word="' + App.escHtml(front) + '">' +
             '<span class="gsr-word">' + front + phonetic + '</span>' +
             posBadge +
@@ -358,15 +358,15 @@ var FlashcardApp = window.FlashcardApp || {};
         }).join('');
         results.querySelectorAll('.gsr-item').forEach(function (item) {
           item.addEventListener('click', function () {
-            var deckId = this.dataset.deck;
-            var word = this.dataset.word;
+            let deckId = this.dataset.deck;
+            let word = this.dataset.word;
             App.state.currentDeckId = deckId;
             App.saveData();
             App.renderDeckSelect();
             App.switchTab('preview');
-            var deck = App.getDeck(deckId);
+            let deck = App.getDeck(deckId);
             if (deck) {
-              var query = document.getElementById('previewSearch');
+              let query = document.getElementById('previewSearch');
               query.value = word;
               App._renderPreviewTable(App._filterPreviewCards(deck, word));
             }
@@ -380,8 +380,8 @@ var FlashcardApp = window.FlashcardApp || {};
 
     /* 点击空白关闭全局搜索 */
     document.addEventListener('click', function (e) {
-      var results = document.getElementById('globalSearchResults');
-      var search = document.getElementById('globalSearch');
+      let results = document.getElementById('globalSearchResults');
+      let search = document.getElementById('globalSearch');
       if (!results.contains(e.target) && e.target !== search) {
         results.style.display = 'none';
       }
@@ -404,9 +404,9 @@ var FlashcardApp = window.FlashcardApp || {};
     });
     document.getElementById('importModal').addEventListener('click', function (e) {
       if (e.target === this) App.closeImportModal();
-      var bookBtn = e.target.closest('[data-book]');
+      let bookBtn = e.target.closest('[data-book]');
       if (bookBtn && !bookBtn.disabled) {
-        var bookInfo = App.BUILTIN_WORDBOOKS.find(function (b) { return b.key === bookBtn.dataset.book; });
+        let bookInfo = App.BUILTIN_WORDBOOKS.find(function (b) { return b.key === bookBtn.dataset.book; });
         if (bookInfo) App.loadAndImportWordbook(bookInfo);
       }
     });
@@ -420,9 +420,9 @@ var FlashcardApp = window.FlashcardApp || {};
 
     /* 主题切换 */
     document.getElementById('themeToggle').addEventListener('click', function () {
-      var html = document.documentElement;
-      var current = html.getAttribute('data-theme');
-      var next = current === 'dark' ? null : 'dark';
+      let html = document.documentElement;
+      let current = html.getAttribute('data-theme');
+      let next = current === 'dark' ? null : 'dark';
       if (next) html.setAttribute('data-theme', next);
       else html.removeAttribute('data-theme');
       localStorage.setItem('flashcard-theme', next || 'light');
@@ -435,7 +435,7 @@ var FlashcardApp = window.FlashcardApp || {};
 
     /* 恢复主题 */
     (function () {
-      var saved = localStorage.getItem('flashcard-theme');
+      let saved = localStorage.getItem('flashcard-theme');
       if (saved === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
         document.getElementById('themeToggle').textContent = '☀️';
@@ -457,10 +457,10 @@ var FlashcardApp = window.FlashcardApp || {};
 
   /* ========== 快捷键弹窗 ========== */
   App.showShortcutModal = function () {
-    var existing = document.querySelector('.shortcut-overlay');
+    let existing = document.querySelector('.shortcut-overlay');
     if (existing) { existing.remove(); return; }
 
-    var overlay = document.createElement('div');
+    let overlay = document.createElement('div');
     overlay.className = 'shortcut-overlay';
     overlay.innerHTML = '<div class="shortcut-modal">' +
       '<h3>⌨️ 快捷键</h3>' +
@@ -485,11 +485,11 @@ var FlashcardApp = window.FlashcardApp || {};
 
   /* 庆祝粒子动画 */
   App.spawnConfetti = function () {
-    var container = document.createElement('div');
+    let container = document.createElement('div');
     container.className = 'confetti-container';
-    var colors = ['#4f46e5', '#818cf8', '#f59e0b', '#ef4444', '#16a34a', '#06b6d4', '#ec4899', '#f97316'];
-    for (var i = 0; i < 50; i++) {
-      var piece = document.createElement('div');
+    let colors = ['#4f46e5', '#818cf8', '#f59e0b', '#ef4444', '#16a34a', '#06b6d4', '#ec4899', '#f97316'];
+    for (let i = 0; i < 50; i++) {
+      let piece = document.createElement('div');
       piece.className = 'confetti-piece';
       piece.style.left = Math.random() * 100 + '%';
       piece.style.background = colors[Math.floor(Math.random() * colors.length)];
@@ -505,7 +505,7 @@ var FlashcardApp = window.FlashcardApp || {};
   App.speak = function (text) {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
-    var utterance = new SpeechSynthesisUtterance(text);
+    let utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US';
     utterance.rate = 0.85;
     window.speechSynthesis.speak(utterance);

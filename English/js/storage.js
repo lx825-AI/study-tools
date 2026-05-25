@@ -3,14 +3,14 @@ var FlashcardApp = window.FlashcardApp || {};
 (function (App) {
   'use strict';
 
-  var STORAGE_KEY = 'flashcard-data';
+  let STORAGE_KEY = 'flashcard-data';
   App.STORAGE_KEY = STORAGE_KEY;
 
   App.loadData = function () {
     try {
-      var raw = localStorage.getItem(STORAGE_KEY);
+      let raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
-        var data = JSON.parse(raw);
+        let data = JSON.parse(raw);
         return { decks: data.decks || [], currentDeckId: data.currentDeckId || null };
       }
     } catch (e) { /* 数据损坏则重置 */ }
