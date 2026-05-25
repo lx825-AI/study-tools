@@ -20,7 +20,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
 
       # 构建 English
       - name: Build English
@@ -42,16 +42,16 @@ jobs:
           cd math
           npm run build
 
-      # 合并产物
+      # 合并产物 (用 _site 避免 .gitignore 中 dist/ 导致 upload-pages-artifact 跳过文件)
       - name: Merge dist
         run: |
-          mkdir -p dist
-          cp -r English/dist dist/english
-          cp -r math/dist dist/math
+          mkdir -p _site
+          cp -r English/dist _site/english
+          cp -r math/dist _site/math
 
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist'
+          path: './_site'
       - id: deployment
         uses: actions/deploy-pages@v4

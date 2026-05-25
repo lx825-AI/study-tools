@@ -21,8 +21,8 @@ cd math   && npm install && npm run build
 
 | 工具 | 地址 |
 |------|------|
-| 数学公式 | https://lx825-ai.github.io/study-tools/ |
-| 英语闪卡 | 暂未部署 |
+| 英语闪卡 | https://lx825-ai.github.io/study-tools/english/ |
+| 数学公式 | https://lx825-ai.github.io/study-tools/math/ |
 
 ## 功能特性
 
