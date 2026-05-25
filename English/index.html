@@ -286,12 +286,11 @@
 
   <!-- 导入词书弹窗 -->
   <div class="import-modal-overlay" id="importModal" style="display:none">
-    <div class="import-modal" style="max-width:400px">
+    <div class="import-modal" style="max-width:440px">
       <h3>📥 导入词书</h3>
-      <p>选择词书自动创建牌组，已导入的不会重复添加</p>
+      <p>内置词书或外部数据均可导入，已导入的不会重复添加</p>
       <div class="modal-options" id="importBookList"></div>
       <p id="importStatus" style="font-size:13px;margin-bottom:12px;min-height:20px;"></p>
-      <button class="btn btn-outline btn-sm btn-block" id="btnImportFile" style="margin-bottom:8px;">📁 从文件导入 (JSON/TXT/CSV)</button>
       <input type="file" id="importFileInput" accept=".json,.txt,.csv,.text" style="display:none">
       <button class="modal-cancel" id="btnModalCancel">取消</button>
     </div>

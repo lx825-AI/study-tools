@@ -110,51 +110,67 @@ var FlashcardApp = window.FlashcardApp || {};
     }
   };
 
-  App.handleFileImport = function (file) {
-    let reader = new FileReader();
-    reader.onload = function (e) {
-      try {
-        let text = e.target.result;
-        let words = [];
-        let deckName = '';
+  /** 通用文本解析：从 JSON/CSV/TXT 文本中提取单词数组 */
+  App._parseImportText = function (text, sourceName) {
+    let words = [];
+    let deckName = sourceName;
 
-        if (file.name.endsWith('.json')) {
-          let data = JSON.parse(text);
-          deckName = data.name || file.name.replace('.json', '');
-          let rawWords = data.words || data;
-          if (Array.isArray(rawWords)) {
-            rawWords.forEach(function (item) {
-              if (Array.isArray(item) && item.length >= 2) {
-                words.push(item);
-              } else if (item.word) {
-                words.push([item.word, (item.definitions || [''])[0]]);
-              }
-            });
-          }
-        } else if (file.name.endsWith('.csv')) {
-          deckName = file.name.replace('.csv', '');
-          let lines = text.split(/[\r\n]+/).filter(Boolean);
-          lines.forEach(function (line) {
-            let cols = App.parseCSVLine(line);
-            if (cols.length >= 2 && cols[0].trim() && cols[1].trim()) {
-              words.push([cols[0].trim(), cols[1].trim()]);
-            }
-          });
-        } else {
-          deckName = file.name.replace(/\.(txt|text)$/, '');
-          let txtLines = text.split(/[\r\n]+/).filter(Boolean);
-          txtLines.forEach(function (line) {
-            let parts = line.split(/\t|\s{2,}/);
-            if (parts.length >= 2 && parts[0].trim() && parts[1].trim()) {
-              words.push([parts[0].trim(), parts[1].trim()]);
+    /* 尝试 JSON */
+    try {
+      let data = JSON.parse(text);
+      if (data && typeof data === 'object') {
+        deckName = data.name || deckName;
+        let rawWords = data.words || data;
+        if (Array.isArray(rawWords)) {
+          rawWords.forEach(function (item) {
+            if (Array.isArray(item) && item.length >= 2) {
+              words.push(item);
+            } else if (item && item.word) {
+              words.push({ word: item.word, phonetic: item.phonetic || '', pos: item.pos || '', definitions: item.definitions || [''], phrases: item.phrases || [], sentences: item.sentences || [], synonyms: item.synonyms || [], antonyms: item.antonyms || [], confused: item.confused || [] });
             }
           });
         }
+        if (words.length > 0) return { words: words, deckName: deckName };
+      }
+    } catch (e) { /* 非 JSON，尝试其他格式 */ }
 
-        if (words.length === 0) { App.showToast('未能解析到有效单词，请检查文件格式', 'error'); return; }
+    /* CSV 或 TXT 按行解析 */
+    let lines = text.split(/[\r\n]+/).filter(Boolean);
+    if (lines.length === 0) return null;
 
+    /* 检测分隔符：优先 tab，其次逗号，最后空格 */
+    let sep = '\t';
+    let firstLine = lines[0];
+    if (firstLine.indexOf('\t') === -1 && firstLine.indexOf(',') !== -1) sep = ',';
+
+    lines.forEach(function (line) {
+      let cols;
+      if (sep === '\t' || sep === ',') {
+        cols = App.parseCSVLine(line);
+      } else {
+        cols = line.split(/\s{2,}/);
+      }
+      if (cols.length >= 2 && cols[0].trim() && cols[1].trim()) {
+        words.push([cols[0].trim(), cols[1].trim()]);
+      }
+    });
+
+    if (words.length === 0) return null;
+    return { words: words, deckName: deckName };
+  };
+
+  App.handleFileImport = function (file) {
+    let reader = new FileReader();
+    let sourceName = file.name.replace(/\.(json|txt|csv|text)$/, '');
+    reader.onload = function (e) {
+      try {
+        let result = App._parseImportText(e.target.result, sourceName);
+        if (!result || result.words.length === 0) {
+          App.showToast('未能解析到有效单词，请检查文件格式', 'error');
+          return;
+        }
         let key = 'custom-' + Date.now();
-        window.__VOCAB_REGISTRY__[key] = { name: deckName, description: '从文件导入 (' + words.length + '词)', words: words };
+        window.__VOCAB_REGISTRY__[key] = { name: result.deckName, description: '从文件导入 (' + result.words.length + '词)', words: result.words };
         App.importWordbookFromRegistry(key);
         delete window.__VOCAB_REGISTRY__[key];
       } catch (err) {
@@ -164,6 +180,64 @@ var FlashcardApp = window.FlashcardApp || {};
     reader.readAsText(file);
   };
 
+  /** 从外部 URL 导入词书 */
+  App.handleUrlImport = function (url) {
+    if (!url || !/^https?:\/\/.+/.test(url)) {
+      App.showToast('请输入有效的 HTTP/HTTPS 链接', 'warn');
+      return;
+    }
+    let statusEl = document.getElementById('importStatus');
+    statusEl.innerHTML = '<span class="spinner"></span>正在获取词书...';
+    statusEl.style.color = '#64748b';
+
+    fetch(url, { mode: 'cors' })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + res.statusText);
+        return res.text();
+      })
+      .then(function (text) {
+        let sourceName = url.split('/').pop().replace(/\.(json|txt|csv|text|js)$/, '') || 'external';
+        let result = App._parseImportText(text, sourceName);
+        if (!result || result.words.length === 0) {
+          App.showToast('未能解析到有效单词数据，请检查链接内容格式', 'error');
+          statusEl.textContent = '';
+          return;
+        }
+        let key = 'external-' + Date.now();
+        window.__VOCAB_REGISTRY__[key] = { name: result.deckName, description: '从链接导入 (' + result.words.length + '词)', words: result.words };
+        App.importWordbookFromRegistry(key);
+        delete window.__VOCAB_REGISTRY__[key];
+        statusEl.textContent = '';
+      })
+      .catch(function (err) {
+        statusEl.textContent = '获取失败: ' + err.message;
+        statusEl.style.color = '#dc2626';
+        console.error(err);
+      });
+  };
+
+  /** 粘贴 JSON 文本导入 */
+  App.handlePasteImport = function () {
+    let textarea = document.getElementById('importPasteArea');
+    let text = textarea.value.trim();
+    if (!text) { App.showToast('请粘贴词书 JSON 数据', 'warn'); return; }
+
+    try {
+      let result = App._parseImportText(text, '粘贴导入');
+      if (!result || result.words.length === 0) {
+        App.showToast('未能解析到有效单词数据，请检查 JSON 格式', 'error');
+        return;
+      }
+      let key = 'paste-' + Date.now();
+      window.__VOCAB_REGISTRY__[key] = { name: result.deckName, description: '粘贴导入 (' + result.words.length + '词)', words: result.words };
+      App.importWordbookFromRegistry(key);
+      delete window.__VOCAB_REGISTRY__[key];
+      textarea.value = '';
+    } catch (err) {
+      App.showToast('JSON 解析失败: ' + err.message, 'error');
+    }
+  };
+
   App.renderImportModal = function () {
     let bookList = document.getElementById('importBookList');
     let statusEl = document.getElementById('importStatus');
@@ -171,21 +245,66 @@ var FlashcardApp = window.FlashcardApp || {};
     statusEl.textContent = '';
     let books = App.getRegisteredWordbooks();
 
-    bookList.innerHTML = books.map(function (b) {
-      let imported = App.isWordbookImported(b);
+    /* 内置词书部分 */
+    var builtinHtml = '<div class="import-section-title">📚 内置词书</div>';
+    builtinHtml += books.map(function (b) {
+      var imported = App.isWordbookImported(b);
       return '<button data-book="' + b.key + '"' + (imported ? ' disabled' : '') + '>' +
-        (imported ? '✅' : '📥') + ' ' + b.name +
+        (imported ? '✅' : '📥') + ' ' + App.escHtml(b.name) +
         '<span style="color:#94a3b8;font-size:12px;">— ' + (b.loaded ? b.count + ' 词' : b.desc) + '</span>' +
         (imported ? '<span style="color:#16a34a;">（已导入）</span>' : '') +
         (!b.loaded ? '<span style="color:#f59e0b;">（需加载）</span>' : '') +
       '</button>';
     }).join('');
+
+    /* 外部导入部分 */
+    var externalHtml = '<div class="import-section-title" style="margin-top:16px;">🌐 外部导入</div>';
+
+    /* 从 URL 导入 */
+    externalHtml += '<details class="import-details">' +
+      '<summary>🔗 从链接导入</summary>' +
+      '<div class="import-details-body">' +
+      '<input type="url" id="importUrlInput" placeholder="输入词书数据链接 (JSON/TXT/CSV)..." style="width:100%;padding:8px 12px;border:2px solid var(--border);border-radius:var(--radius);font-size:13px;margin-bottom:8px;background:var(--surface);color:var(--text-primary);">' +
+      '<button class="btn btn-primary btn-sm btn-block" id="btnUrlImport">获取并导入</button>' +
+      '</div></details>';
+
+    /* 粘贴 JSON */
+    externalHtml += '<details class="import-details">' +
+      '<summary>📋 粘贴 JSON 导入</summary>' +
+      '<div class="import-details-body">' +
+      '<textarea id="importPasteArea" rows="5" placeholder=\'粘贴词书 JSON 数据：&#10;{"name":"我的词书","words":[&#10;  {"word":"hello","definitions":["你好"]},&#10;  {"word":"world","definitions":["世界"]}&#10;]}\' style="width:100%;padding:10px;border:2px solid var(--border);border-radius:var(--radius);font-size:13px;resize:vertical;margin-bottom:8px;background:var(--surface);color:var(--text-primary);font-family:monospace;"></textarea>' +
+      '<button class="btn btn-primary btn-sm btn-block" id="btnPasteImport">导入</button>' +
+      '</div></details>';
+
+    /* 从文件导入 */
+    externalHtml += '<button class="btn btn-outline btn-sm btn-block" id="btnImportFile" style="margin-top:8px;">📁 从文件导入 (JSON/TXT/CSV)</button>';
+
+    bookList.innerHTML = builtinHtml + '<div style="margin-top:4px;"></div>' + externalHtml;
+
+    /* 绑定新按钮事件 */
+    var btnUrl = document.getElementById('btnUrlImport');
+    if (btnUrl) btnUrl.addEventListener('click', function () {
+      App.handleUrlImport(document.getElementById('importUrlInput').value.trim());
+    });
+
+    var btnPaste = document.getElementById('btnPasteImport');
+    if (btnPaste) btnPaste.addEventListener('click', App.handlePasteImport);
+
+    /* 重新绑定文件导入（因为按钮被重建了） */
+    var btnFile = document.getElementById('btnImportFile');
+    if (btnFile) btnFile.addEventListener('click', function () {
+      document.getElementById('importFileInput').click();
+    });
   };
 
   App.closeImportModal = function () {
     document.getElementById('importModal').style.display = 'none';
     document.getElementById('importFileInput').value = '';
     document.getElementById('importStatus').textContent = '';
+    var urlInput = document.getElementById('importUrlInput');
+    if (urlInput) urlInput.value = '';
+    var pasteArea = document.getElementById('importPasteArea');
+    if (pasteArea) pasteArea.value = '';
   };
 
 })(FlashcardApp);

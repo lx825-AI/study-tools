@@ -411,9 +411,6 @@ var FlashcardApp = window.FlashcardApp || {};
       }
     });
     document.getElementById('btnModalCancel').addEventListener('click', App.closeImportModal);
-    document.getElementById('btnImportFile').addEventListener('click', function () {
-      document.getElementById('importFileInput').click();
-    });
     document.getElementById('importFileInput').addEventListener('change', function () {
       if (this.files && this.files[0]) App.handleFileImport(this.files[0]);
     });
