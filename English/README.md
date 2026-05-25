@@ -9,7 +9,7 @@
 - **预览浏览** — 表格模式快速浏览词库，支持搜索
 - **卡片编辑** — 增删卡片、批量粘贴导入
 - **学习统计** — 每日学习量、连续打卡、周热力图
-- **内置词书** — 四级大纲 4541 词、六级核心 2138 词、六级大纲 1151 词
+- **内置词书** — 四级大纲 4541 词、六级核心 2138 词、六级完整大纲 6363 词（含四级）
 - **文件导入** — 支持 JSON / CSV / TXT 格式导入自定义词书
 - **离线 PWA** — Service Worker 缓存，无网络也能学习
 - **暗色模式** — 支持亮色/暗色主题切换
@@ -40,7 +40,7 @@ A spaced-repetition English vocabulary learning tool for Chinese CET-4/CET-6 exa
 
 - SM-2 spaced repetition algorithm
 - Multiple study modes: flashcard flip, typing recall, table preview
-- Built-in wordbooks: CET-4 (4541 words), CET-6 core (2138 words), CET-6 full (1151 words)
+- Built-in wordbooks: CET-4 (4541 words), CET-6 core (2138 words), CET-6 full (6363 words, includes CET-4 overlap)
 - Custom wordbook import (JSON/CSV/TXT)
 - Learning statistics with daily goals and heatmaps
 - PWA offline support with Service Worker

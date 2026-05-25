@@ -116,9 +116,18 @@ var FlashcardApp = window.FlashcardApp || {};
 
     /* 卡片列表操作 */
     document.getElementById('cardList').addEventListener('click', function (e) {
-      var btn = e.target.closest('button[data-action="deleteCard"]');
-      if (!btn) return;
-      App.handleCardDelete(parseInt(btn.dataset.index));
+      var delBtn = e.target.closest('button[data-action="deleteCard"]');
+      if (delBtn) {
+        App.handleCardDelete(parseInt(delBtn.dataset.index));
+        return;
+      }
+      var speakBtn = e.target.closest('.speak-card-btn');
+      if (!speakBtn) return;
+      e.stopPropagation();
+      var frontDiv = speakBtn.closest('.edit-card-front');
+      if (!frontDiv) return;
+      var text = (frontDiv.textContent || '').replace(/🔊\s*$/, '').trim();
+      if (text) App.speak(text);
     });
 
     /* 批量操作 */
@@ -249,6 +258,17 @@ var FlashcardApp = window.FlashcardApp || {};
       var query = this.value.trim().toLowerCase();
       App._renderPreviewTable(App._filterPreviewCards(deck, query));
     }, 150));
+
+    /* 预览表格朗读按钮 */
+    document.getElementById('previewTbody').addEventListener('click', function (e) {
+      var btn = e.target.closest('.speak-preview-btn');
+      if (!btn) return;
+      e.stopPropagation();
+      var td = btn.closest('td');
+      if (!td) return;
+      var text = (td.textContent || '').replace(/🔊\s*$/, '').trim();
+      if (text) App.speak(text);
+    });
 
     /* 全局搜索 */
     document.getElementById('globalSearch').addEventListener('input', App.debounce(function () {

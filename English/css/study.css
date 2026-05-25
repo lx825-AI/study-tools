@@ -115,6 +115,27 @@
 .speak-btn:hover { border-color: var(--primary); color: var(--primary); }
 .speak-btn:active { transform: scale(0.9); }
 
+/* 小号朗读按钮（表格/列表中内联使用） */
+.speak-btn-sm {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  vertical-align: middle;
+}
+.speak-btn-sm:hover { border-color: var(--primary); color: var(--primary); }
+.speak-btn-sm:active { transform: scale(0.9); }
+
 /* 庆祝粒子 */
 .confetti-container {
   position: fixed;

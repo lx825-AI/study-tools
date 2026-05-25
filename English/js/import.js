@@ -6,14 +6,16 @@ var FlashcardApp = window.FlashcardApp || {};
   window.__VOCAB_REGISTRY__ = window.__VOCAB_REGISTRY__ || {};
 
   App.BUILTIN_WORDBOOKS = [
-    { key: 'cet6-core-enriched',       name: '六级核心高频（含词性）',  desc: 'CET-6 高频约 2138 词，含自动词性标注（43%覆盖）',            file: 'wordbooks/cet6-core-enriched.json' },
-    { key: 'cet4-syllabus-enriched',   name: '四级大纲词汇（含词性）',  desc: 'CET-4 完整考纲词汇约 4541 词，含自动词性标注（33%覆盖）',     file: 'wordbooks/cet4-syllabus-enriched.json' },
-    { key: 'cet6-syllabus-enriched',   name: '六级大纲词汇（含词性）',  desc: 'CET-6 完整考纲词汇约 1151 词，含自动词性标注（43%覆盖）',     file: 'wordbooks/cet6-syllabus-enriched.json' },
+    { key: 'senior-high-enriched',     name: '高中英语词汇（含词性）',  desc: '高中英语大纲词汇约 3500 词，含词性标注',                      file: 'wordbooks/senior-high-enriched.js' },
+    { key: 'kaoyan-enriched',          name: '考研英语词汇（含词性）',  desc: '考研英语大纲词汇约 5500 词，含词性标注',                      file: 'wordbooks/kaoyan-enriched.js' },
+    { key: 'cet6-core-enriched',       name: '六级核心高频（含词性）',  desc: 'CET-6 高频约 2138 词，含自动词性标注（43%覆盖）',            file: 'wordbooks/cet6-core-enriched.js' },
+    { key: 'cet4-syllabus-enriched',   name: '四级大纲词汇（含词性）',  desc: 'CET-4 完整考纲词汇约 4541 词，含自动词性标注（33%覆盖）',     file: 'wordbooks/cet4-syllabus-enriched.js' },
+    { key: 'cet6-syllabus-enriched',   name: '六级完整大纲（含词性）',  desc: 'CET-6 完整考纲词汇（含四级）约 6363 词，含词性标注',     file: 'wordbooks/cet6-syllabus-enriched.js' },
   ];
 
   App._wordbookFetching = {};
 
-  /** 通过 fetch 异步加载 JSON 词书 */
+  /** 通过动态 &lt;script&gt; 标签加载 JS 词书（文件自注册到 window.__VOCAB_REGISTRY__） */
   App.loadWordbookScript = function (bookInfo) {
     if (window.__VOCAB_REGISTRY__[bookInfo.key]) {
       return Promise.resolve(window.__VOCAB_REGISTRY__[bookInfo.key]);
@@ -22,20 +24,24 @@ var FlashcardApp = window.FlashcardApp || {};
     if (App._wordbookFetching[bookInfo.key]) {
       return App._wordbookFetching[bookInfo.key];
     }
-    App._wordbookFetching[bookInfo.key] = fetch(bookInfo.file)
-      .then(function (response) {
-        if (!response.ok) throw new Error('HTTP ' + response.status);
-        return response.json();
-      })
-      .then(function (data) {
-        window.__VOCAB_REGISTRY__[bookInfo.key] = data;
+    App._wordbookFetching[bookInfo.key] = new Promise(function (resolve, reject) {
+      var script = document.createElement('script');
+      script.src = bookInfo.file;
+      script.onload = function () {
         delete App._wordbookFetching[bookInfo.key];
-        return data;
-      })
-      .catch(function (err) {
+        var data = window.__VOCAB_REGISTRY__[bookInfo.key];
+        if (data) {
+          resolve(data);
+        } else {
+          reject(new Error('词书脚本已加载但未注册数据: ' + bookInfo.file));
+        }
+      };
+      script.onerror = function () {
         delete App._wordbookFetching[bookInfo.key];
-        throw new Error('词书加载失败: ' + bookInfo.file + ' (' + err.message + ')');
-      });
+        reject(new Error('词书加载失败: ' + bookInfo.file + ' (脚本加载错误)'));
+      };
+      document.head.appendChild(script);
+    });
     return App._wordbookFetching[bookInfo.key];
   };
 

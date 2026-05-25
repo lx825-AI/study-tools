@@ -50,7 +50,9 @@ var FlashcardApp = window.FlashcardApp || {};
       }
       return '<tr>' +
         '<td class="col-idx">' + (i + 1) + '</td>' +
-        '<td class="col-front">' + frontHtml + '</td>' +
+        '<td class="col-front">' + frontHtml +
+          '<button class="speak-btn-sm speak-preview-btn" title="朗读">🔊</button>' +
+        '</td>' +
         (showPos ? '<td class="col-pos">' + App.escHtml(pos) + '</td>' : '') +
         '<td class="col-back' + cls + '">' + backHtml + '</td>' +
       '</tr>';

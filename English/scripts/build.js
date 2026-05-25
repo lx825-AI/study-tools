@@ -45,37 +45,23 @@ const result = esbuild.transformSync(jsContent, {
 fs.writeFileSync(path.join(DIST, 'app.bundle.js'), result.code);
 console.log('✓ JS merged + minified (' + jsContent.length + ' -> ' + result.code.length + ' bytes)');
 
-/* ========== 词书 JS → JSON 转换 ========== */
+/* ========== 词书：直接复制 JS 文件（通过动态 &lt;script&gt; 标签加载） ========== */
 const WORDBOOKS = [
+  'senior-high-enriched',
+  'kaoyan-enriched',
   'cet4-syllabus-enriched',
   'cet6-core-enriched',
   'cet6-syllabus-enriched'
 ];
 
 WORDBOOKS.forEach(name => {
-  const jsFile = path.join(ROOT, 'wordbooks', name + '.js');
-  const raw = fs.readFileSync(jsFile, 'utf8');
-
-  /* 提取 window.__VOCAB_REGISTRY__['key'] = { ... }; 中的数据对象 */
-  const match = raw.match(/window\.__VOCAB_REGISTRY__\['[^']+'\]\s*=\s*(\{[\s\S]*\})\s*;?\s*$/m);
-  if (!match) {
-    console.error('✗ Failed to parse wordbook: ' + name);
+  const src = path.join(ROOT, 'wordbooks', name + '.js');
+  if (!fs.existsSync(src)) {
+    console.warn('⚠ Wordbook source not found, skipping: ' + name);
     return;
   }
-
-  let data;
-  try {
-    data = eval('(' + match[1] + ')');
-  } catch (e) {
-    console.error('✗ Failed to eval wordbook data: ' + name, e.message);
-    return;
-  }
-
-  fs.writeFileSync(
-    path.join(DIST, 'wordbooks', name + '.json'),
-    JSON.stringify(data)
-  );
-  console.log('✓ Wordbook converted: ' + name + ' (' + data.words.length + ' words)');
+  fs.copyFileSync(src, path.join(DIST, 'wordbooks', name + '.js'));
+  console.log('✓ Wordbook copied: ' + name);
 });
 
 /* ========== 复制 index.html 并替换引用 ========== */

@@ -48,7 +48,9 @@ var FlashcardApp = window.FlashcardApp || {};
       return '<div class="edit-card-item">' +
         checkboxHtml +
         '<div class="edit-card-content">' +
-          '<div class="edit-card-front">' + App.escHtml(front) + '</div>' +
+          '<div class="edit-card-front">' + App.escHtml(front) +
+            '<button class="speak-btn-sm speak-card-btn" title="朗读">🔊</button>' +
+          '</div>' +
           '<div class="edit-card-back">' + App.escHtml(back) + '</div>' +
         '</div>' +
         '<div class="edit-card-count" title="难度等级">⚡' + (c.difficulty || 0) + '</div>' +
