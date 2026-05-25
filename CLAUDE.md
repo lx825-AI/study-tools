@@ -16,4 +16,4 @@ math/       -- 数学公式速查 PWA（React + TypeScript + Vite）
 
 ## 部署
 
-Math 项目使用 GitHub Pages 部署 (`lx825-ai/math-reference`)。English 项目暂未部署。
+Math 项目使用 GitHub Pages 部署 (https://lx825-ai.github.io/study-tools/)。English 项目暂未部署。
