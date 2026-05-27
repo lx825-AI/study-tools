@@ -4,11 +4,13 @@
 
 ## 功能
 
-- **翻卡学习** — SM-2 间隔重复算法，自动安排复习计划
-- **打字练习** — 输入英文单词验证记忆
-- **预览浏览** — 表格模式快速浏览词库，支持搜索
+- **翻卡学习** — SM-2 间隔重复算法，自动安排复习计划，三种排序模式（智能复习/乱序/正序）
+- **TTS 发音** — 单词朗读，支持英式/美式口音一键切换
+- **打字练习** — 看中文释义听发音拼写英文，双重验证记忆
+- **预览浏览** — 表格模式快速浏览词库，支持搜索和单词朗读
 - **卡片编辑** — 增删卡片、批量粘贴导入
-- **学习统计** — 每日学习量、连续打卡、周热力图
+- **学习统计** — 每日学习量、连续打卡、周热力图、学习用时统计
+- **学习提醒** — 可设置每日定时提醒，支持系统通知
 - **内置词书** — 高考 3500 词、四级大纲 4541 词、六级核心 2138 词、六级完整大纲 6363 词、考研 5500 词
 - **外部导入** — 支持文件导入 (JSON/CSV/TXT)、粘贴 JSON 导入、从链接获取词书
 - **离线 PWA** — Service Worker 缓存，无网络也能学习
@@ -38,11 +40,13 @@ A spaced-repetition English vocabulary learning tool for Chinese CET-4/CET-6 exa
 
 ### Features
 
-- SM-2 spaced repetition algorithm
-- Multiple study modes: flashcard flip, typing recall, table preview
+- SM-2 spaced repetition algorithm with multiple review modes (smart/difficulty, random, sequential)
+- TTS pronunciation with British/American accent switching
+- Multiple study modes: flashcard flip, typing recall (listen then type), table preview with speak
 - Built-in wordbooks: Senior High (3500), CET-4 (4541), CET-6 core (2138), CET-6 full (6363), Postgraduate (5500)
 - Custom wordbook import: file (JSON/CSV/TXT), paste JSON, fetch from URL
-- Learning statistics with daily goals and heatmaps
+- Learning statistics with daily goals, heatmaps, and session timing
+- Daily study reminder with system notification support
 - PWA offline support with Service Worker
 - Light/dark theme
 

@@ -67,6 +67,23 @@
 .gsr-def { color: var(--text-secondary); flex: 1; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .gsr-deck { color: var(--text-muted); font-size: 12px; white-space: nowrap; }
 .gsr-empty { padding: 20px; text-align: center; color: var(--text-muted); font-size: 14px; }
+.gsr-speak-btn {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: all 0.15s;
+}
+.gsr-speak-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-bg); }
+.gsr-speak-btn:active { transform: scale(0.9); }
 
 /* 移动端响应式 */
 @media (max-width: 480px) {
@@ -134,7 +151,7 @@
     <div id="studyContent" style="display:none">
       <div class="study-header">
         <div class="study-deck-name" id="studyDeckName"></div>
-        <button class="order-toggle" id="btnStudyOrder" title="切换排序方式">📊 难度</button>
+        <button class="order-toggle" id="btnStudyOrder" title="点击切换排序：智能复习 → 乱序 → 正序"><span class="order-icon">⚡</span><span class="order-label">智能复习</span><span class="order-arrow">▾</span></button>
         <div class="study-progress" id="studyProgress"></div>
         <div class="progress-bar"><div class="progress-bar-fill" id="progressFill"></div></div>
       </div>
@@ -149,7 +166,10 @@
           <div class="card-face card-front">
             <div class="card-label">问题</div>
             <div class="card-text" id="cardFrontText"></div>
-            <button class="speak-btn" id="btnSpeak" title="朗读">🔊</button>
+            <div class="speak-row">
+              <button class="speak-btn" id="btnSpeak" title="朗读">🔊</button>
+              <button class="accent-toggle" id="btnAccentToggle" title="切换美式/英式发音"><span id="accentLabel">🇺🇸</span></button>
+            </div>
             <div class="card-hint">👆 点击卡片翻转查看答案</div>
           </div>
           <div class="card-face card-back">
@@ -187,7 +207,7 @@
     <div id="typingContent" style="display:none">
       <div class="study-header">
         <div class="study-deck-name" id="typingDeckName"></div>
-        <button class="order-toggle" id="btnTypingOrder" title="切换排序方式">📊 难度</button>
+        <button class="order-toggle" id="btnTypingOrder" title="点击切换排序：智能复习 → 乱序 → 正序"><span class="order-icon">⚡</span><span class="order-label">智能复习</span><span class="order-arrow">▾</span></button>
         <div class="typing-score">
           <span>✅ <span class="correct-count" id="typingCorrect">0</span></span>
           <span>❌ <span class="wrong-count" id="typingWrong">0</span></span>
@@ -196,6 +216,10 @@
       </div>
       <div class="typing-area">
         <div class="typing-word" id="typingWord"></div>
+        <div class="typing-speak-row">
+          <button class="speak-btn-sm" id="btnTypingSpeak" title="朗读单词发音">🔊</button>
+          <span class="typing-speak-hint">听发音后再拼写</span>
+        </div>
         <div class="typing-input-row">
           <input type="text" id="typingInput" placeholder="输入英文单词..." autocomplete="off">
           <button class="btn btn-primary" id="btnTypingSubmit">确认</button>
@@ -321,7 +345,8 @@ if ('serviceWorker' in navigator) {
 /* 朗读按钮点击 */
 document.getElementById('btnSpeak').addEventListener('click', function (e) {
   e.stopPropagation();
-  var text = document.getElementById('cardFrontText').textContent;
+  var wordNode = document.getElementById('cardFrontText').childNodes[0];
+  var text = wordNode ? wordNode.textContent.trim() : '';
   if (text) FlashcardApp.speak(text);
 });
 /* 启动应用 */

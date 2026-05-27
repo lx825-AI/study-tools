@@ -73,3 +73,16 @@
 }
 .typing-score .correct-count { color: var(--success); }
 .typing-score .wrong-count { color: var(--danger-text); }
+
+/* 打字模式朗读区域 */
+.typing-speak-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.typing-speak-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+}

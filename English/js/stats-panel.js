@@ -6,6 +6,57 @@ var FlashcardApp = window.FlashcardApp || {};
   /* 学习记录 key */
   App.LEARNING_LOG_KEY = 'flashcard-learning-log';
 
+  /* 提醒功能 */
+  App._REMINDER_KEY = 'flashcard-reminder';
+  App._REMINDER_TIMER = null;
+
+  App._loadReminderSettings = function () {
+    try {
+      var raw = localStorage.getItem(App._REMINDER_KEY);
+      return raw ? JSON.parse(raw) : { enabled: false, time: '09:00' };
+    } catch (e) { return { enabled: false, time: '09:00' }; }
+  };
+
+  App._saveReminderSettings = function (settings) {
+    try { localStorage.setItem(App._REMINDER_KEY, JSON.stringify(settings)); } catch (e) {}
+  };
+
+  App._isReminderEnabled = function () {
+    return App._loadReminderSettings().enabled;
+  };
+
+  App._getReminderTime = function () {
+    return App._loadReminderSettings().time;
+  };
+
+  App._setupReminderTimer = function () {
+    if (App._REMINDER_TIMER) clearInterval(App._REMINDER_TIMER);
+    var settings = App._loadReminderSettings();
+    if (!settings.enabled) return;
+    App._REMINDER_TIMER = setInterval(function () {
+      var now = new Date();
+      var current = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+      if (current === settings.time) {
+        App._fireReminder();
+      }
+    }, 60000);
+  };
+
+  App._fireReminder = function () {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('📚 学习时间到！', {
+        body: '该复习英语单词了，打开闪卡开始练习吧。',
+        icon: './icon.svg',
+        tag: 'flashcard-reminder'
+      });
+    } else if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().then(function (perm) {
+        if (perm === 'granted') App._fireReminder();
+      });
+    }
+    App.showToast('📚 学习时间到！该复习单词了', 'info', 5000);
+  };
+
   /* 加载学习日志: { 'YYYY-MM-DD': { correct: N, wrong: N } } */
   App.loadLearningLog = function () {
     try {
@@ -169,7 +220,27 @@ var FlashcardApp = window.FlashcardApp || {};
         '<button id="btnImportAll" class="btn btn-outline btn-sm">📤 导入数据恢复</button>' +
         '<input type="file" id="importFileInput" accept=".json" style="display:none;">' +
       '</div>' +
-      '<div style="font-size:12px;color:var(--text-muted);margin-top:4px;">导出包含所有牌组、学习进度和偏好设置。导入将<strong>替换</strong>当前全部数据。</div>';
+      '<div style="font-size:12px;color:var(--text-muted);margin-top:4px;">导出包含所有牌组、学习进度和偏好设置。导入将<strong>替换</strong>当前全部数据。</div>' +
+
+      /* 学习提醒 */
+      (function () {
+        var settings = App._loadReminderSettings();
+        var checked = settings.enabled ? ' checked' : '';
+        var disabled = settings.enabled ? '' : ' disabled';
+        return '<div class="section-title" style="margin-top:24px;">⏰ 学习提醒</div>' +
+        '<div class="reminder-settings">' +
+          '<label class="reminder-row">' +
+            '<input type="checkbox" id="reminderEnabled"' + checked + '>' +
+            '<span>开启每日学习提醒</span>' +
+          '</label>' +
+          '<div class="reminder-row">' +
+            '<span>提醒时间:</span>' +
+            '<input type="time" id="reminderTime" value="' + settings.time + '"' + disabled + '>' +
+          '</div>' +
+          '<button class="btn btn-outline btn-sm" id="btnTestReminder">🔔 测试提醒</button>' +
+          '<div style="font-size:12px;color:var(--text-muted);margin-top:6px;">提醒仅在安装为桌面应用后支持系统通知。页面打开时会在设定时间弹出提示。</div>' +
+        '</div>';
+      })();
 
     /* 绑定导出按钮 */
     let btnExport = document.getElementById('btnExportAll');
@@ -208,6 +279,33 @@ var FlashcardApp = window.FlashcardApp || {};
             localStorage.setItem('flashcard-daily-goal', v);
             App.renderStatsPanel();
           }
+        });
+      }
+
+      /* 绑定提醒设置 */
+      var reminderCheckbox = document.getElementById('reminderEnabled');
+      var reminderTimeInput = document.getElementById('reminderTime');
+      var testReminderBtn = document.getElementById('btnTestReminder');
+      if (reminderCheckbox) {
+        reminderCheckbox.addEventListener('change', function () {
+          var settings = App._loadReminderSettings();
+          settings.enabled = this.checked;
+          App._saveReminderSettings(settings);
+          if (reminderTimeInput) reminderTimeInput.disabled = !this.checked;
+          App._setupReminderTimer();
+        });
+      }
+      if (reminderTimeInput) {
+        reminderTimeInput.addEventListener('change', function () {
+          var settings = App._loadReminderSettings();
+          settings.time = this.value;
+          App._saveReminderSettings(settings);
+          App._setupReminderTimer();
+        });
+      }
+      if (testReminderBtn) {
+        testReminderBtn.addEventListener('click', function () {
+          App._fireReminder();
         });
       }
   };

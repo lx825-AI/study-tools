@@ -95,7 +95,13 @@
 .study-complete h2 { font-size: 22px; margin-bottom: 8px; }
 .study-complete p { color: var(--text-secondary); margin-bottom: 24px; }
 
-/* 朗读按钮 */
+/* 朗读按钮行 */
+.speak-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
 .speak-btn {
   background: none;
   border: 2px solid var(--border);
@@ -107,7 +113,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 12px;
   transition: all 0.2s;
   flex-shrink: 0;
   color: var(--text-secondary);
@@ -115,25 +120,53 @@
 .speak-btn:hover { border-color: var(--primary); color: var(--primary); }
 .speak-btn:active { transform: scale(0.9); }
 
+/* 口音切换按钮 */
+.accent-toggle {
+  background: none;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+.accent-toggle:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-bg);
+}
+.accent-toggle:active { transform: scale(0.9); }
+
 /* 小号朗读按钮（表格/列表中内联使用） */
 .speak-btn-sm {
-  background: none;
-  border: 1.5px solid var(--border);
+  background: var(--primary-bg);
+  border: 1.5px solid var(--primary-border);
   border-radius: 50%;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-left: 6px;
+  margin-left: 8px;
   transition: all 0.2s;
   flex-shrink: 0;
-  color: var(--text-muted);
+  color: var(--primary);
   vertical-align: middle;
 }
-.speak-btn-sm:hover { border-color: var(--primary); color: var(--primary); }
+.speak-btn-sm:hover {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  transform: scale(1.1);
+}
 .speak-btn-sm:active { transform: scale(0.9); }
 
 /* 庆祝粒子 */
@@ -236,6 +269,35 @@
   padding-top: 6px;
   border-top: 1px solid var(--border-light);
   flex-shrink: 0;
+}
+
+/* 卡片正面难度指示 */
+.card-diff-badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  margin-top: 10px;
+  padding: 3px 10px;
+  border: 1px solid;
+  border-radius: 10px;
+  opacity: 0.85;
+}
+
+/* 学习完成统计增强 */
+.complete-stats-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.complete-stat {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--surface);
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-xs);
 }
 
 /* 移动端卡片高度 */

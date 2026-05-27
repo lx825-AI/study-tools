@@ -9,6 +9,7 @@ var FlashcardApp = window.FlashcardApp || {};
   App.studyPassed = 0;
   App.studyFailed = 0;
   App.studyOrder = 'difficulty'; // 'difficulty' | 'random' | 'sequential'
+  App.studyStartTime = null;
 
   /* SM-2 间隔重复算法 */
   App.applySM2 = function (card, passed) {
@@ -68,6 +69,7 @@ var FlashcardApp = window.FlashcardApp || {};
     App.studyPassed = 0;
     App.studyFailed = 0;
     App.isFlipped = false;
+    App.studyStartTime = Date.now();
     App.renderStudyPanel();
   };
 
@@ -88,11 +90,25 @@ var FlashcardApp = window.FlashcardApp || {};
 
     if (App.studyQueue.length === 0 || App.studyIndex >= App.studyQueue.length) {
       complete.style.display = 'block';
-      let total = App.studyPassed + App.studyFailed;
+      var total = App.studyPassed + App.studyFailed;
+      var accuracy = total > 0 ? Math.round(App.studyPassed / total * 100) : 0;
+      var elapsedSec = App.studyStartTime ? Math.round((Date.now() - App.studyStartTime) / 1000) : 0;
+      var min = Math.floor(elapsedSec / 60);
+      var sec = elapsedSec % 60;
+      var timeStr = min > 0 ? min + '分' + sec + '秒' : sec + '秒';
+      var rate = total > 0 && elapsedSec > 0 ? Math.round(total / elapsedSec * 60) : 0;
       document.getElementById('completeTitle').textContent =
-        App.studyFailed === 0 ? '完美通关！' : App.studyFailed <= total / 3 ? '不错哦！' : '继续加油！';
-      document.getElementById('completeStats').textContent =
-        '本轮 ' + total + ' 张卡片，会了 ' + App.studyPassed + ' 张，不会 ' + App.studyFailed + ' 张';
+        App.studyFailed === 0 ? '完美通关！' : accuracy >= 70 ? '不错哦！' : '继续加油！';
+      document.getElementById('completeStats').innerHTML =
+        '<div class="complete-stats-row">' +
+          '<span class="complete-stat">✅ ' + App.studyPassed + '</span>' +
+          '<span class="complete-stat">❌ ' + App.studyFailed + '</span>' +
+          '<span class="complete-stat">🎯 ' + accuracy + '%</span>' +
+        '</div>' +
+        '<div class="complete-stats-row" style="margin-top:8px;">' +
+          '<span class="complete-stat">⏱ ' + timeStr + '</span>' +
+          '<span class="complete-stat">⚡ ' + rate + '词/分</span>' +
+        '</div>';
       if (App.studyPassed > 0 && App.studyFailed <= total / 3) {
         App.spawnConfetti();
       }
@@ -108,12 +124,25 @@ var FlashcardApp = window.FlashcardApp || {};
     document.getElementById('progressFill').style.width =
       ((App.studyIndex / App.studyQueue.length) * 100) + '%';
 
-    /* 卡片正面：单词 + 音标 */
+    /* 卡片正面：单词 + 音标 + 难度指示 */
     let frontHtml = App.escHtml(card.front || card.word);
     if (card.phonetic) {
       frontHtml += ' <span class="card-front-phonetic">' + App.escHtml(card.phonetic) + '</span>';
     }
-    document.getElementById('cardFrontText').innerHTML = frontHtml;
+    /* 难度指示: 从真实 deck 数据读取 EF，避免队列副本不同步 */
+    var deckCard = deck.cards.find(function (c) { return c.id === card.id; });
+    var ef = deckCard ? deckCard.easeFactor : card.easeFactor;
+    var diffHtml = '';
+    if (typeof ef === 'number') {
+      var level = ef >= 2.8 ? 3 : ef >= 2.0 ? 2 : 1;
+      var levelText = ef >= 2.8 ? '已掌握' : ef >= 2.0 ? '学习中' : '较难';
+      var levelColor = ef >= 2.8 ? 'var(--success)' : ef >= 2.0 ? 'var(--warning)' : 'var(--danger-text)';
+      var dots = '';
+      for (var d = 0; d < 3; d++) dots += d < level ? '●' : '○';
+      diffHtml = '<div class="card-diff-badge" style="color:' + levelColor + ';border-color:' + levelColor + ';">' +
+        dots + ' ' + levelText + '</div>';
+    }
+    document.getElementById('cardFrontText').innerHTML = frontHtml + diffHtml;
 
     /* 卡片背面：丰富数据 + SM-2 状态 */
     let parts = [];
@@ -196,6 +225,11 @@ var FlashcardApp = window.FlashcardApp || {};
     let deckCard = deck.cards.find(function (c) { return c.id === card.id; });
     if (deckCard) {
       App.applySM2(deckCard, passed);
+      /* 同步 SM-2 状态回学习队列副本 */
+      card.easeFactor = deckCard.easeFactor;
+      card.repetitions = deckCard.repetitions;
+      card.interval = deckCard.interval;
+      card.nextReview = deckCard.nextReview;
       if (passed) { App.studyPassed++; }
       else { App.studyFailed++; }
     }
@@ -228,10 +262,17 @@ var FlashcardApp = window.FlashcardApp || {};
   App.cycleOrder = function () {
     let orderCycle = { difficulty: 'random', random: 'sequential', sequential: 'difficulty' };
     App.studyOrder = orderCycle[App.studyOrder];
-    let labels = { difficulty: '📊 难度', random: '🔀 乱序', sequential: '📋 正序' };
-    let label = labels[App.studyOrder];
-    document.getElementById('btnStudyOrder').textContent = label;
-    document.getElementById('btnTypingOrder').textContent = label;
+    var labels = {
+      difficulty: { icon: '⚡', label: '智能复习' },
+      random:     { icon: '🔀', label: '乱序' },
+      sequential: { icon: '📋', label: '正序' }
+    };
+    var info = labels[App.studyOrder];
+    ['btnStudyOrder', 'btnTypingOrder'].forEach(function (btnId) {
+      var btn = document.getElementById(btnId);
+      if (!btn) return;
+      btn.innerHTML = '<span class="order-icon">' + info.icon + '</span><span class="order-label">' + info.label + '</span><span class="order-arrow">▾</span>';
+    });
 
     let deck = App.getCurrentDeck();
     if (!deck) return;

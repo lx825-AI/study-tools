@@ -135,17 +135,31 @@ nav button:hover:not(.active) {
   margin-bottom: 12px;
 }
 
-/* 顺序切换 */
+/* 顺序切换按钮 */
 .order-toggle {
-  display: inline-block;
-  padding: 4px 10px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border: 2px solid var(--primary-border);
+  border-radius: var(--radius);
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  background: var(--surface);
-  color: var(--text-secondary);
-  transition: all 0.15s;
+  background: var(--primary-bg);
+  color: var(--primary);
+  transition: all 0.2s;
+  font-family: inherit;
+  white-space: nowrap;
 }
-.order-toggle:hover { border-color: var(--primary); color: var(--primary); }
+.order-toggle:hover {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+}
+.order-toggle:active { transform: translateY(0) scale(0.97); }
+.order-toggle .order-icon { font-size: 15px; line-height: 1; }
+.order-toggle .order-label { line-height: 1; }
+.order-toggle .order-arrow { font-size: 10px; opacity: 0.6; margin-left: 2px; }

@@ -7,8 +7,8 @@ var FlashcardApp = window.FlashcardApp || {};
     if (action === 'study') {
       App.state.currentDeckId = deckId;
       App.studyOrder = 'difficulty';
-      document.getElementById('btnStudyOrder').textContent = '📊 难度';
-      document.getElementById('btnTypingOrder').textContent = '📊 难度';
+      document.getElementById('btnStudyOrder').innerHTML = '<span class="order-icon">⚡</span><span class="order-label">智能复习</span><span class="order-arrow">▾</span>';
+      document.getElementById('btnTypingOrder').innerHTML = '<span class="order-icon">⚡</span><span class="order-label">智能复习</span><span class="order-arrow">▾</span>';
       App.saveData();
       App.startStudy();
       App.switchTab('study');

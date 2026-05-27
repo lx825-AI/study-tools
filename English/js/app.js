@@ -279,6 +279,12 @@ var FlashcardApp = window.FlashcardApp || {};
     document.getElementById('btnTypingSubmit').addEventListener('click', App.submitTyping);
     document.getElementById('btnTypingNext').addEventListener('click', App.nextTyping);
     document.getElementById('btnTypingRestart').addEventListener('click', App.startTyping);
+    document.getElementById('btnTypingSpeak').addEventListener('click', function () {
+      if (App.typingQueue.length === 0 || App.typingIndex >= App.typingQueue.length) return;
+      var card = App.typingQueue[App.typingIndex];
+      var word = card.front || card.word || '';
+      if (word) App.speak(word);
+    });
     document.getElementById('typingInput').addEventListener('keydown', function (e) {
       if (e.key === 'Enter') {
         if (document.getElementById('btnTypingNext').style.display !== 'none') {
@@ -349,11 +355,12 @@ var FlashcardApp = window.FlashcardApp || {};
           let back = App.escHtml(c.back || (c.definitions || [''])[0]);
           let posBadge = c.pos ? '<span class="gsr-pos">' + App.escHtml(c.pos) + '</span>' : '';
           let phonetic = c.phonetic ? '<span class="gsr-phonetic">' + App.escHtml(c.phonetic) + '</span>' : '';
-          return '<div class="gsr-item" data-deck="' + h.deckId + '" data-word="' + App.escHtml(front) + '">' +
+          return '<div class="gsr-item" data-deck="' + h.deckId + '" data-word="' + front + '">' +
             '<span class="gsr-word">' + front + phonetic + '</span>' +
             posBadge +
             '<span class="gsr-def">' + back + '</span>' +
             '<span class="gsr-deck">' + App.escHtml(h.deckName) + '</span>' +
+            '<button class="gsr-speak-btn" title="朗读">🔊</button>' +
           '</div>';
         }).join('');
         results.querySelectorAll('.gsr-item').forEach(function (item) {
@@ -372,6 +379,13 @@ var FlashcardApp = window.FlashcardApp || {};
             }
             document.getElementById('globalSearch').value = '';
             results.style.display = 'none';
+          });
+        });
+        results.querySelectorAll('.gsr-speak-btn').forEach(function (btn) {
+          btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var word = this.closest('.gsr-item').dataset.word;
+            if (word) App.speak(word);
           });
         });
       }
@@ -426,6 +440,19 @@ var FlashcardApp = window.FlashcardApp || {};
       document.getElementById('themeToggle').textContent = next ? '☀️' : '🌙';
     });
 
+    /* 口音切换按钮 */
+    document.getElementById('btnAccentToggle').addEventListener('click', function (e) {
+      e.stopPropagation();
+      App.toggleAccent();
+    });
+
+    /* 初始化 TTS 语音列表 */
+    if (window.speechSynthesis) {
+      window.speechSynthesis.onvoiceschanged = function () { /* 预加载 voices */ };
+      window.speechSynthesis.getVoices();
+    }
+    App._updateAccentUI();
+
     /* ========== 启动 ========== */
     App.seedDemoData();
     App.renderAll();
@@ -450,6 +477,9 @@ var FlashcardApp = window.FlashcardApp || {};
 
     /* 后台预加载词书 */
     App.BUILTIN_WORDBOOKS.forEach(function (b) { App.loadWordbookScript(b).catch(function () {}); });
+
+    /* 启动学习提醒定时器 */
+    App._setupReminderTimer();
   };
 
   /* ========== 快捷键弹窗 ========== */
@@ -498,13 +528,56 @@ var FlashcardApp = window.FlashcardApp || {};
     setTimeout(function () { container.remove(); }, 3500);
   };
 
+  /* TTS 口音偏好: 'en-US' | 'en-GB' */
+  App.ttsAccent = (function () {
+    try { return localStorage.getItem('flashcard-tts-accent') || 'en-US'; }
+    catch (e) { return 'en-US'; }
+  })();
+
+  /* 获取当前口音对应的最佳语音 */
+  App._getBestVoice = function () {
+    var voices = window.speechSynthesis.getVoices();
+    if (voices.length === 0) return null;
+    var lang = App.ttsAccent;
+    var exactDefault = null, exactAny = null, prefixDefault = null, prefixAny = null;
+    voices.forEach(function (v) {
+      if (v.lang === lang) {
+        if (v.default || v.localService) { exactDefault = exactDefault || v; }
+        else { exactAny = exactAny || v; }
+      }
+      if (v.lang.indexOf(lang) === 0) {
+        if (v.default || v.localService) { prefixDefault = prefixDefault || v; }
+        else { prefixAny = prefixAny || v; }
+      }
+    });
+    return exactDefault || exactAny || prefixDefault || prefixAny || null;
+  };
+
+  /* 切换口音 */
+  App.toggleAccent = function () {
+    App.ttsAccent = (App.ttsAccent === 'en-US') ? 'en-GB' : 'en-US';
+    try { localStorage.setItem('flashcard-tts-accent', App.ttsAccent); }
+    catch (e) {}
+    App._updateAccentUI();
+    App.showToast('发音切换为: ' + (App.ttsAccent === 'en-US' ? '美式 🇺🇸' : '英式 🇬🇧'), 'info', 1500);
+  };
+
+  /* 更新 UI 中的口音标识 */
+  App._updateAccentUI = function () {
+    var flag = App.ttsAccent === 'en-US' ? '🇺🇸' : '🇬🇧';
+    var el = document.getElementById('accentLabel');
+    if (el) el.textContent = flag;
+  };
+
   /* 朗读功能 */
   App.speak = function (text) {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
-    let utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
+    var utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = App.ttsAccent;
     utterance.rate = 0.85;
+    var voice = App._getBestVoice();
+    if (voice) utterance.voice = voice;
     window.speechSynthesis.speak(utterance);
   };
 
