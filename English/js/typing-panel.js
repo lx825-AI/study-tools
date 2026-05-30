@@ -35,7 +35,10 @@ var FlashcardApp = window.FlashcardApp || {};
 
     document.getElementById('typingContent').style.display = 'block';
     let card = App.typingQueue[App.typingIndex];
-    document.getElementById('typingDeckName').textContent = deck.name;
+    var isReviewMode = card._deckId !== undefined;
+    document.getElementById('typingDeckName').textContent = isReviewMode
+      ? '📋 错题打字 · ' + (card._deckName || '')
+      : deck.name;
 
     /* 释义 + 可选音标/词性提示 */
     let wordHtml = App.escHtml(card.back || (card.definitions || [''])[0]);
@@ -71,6 +74,37 @@ var FlashcardApp = window.FlashcardApp || {};
     App.renderTypingPanel();
   };
 
+  /* 错题打字复习 */
+  App.startTypingFailed = function () {
+    var failedCards = App.collectFailedCards();
+    if (failedCards.length === 0) {
+      App.showToast('暂无需要复习的错题！🎉', 'success', 2000);
+      return;
+    }
+    App.typingQueue = failedCards.map(function (f) {
+      return Object.assign({}, f.card, { _deckName: f.deckName, _deckId: f.deckId });
+    }).sort(function (a, b) {
+      return (a.easeFactor || 2.5) - (b.easeFactor || 2.5);
+    });
+    App.typingIndex = 0;
+    App.typingCorrect = 0;
+    App.typingWrong = 0;
+    App.typingDone = false;
+    /* 直接切换到打字面板 */
+    document.querySelectorAll('nav button').forEach(function (b) { b.classList.remove('active'); });
+    var tabBtn = document.querySelector('nav button[data-tab="typing"]');
+    if (tabBtn) tabBtn.classList.add('active');
+    document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('visible'); });
+    document.getElementById('panelTyping').classList.add('visible');
+    /* 隐藏空状态提示，渲染打字内容 */
+    document.getElementById('typingNoDeck').style.display = 'none';
+    document.getElementById('typingEmpty').style.display = 'none';
+    App.typingIndex = 0;
+    App.typingDone = false;
+    App.renderTypingPanel();
+    App.showToast('📋 错题打字模式：共 ' + App.typingQueue.length + ' 个需强化记忆的词', 'info', 2500);
+  };
+
   App.submitTyping = function () {
     if (App.typingQueue.length === 0 || App.typingIndex >= App.typingQueue.length) return;
     let input = document.getElementById('typingInput').value.trim();
@@ -89,9 +123,9 @@ var FlashcardApp = window.FlashcardApp || {};
       inputEl.className = 'correct';
       feedback.textContent = '✅ 正确！';
       feedback.className = 'typing-feedback correct';
-      let deck = App.getCurrentDeck();
-      let deckCard = deck.cards.find(function (c) { return c.id === card.id; });
-      if (deckCard) App.applySM2(deckCard, true);
+      var d = card._deckId ? App.getDeck(card._deckId) : App.getCurrentDeck();
+      var dc = d ? d.cards.find(function (c) { return c.id === card.id; }) : null;
+      if (dc) App.applySM2(dc, true);
       App.trackLearning(1);
       App.saveData();
       App.updateNavBadges();
@@ -107,9 +141,9 @@ var FlashcardApp = window.FlashcardApp || {};
       inputEl.className = 'wrong';
       feedback.innerHTML = '❌ 错误！正确答案：<strong>' + App.escHtml(card.front || card.word) + '</strong>';
       feedback.className = 'typing-feedback wrong';
-      let d = App.getCurrentDeck();
-      let dc = d.cards.find(function (c) { return c.id === card.id; });
-      if (dc) App.applySM2(dc, false);
+      var d2 = card._deckId ? App.getDeck(card._deckId) : App.getCurrentDeck();
+      var dc2 = d2 ? d2.cards.find(function (c) { return c.id === card.id; }) : null;
+      if (dc2) App.applySM2(dc2, false);
       App.trackLearning(0);
       App.updateNavBadges();
       document.getElementById('btnTypingNext').style.display = '';

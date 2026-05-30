@@ -6,6 +6,8 @@ var FlashcardApp = window.FlashcardApp || {};
   App.handleDeckAction = function (action, deckId) {
     if (action === 'study') {
       App.state.currentDeckId = deckId;
+      App.isReviewMode = false;
+      App.reviewSourceDeckId = null;
       App.studyOrder = 'difficulty';
       document.getElementById('btnStudyOrder').innerHTML = '<span class="order-icon">⚡</span><span class="order-label">智能复习</span><span class="order-arrow">▾</span>';
       document.getElementById('btnTypingOrder').innerHTML = '<span class="order-icon">⚡</span><span class="order-label">智能复习</span><span class="order-arrow">▾</span>';

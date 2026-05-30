@@ -157,3 +157,36 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* 错题统计 */
+.failed-words-list {
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  margin-top: 8px;
+  box-shadow: var(--shadow-xs);
+}
+.failed-word-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 13px;
+}
+.failed-word-item:last-child { border-bottom: none; }
+.failed-word {
+  font-weight: 700;
+  color: var(--text-primary);
+  min-width: 80px;
+}
+.failed-ef {
+  color: var(--danger-text);
+  font-size: 11px;
+  font-weight: 600;
+}
+.failed-deck {
+  color: var(--text-muted);
+  font-size: 11px;
+  margin-left: auto;
+}

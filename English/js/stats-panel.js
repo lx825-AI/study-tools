@@ -178,6 +178,36 @@ var FlashcardApp = window.FlashcardApp || {};
         '</div>' +
       '</div>' +
 
+      /* 错题统计 */
+      (function () {
+        var failedCards = App.collectFailedCards ? App.collectFailedCards() : [];
+        var weekWrong = 0;
+        weekStats.forEach(function (s) { weekWrong += s.wrong; });
+        var topFailed = failedCards
+          .sort(function (a, b) { return (a.card.easeFactor || 2.5) - (b.card.easeFactor || 2.5); })
+          .slice(0, 5)
+          .map(function (f) {
+            return '<div class="failed-word-item">' +
+              '<span class="failed-word">' + App.escHtml(f.card.word || f.card.front) + '</span>' +
+              '<span class="failed-ef">EF: ' + ((f.card.easeFactor || 2.5).toFixed(1)) + '</span>' +
+              '<span class="failed-deck">' + App.escHtml(f.deckName) + '</span>' +
+            '</div>';
+          }).join('');
+        return '<div class="section-title" style="margin-top:24px;">📋 错题统计</div>' +
+        '<div class="stats-grid">' +
+          '<div class="stat-card">' +
+            '<div class="stat-value" style="color:' + (failedCards.length > 0 ? 'var(--danger-text)' : 'var(--success)') + '">' + failedCards.length + '</div>' +
+            '<div class="stat-label">待强化词汇</div>' +
+          '</div>' +
+          '<div class="stat-card">' +
+            '<div class="stat-value">' + weekWrong + '</div>' +
+            '<div class="stat-label">本周错题数</div>' +
+          '</div>' +
+        '</div>' +
+        (topFailed ? '<div class="section-title" style="margin-top:16px;font-size:12px;">📌 最需强化的词</div>' +
+        '<div class="failed-words-list">' + topFailed + '</div>' : '');
+      })() +
+
       /* 每日目标 */
       '<div class="section-title" style="margin-top:24px;">🎯 每日目标</div>' +
       '<div class="daily-goal">' +
@@ -218,9 +248,10 @@ var FlashcardApp = window.FlashcardApp || {};
       '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
         '<button id="btnExportAll" class="btn btn-outline btn-sm">📥 导出全部数据</button>' +
         '<button id="btnImportAll" class="btn btn-outline btn-sm">📤 导入数据恢复</button>' +
+        '<button id="btnExportFailed" class="btn btn-outline btn-sm">📋 导出错题集</button>' +
         '<input type="file" id="importFileInput" accept=".json" style="display:none;">' +
       '</div>' +
-      '<div style="font-size:12px;color:var(--text-muted);margin-top:4px;">导出包含所有牌组、学习进度和偏好设置。导入将<strong>替换</strong>当前全部数据。</div>' +
+      '<div style="font-size:12px;color:var(--text-muted);margin-top:4px;">导出包含所有牌组、学习进度和偏好设置。导入将<strong>替换</strong>当前全部数据。错题集导出为CSV格式，可在Excel中打开。</div>' +
 
       /* 学习提醒 */
       (function () {
@@ -246,6 +277,12 @@ var FlashcardApp = window.FlashcardApp || {};
     let btnExport = document.getElementById('btnExportAll');
     if (btnExport) {
       btnExport.addEventListener('click', App.exportAllData);
+    }
+
+    /* 绑定导出错题按钮 */
+    let btnExportFailed = document.getElementById('btnExportFailed');
+    if (btnExportFailed) {
+      btnExportFailed.addEventListener('click', App.exportFailedCards);
     }
 
     /* 绑定导入按钮 → 触发文件选择 */
@@ -346,6 +383,38 @@ var FlashcardApp = window.FlashcardApp || {};
     a.click();
     URL.revokeObjectURL(url);
     App.showToast('数据已导出', 'success');
+  };
+
+  /* 导出错题集为 CSV 文件 */
+  App.exportFailedCards = function () {
+    var failedCards = App.collectFailedCards();
+    if (failedCards.length === 0) {
+      App.showToast('暂无错题可导出', 'warn');
+      return;
+    }
+    /* CSV header: word,phonetic,pos,definitions,easeFactor,deck */
+    var rows = [['单词', '音标', '词性', '释义', 'EF系数', '所属牌组']];
+    failedCards.forEach(function (f) {
+      rows.push([
+        f.card.word || f.card.front || '',
+        f.card.phonetic || '',
+        f.card.pos || '',
+        (f.card.definitions || [f.card.back || '']).join('; '),
+        String((f.card.easeFactor || 2.5).toFixed(1)),
+        f.deckName
+      ]);
+    });
+    var csv = '﻿' + rows.map(function (r) {
+      return r.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(',');
+    }).join('\n');
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'flashcard-failed-' + new Date().toISOString().slice(0, 10) + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    App.showToast('已导出 ' + failedCards.length + ' 个错题', 'success');
   };
 
   /* 从 JSON 文件导入恢复全部数据 */

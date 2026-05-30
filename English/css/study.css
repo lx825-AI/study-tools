@@ -7,6 +7,20 @@
   font-size: 18px;
   font-weight: 700;
 }
+.study-deck-name .review-mode-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 10px;
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  border: 1px solid var(--danger-border);
+  font-size: 13px;
+}
+.review-failed-btn {
+  margin-top: 8px;
+  font-size: 12px;
+}
+.review-failed-btn:hover { border-color: var(--danger); color: var(--danger); }
 .study-progress {
   font-size: 14px;
   color: var(--text-secondary);

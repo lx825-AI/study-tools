@@ -10,6 +10,8 @@ var FlashcardApp = window.FlashcardApp || {};
   App.studyFailed = 0;
   App.studyOrder = 'difficulty'; // 'difficulty' | 'random' | 'sequential'
   App.studyStartTime = null;
+  App.isReviewMode = false;       /* 错题复习模式标识 */
+  App.reviewSourceDeckId = null;   /* 复习模式下来源牌组 */
 
   /* SM-2 间隔重复算法 */
   App.applySM2 = function (card, passed) {
@@ -61,9 +63,64 @@ var FlashcardApp = window.FlashcardApp || {};
     return cards;
   };
 
+  /* 收集所有牌组中的错题（EF <= 1.8 或 repetitions === 0） */
+  App.collectFailedCards = function () {
+    var failed = [];
+    App.state.decks.forEach(function (deck) {
+      deck.cards.forEach(function (c) {
+        if ((typeof c.easeFactor === 'number' && c.easeFactor <= 1.8) || c.repetitions === 0) {
+          failed.push({ card: c, deckName: deck.name, deckId: deck.id });
+        }
+      });
+    });
+    return failed;
+  };
+
+  /* 收集当前牌组中当天到期的待复习卡片 */
+  App.collectDueCards = function (deck) {
+    var today = new Date().toISOString().slice(0, 10);
+    return deck.cards.filter(function (c) {
+      return c.nextReview && c.nextReview <= today;
+    });
+  };
+
+  /* 启动错题复习模式 */
+  App.startFailedReview = function () {
+    var failedCards = App.collectFailedCards();
+    if (failedCards.length === 0) {
+      App.showToast('暂无需要复习的错题，继续加油！🎉', 'success', 2000);
+      return;
+    }
+    App.isReviewMode = true;
+    App.reviewSourceDeckId = App.state.currentDeckId;
+    /* 用错题建学习队列，优先 EF 低的（更难的） */
+    App.studyQueue = failedCards.map(function (f) {
+      return Object.assign({}, f.card, { _deckName: f.deckName, _deckId: f.deckId });
+    }).sort(function (a, b) {
+      return (a.easeFactor || 2.5) - (b.easeFactor || 2.5);
+    });
+    App.studyIndex = 0;
+    App.studyPassed = 0;
+    App.studyFailed = 0;
+    App.isFlipped = false;
+    App.studyStartTime = Date.now();
+    App.renderStudyPanel();
+    App.showToast('📋 错题复习模式：共 ' + App.studyQueue.length + ' 个需强化记忆的词', 'info', 2500);
+  };
+
+  /* 退出复习模式，恢复正常学习 */
+  App.exitReviewMode = function () {
+    App.isReviewMode = false;
+    App.reviewSourceDeckId = null;
+    App.state.currentDeckId = App.state.currentDeckId; /* 触发牌组刷新 */
+    App.startStudy();
+  };
+
   App.startStudy = function () {
-    let deck = App.getCurrentDeck();
+    var deck = App.getCurrentDeck();
     if (!deck || deck.cards.length === 0) return;
+    App.isReviewMode = false;
+    App.reviewSourceDeckId = null;
     App.studyQueue = App.buildStudyQueue(deck);
     App.studyIndex = 0;
     App.studyPassed = 0;
@@ -74,19 +131,22 @@ var FlashcardApp = window.FlashcardApp || {};
   };
 
   App.renderStudyPanel = function () {
-    let deck = App.getCurrentDeck();
-    let noDeck = document.getElementById('studyNoDeck');
-    let content = document.getElementById('studyContent');
-    let complete = document.getElementById('studyComplete');
-    let empty = document.getElementById('studyEmpty');
+    var deck = App.getCurrentDeck();
+    var noDeck = document.getElementById('studyNoDeck');
+    var content = document.getElementById('studyContent');
+    var complete = document.getElementById('studyComplete');
+    var empty = document.getElementById('studyEmpty');
 
     noDeck.style.display = 'none';
     content.style.display = 'none';
     complete.style.display = 'none';
     empty.style.display = 'none';
 
-    if (!deck) { noDeck.style.display = 'block'; return; }
-    if (deck.cards.length === 0) { empty.style.display = 'block'; return; }
+    /* 复习模式下不检查当前牌组 */
+    if (!App.isReviewMode) {
+      if (!deck) { noDeck.style.display = 'block'; return; }
+      if (deck.cards.length === 0) { empty.style.display = 'block'; return; }
+    }
 
     if (App.studyQueue.length === 0 || App.studyIndex >= App.studyQueue.length) {
       complete.style.display = 'block';
@@ -97,8 +157,13 @@ var FlashcardApp = window.FlashcardApp || {};
       var sec = elapsedSec % 60;
       var timeStr = min > 0 ? min + '分' + sec + '秒' : sec + '秒';
       var rate = total > 0 && elapsedSec > 0 ? Math.round(total / elapsedSec * 60) : 0;
-      document.getElementById('completeTitle').textContent =
-        App.studyFailed === 0 ? '完美通关！' : accuracy >= 70 ? '不错哦！' : '继续加油！';
+      var title = '';
+      if (App.isReviewMode) {
+        title = App.studyFailed === 0 ? '🎉 错题全部攻克！' : accuracy >= 70 ? '👍 大部分已掌握！' : '💪 还需多加练习！';
+      } else {
+        title = App.studyFailed === 0 ? '完美通关！' : accuracy >= 70 ? '不错哦！' : '继续加油！';
+      }
+      document.getElementById('completeTitle').textContent = title;
       document.getElementById('completeStats').innerHTML =
         '<div class="complete-stats-row">' +
           '<span class="complete-stat">✅ ' + App.studyPassed + '</span>' +
@@ -112,15 +177,59 @@ var FlashcardApp = window.FlashcardApp || {};
       if (App.studyPassed > 0 && App.studyFailed <= total / 3) {
         App.spawnConfetti();
       }
+      /* 复习模式下显示退出按钮，正常模式有错题时显示复习按钮 */
+      var restartBtn = document.getElementById('btnRestart');
+      var reviewFailedBtn = document.getElementById('btnReviewRound');
+      if (App.isReviewMode) {
+        restartBtn.textContent = '🔄 再复习一轮';
+        restartBtn.onclick = App.startFailedReview;
+        var exitBtn = document.getElementById('btnExitReview');
+        if (!exitBtn) {
+          exitBtn = document.createElement('button');
+          exitBtn.id = 'btnExitReview';
+          exitBtn.className = 'btn btn-outline';
+          exitBtn.textContent = '↩ 退出复习';
+          exitBtn.onclick = function () { App.exitReviewMode(); };
+          restartBtn.parentNode.appendChild(exitBtn);
+        }
+        exitBtn.style.display = '';
+        if (reviewFailedBtn) reviewFailedBtn.style.display = 'none';
+      } else {
+        restartBtn.textContent = '再来一轮';
+        restartBtn.onclick = function () { App.startStudy(); };
+        var exitBtn2 = document.getElementById('btnExitReview');
+        if (exitBtn2) exitBtn2.style.display = 'none';
+        /* 有错题时显示"复习本轮 N 个错题"按钮 */
+        if (App.studyFailed > 0) {
+          if (!reviewFailedBtn) {
+            reviewFailedBtn = document.createElement('button');
+            reviewFailedBtn.id = 'btnReviewRound';
+            reviewFailedBtn.className = 'btn btn-outline';
+            reviewFailedBtn.style.marginTop = '8px';
+            restartBtn.parentNode.appendChild(reviewFailedBtn);
+          }
+          reviewFailedBtn.textContent = '📋 复习本轮 ' + App.studyFailed + ' 个错题';
+          reviewFailedBtn.style.display = '';
+          reviewFailedBtn.onclick = App.startFailedReview;
+        } else {
+          if (reviewFailedBtn) reviewFailedBtn.style.display = 'none';
+        }
+      }
       return;
     }
 
     content.style.display = 'block';
 
-    let card = App.studyQueue[App.studyIndex];
-    document.getElementById('studyDeckName').textContent = deck.name;
+    var card = App.studyQueue[App.studyIndex];
+    var deckName = App.isReviewMode
+      ? '📋 错题复习'
+      : (deck ? deck.name : '');
+    document.getElementById('studyDeckName').innerHTML = App.isReviewMode
+      ? '<span class="review-mode-badge">📋 错题复习</span> ' + App.escHtml(card._deckName || '')
+      : App.escHtml(deckName);
     document.getElementById('studyProgress').textContent =
-      '第 ' + (App.studyIndex + 1) + ' / ' + App.studyQueue.length + ' 张';
+      '第 ' + (App.studyIndex + 1) + ' / ' + App.studyQueue.length + ' 张' +
+      (App.isReviewMode ? ' · 来源: ' + (card._deckName || '') : '');
     document.getElementById('progressFill').style.width =
       ((App.studyIndex / App.studyQueue.length) * 100) + '%';
 
@@ -129,8 +238,12 @@ var FlashcardApp = window.FlashcardApp || {};
     if (card.phonetic) {
       frontHtml += ' <span class="card-front-phonetic">' + App.escHtml(card.phonetic) + '</span>';
     }
-    /* 难度指示: 从真实 deck 数据读取 EF，避免队列副本不同步 */
-    var deckCard = deck.cards.find(function (c) { return c.id === card.id; });
+    /* 难度指示: 从真实牌组数据读取 EF，复习模式下跨牌组查询 */
+    var sourceDeck = deck;
+    if (App.isReviewMode && card._deckId) {
+      sourceDeck = App.getDeck(card._deckId);
+    }
+    var deckCard = sourceDeck ? sourceDeck.cards.find(function (c) { return c.id === card.id; }) : null;
     var ef = deckCard ? deckCard.easeFactor : card.easeFactor;
     var diffHtml = '';
     if (typeof ef === 'number') {
@@ -221,8 +334,8 @@ var FlashcardApp = window.FlashcardApp || {};
     }
 
     let card = App.studyQueue[App.studyIndex];
-    let deck = App.getCurrentDeck();
-    let deckCard = deck.cards.find(function (c) { return c.id === card.id; });
+    let deck = App.isReviewMode && card._deckId ? App.getDeck(card._deckId) : App.getCurrentDeck();
+    let deckCard = deck ? deck.cards.find(function (c) { return c.id === card.id; }) : null;
     if (deckCard) {
       App.applySM2(deckCard, passed);
       /* 同步 SM-2 状态回学习队列副本 */
@@ -232,6 +345,8 @@ var FlashcardApp = window.FlashcardApp || {};
       card.nextReview = deckCard.nextReview;
       if (passed) { App.studyPassed++; }
       else { App.studyFailed++; }
+      /* 记录学习日志 */
+      App.trackLearning(passed ? 1 : 0);
     }
 
     App.studyIndex++;

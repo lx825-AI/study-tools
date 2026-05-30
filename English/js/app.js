@@ -252,7 +252,15 @@ var FlashcardApp = window.FlashcardApp || {};
     /* 学习作答 */
     document.getElementById('btnFail').addEventListener('click', function () { App.answerStudy(false); });
     document.getElementById('btnPass').addEventListener('click', function () { App.answerStudy(true); });
-    document.getElementById('btnRestart').addEventListener('click', function () { App.startStudy(); });
+    document.getElementById('btnRestart').addEventListener('click', function () {
+      if (App.isReviewMode) { App.startFailedReview(); }
+      else { App.startStudy(); }
+    });
+
+    /* 错题复习按钮 */
+    document.getElementById('btnReviewFailed').addEventListener('click', function () {
+      App.startFailedReview();
+    });
 
     /* 键盘快捷键 */
     document.addEventListener('keydown', function (e) {
@@ -279,6 +287,7 @@ var FlashcardApp = window.FlashcardApp || {};
     document.getElementById('btnTypingSubmit').addEventListener('click', App.submitTyping);
     document.getElementById('btnTypingNext').addEventListener('click', App.nextTyping);
     document.getElementById('btnTypingRestart').addEventListener('click', App.startTyping);
+    document.getElementById('btnTypingReviewFailed').addEventListener('click', App.startTypingFailed);
     document.getElementById('btnTypingSpeak').addEventListener('click', function () {
       if (App.typingQueue.length === 0 || App.typingIndex >= App.typingQueue.length) return;
       var card = App.typingQueue[App.typingIndex];
@@ -480,6 +489,20 @@ var FlashcardApp = window.FlashcardApp || {};
 
     /* 启动学习提醒定时器 */
     App._setupReminderTimer();
+
+    /* 页面加载时显示待复习提示 */
+    setTimeout(function () {
+      var today = new Date().toISOString().slice(0, 10);
+      var dueCount = 0;
+      App.state.decks.forEach(function (d) {
+        d.cards.forEach(function (c) {
+          if (c.nextReview && c.nextReview <= today) dueCount++;
+        });
+      });
+      if (dueCount > 0) {
+        App.showToast('📖 今日有 ' + dueCount + ' 个待复习词汇，开始学习吧！', 'info', 4000);
+      }
+    }, 1500);
   };
 
   /* ========== 快捷键弹窗 ========== */
