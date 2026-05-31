@@ -43,8 +43,8 @@ var FlashcardApp = window.FlashcardApp || {};
     let content, filename, mimeType;
     if (format === 'csv') {
       let rows = deck.cards.map(function (c) {
-        let front = (c.front || c.word || '').replace(/"/g, '""');
-        let back = (c.back || (c.definitions || [''])[0]).replace(/"/g, '""');
+        let front = App.getCardFront(c).replace(/"/g, '""');
+        let back = App.getCardBack(c).replace(/"/g, '""');
         return '"' + front + '","' + back + '"';
       });
       content = 'front,back\n' + rows.join('\n');
@@ -56,8 +56,8 @@ var FlashcardApp = window.FlashcardApp || {};
         exportedAt: new Date().toISOString(),
         cards: deck.cards.map(function (c) {
           return {
-            front: c.front || c.word || '',
-            back: c.back || (c.definitions || [''])[0],
+            front: App.getCardFront(c),
+            back: App.getCardBack(c),
             word: c.word || c.front || '',
             phonetic: c.phonetic || '',
             pos: c.pos || '',

@@ -9,6 +9,20 @@ var FlashcardApp = window.FlashcardApp || {};
     return s.replace(/[&<>"']/g, function (c) { return map[c]; });
   };
 
+  /* 安全获取卡片的正面文本（英文单词） */
+  App.getCardFront = function (c) {
+    return c.front || c.word || '';
+  };
+
+  /* 安全获取卡片的背面文本（释义），处理 definitions 可能是字符串或数组的情况 */
+  App.getCardBack = function (c) {
+    if (c.back) return c.back;
+    var defs = c.definitions;
+    if (!defs) return '';
+    if (Array.isArray(defs)) return defs[0] || '';
+    return defs;
+  };
+
   App.parseCSVLine = function (line) {
     let result = [];
     let current = '';

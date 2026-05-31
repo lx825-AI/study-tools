@@ -13,7 +13,7 @@ fs.mkdirSync(path.join(DIST, 'wordbooks'), { recursive: true });
 /* ========== CSS 合并 ========== */
 const CSS_ORDER = [
   'variables.css', 'base.css', 'components.css', 'deck.css',
-  'study.css', 'typing.css', 'preview.css', 'stats.css'
+  'study.css', 'mode.css', 'preview.css', 'stats.css'
 ];
 
 const cssContent = CSS_ORDER
@@ -25,9 +25,10 @@ console.log('✓ CSS merged (' + cssContent.length + ' bytes)');
 
 /* ========== JS 合并 + 压缩 ========== */
 const JS_ORDER = [
-  'js/storage.js', 'js/state.js', 'js/models.js', 'js/utils.js',
+  'js/storage.js', 'js/idb-storage.js', 'js/state.js',
+  'js/models.js', 'js/utils.js', 'js/ebbinghaus.js',
   'js/ui.js', 'js/deck-panel.js', 'js/study-panel.js',
-  'js/typing-panel.js', 'js/preview-panel.js', 'js/cards-panel.js',
+  'js/preview-panel.js', 'js/cards-panel.js',
   'js/import.js', 'js/stats-panel.js',
   'data/word-schema.js', 'js/app.js'
 ];
@@ -86,7 +87,7 @@ html = html.replace('</body>',
   '<script src="./app.bundle.js"></script>\n' +
   '<script>\n' +
   'if ("serviceWorker" in navigator) {\n' +
-  '  navigator.serviceWorker.register("./sw.js").catch(function () {});\n' +
+  '  try { navigator.serviceWorker.register("./sw.js").catch(function () {}); } catch (e) {}\n' +
   '}\n' +
   'FlashcardApp.init();\n' +
   '</script>\n' +

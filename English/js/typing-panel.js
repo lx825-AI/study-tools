@@ -41,7 +41,7 @@ var FlashcardApp = window.FlashcardApp || {};
       : deck.name;
 
     /* 释义 + 可选音标/词性提示 */
-    let wordHtml = App.escHtml(card.back || (card.definitions || [''])[0]);
+    let wordHtml = App.escHtml(App.getCardBack(card));
     if (card.phonetic) {
       wordHtml += ' <span class="typing-phonetic">' + App.escHtml(card.phonetic) + '</span>';
     }

@@ -79,11 +79,12 @@ var FlashcardApp = window.FlashcardApp || {};
 
     data.words.forEach(function (item) {
       let front = Array.isArray(item) ? item[0] : item.word;
-      let back = Array.isArray(item) ? item[1] : (item.definitions || [''])[0];
+      let defs = Array.isArray(item) ? [item[1]] : App._ensureDefinitionsArray(item.definitions, '');
+      let back = defs[0] || '';
       if (!existingWords.has(front.toLowerCase())) {
         let card = Array.isArray(item)
           ? { id: App.genId(), front: front, back: back, difficulty: Math.floor(Math.random() * 5) + 1 }
-          : { id: App.genId(), front: front, back: back, word: item.word, phonetic: item.phonetic || '', pos: item.pos || '', definitions: item.definitions || [back], phrases: item.phrases || [], sentences: item.sentences || [], synonyms: item.synonyms || [], antonyms: item.antonyms || [], confused: item.confused || [], difficulty: Math.floor(Math.random() * 5) + 1 };
+          : { id: App.genId(), front: front, back: back, word: item.word, phonetic: item.phonetic || '', pos: item.pos || '', definitions: defs, phrases: item.phrases || [], sentences: item.sentences || [], synonyms: item.synonyms || [], antonyms: item.antonyms || [], confused: item.confused || [], difficulty: Math.floor(Math.random() * 5) + 1 };
         deck.cards.push(card);
         existingWords.add(front.toLowerCase());
         added++;

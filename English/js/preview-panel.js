@@ -19,16 +19,15 @@ var FlashcardApp = window.FlashcardApp || {};
     let btnToggle = document.getElementById('btnToggleAnswer');
     btnToggle.textContent = App.previewAnswersVisible ? '🙈 隐藏释义' : '👁️ 显示释义';
 
-    /* 判断是否有词性数据来决定是否显示词性列 */
-    let hasPos = deck.cards.some(function (c) { return c.pos; });
-    App._hasPosColumn = hasPos;
     App._renderPreviewTable(deck.cards);
   };
 
   App._renderPreviewTable = function (cards, highlightWord) {
     let tbody = document.getElementById('previewTbody');
     let cls = App.previewAnswersVisible ? '' : ' hidden-answer';
-    let showPos = App._hasPosColumn;
+
+    /* 根据当前渲染的卡片重新判断是否有词性数据 */
+    let showPos = cards.some(function (c) { return c.pos; });
 
     /* 动态更新表头 */
     let thead = document.querySelector('.preview-table thead tr');
@@ -40,8 +39,8 @@ var FlashcardApp = window.FlashcardApp || {};
     }
 
     tbody.innerHTML = cards.map(function (c, i) {
-      let front = c.front || c.word || '';
-      let back = c.back || (c.definitions || [''])[0];
+      let front = App.getCardFront(c);
+      let back = App.getCardBack(c);
       let pos = c.pos || '';
       let frontHtml = App.escHtml(front);
       let backHtml = App.escHtml(back);

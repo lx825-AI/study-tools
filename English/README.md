@@ -30,7 +30,15 @@ npm run dev        # 本地预览 (需要 npx serve)
 
 ## 数据存储
 
-所有学习数据存储在浏览器 `localStorage` 中，包括牌组、卡片、SM-2 复习状态和学习日志。
+所有学习数据存储在浏览器 IndexedDB（主存储）+ localStorage（降级备份）中，包括牌组、卡片、SM-2 复习状态、艾宾浩斯遗忘曲线数据和学习日志。启动时自动运行数据迁移（`migrateCardsSchema`）修复旧格式数据。
+
+## 数据格式
+
+卡片支持两种格式：
+- **简单格式**：`{ front: "abandon", back: "丢弃；放弃" }`
+- **扩展格式**：`{ word, phonetic, pos, definitions[], phrases[], sentences[], synonyms[], antonyms[], confused[] }`
+
+`definitions` 字段会自动规范化为数组格式，兼容字符串输入。
 
 ---
 

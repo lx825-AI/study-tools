@@ -86,8 +86,8 @@ var FlashcardApp = window.FlashcardApp || {};
   App._filterPreviewCards = function (deck, query) {
     if (!query) return deck.cards;
     return deck.cards.filter(function (c) {
-      let front = (c.front || c.word || '').toLowerCase();
-      let back = (c.back || (c.definitions || [''])[0] || '').toLowerCase();
+      let front = App.getCardFront(c).toLowerCase();
+      let back = App.getCardBack(c).toLowerCase();
       let pos = (c.pos || '').toLowerCase();
       return App.fuzzyMatch(query, front) || back.indexOf(query) !== -1 || pos.indexOf(query) !== -1;
     });
@@ -146,7 +146,6 @@ var FlashcardApp = window.FlashcardApp || {};
       let deck = App.getCurrentDeck();
       if (!deck) { App.showToast('请先选择一个牌组', 'warn'); return; }
       if (deck.cards.length === 0) { App.showToast('该牌组还没有卡片，请先添加', 'warn'); return; }
-      App.startStudy();
       App.switchTab('study');
     });
 
@@ -257,6 +256,25 @@ var FlashcardApp = window.FlashcardApp || {};
       else { App.startStudy(); }
     });
 
+    /* 拼写模式 */
+    document.getElementById('btnToggleSpell').addEventListener('click', function () {
+      App.toggleSpellMode();
+    });
+    document.getElementById('btnSpellCheck').addEventListener('click', function () {
+      App.checkSpelling();
+    });
+    document.getElementById('spellInput').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        App.checkSpelling();
+      }
+    });
+
+    /* 返回模式选择 */
+    document.getElementById('btnBackToMode').addEventListener('click', function () {
+      App.returnToModeSelect();
+    });
+
     /* 错题复习按钮 */
     document.getElementById('btnReviewFailed').addEventListener('click', function () {
       App.startFailedReview();
@@ -280,27 +298,6 @@ var FlashcardApp = window.FlashcardApp || {};
         }
         if (e.key === 'ArrowLeft') { e.preventDefault(); App.answerStudy(false); }
         if (e.key === 'ArrowRight') { e.preventDefault(); App.answerStudy(true); }
-      }
-    });
-
-    /* 打字模式 */
-    document.getElementById('btnTypingSubmit').addEventListener('click', App.submitTyping);
-    document.getElementById('btnTypingNext').addEventListener('click', App.nextTyping);
-    document.getElementById('btnTypingRestart').addEventListener('click', App.startTyping);
-    document.getElementById('btnTypingReviewFailed').addEventListener('click', App.startTypingFailed);
-    document.getElementById('btnTypingSpeak').addEventListener('click', function () {
-      if (App.typingQueue.length === 0 || App.typingIndex >= App.typingQueue.length) return;
-      var card = App.typingQueue[App.typingIndex];
-      var word = card.front || card.word || '';
-      if (word) App.speak(word);
-    });
-    document.getElementById('typingInput').addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') {
-        if (document.getElementById('btnTypingNext').style.display !== 'none') {
-          App.nextTyping();
-        } else {
-          App.submitTyping();
-        }
       }
     });
 
@@ -343,8 +340,8 @@ var FlashcardApp = window.FlashcardApp || {};
       let seen = new Set();
       App.state.decks.forEach(function (deck) {
         deck.cards.forEach(function (c) {
-          let front = (c.front || c.word || '').toLowerCase();
-          let back = (c.back || (c.definitions || [''])[0] || '').toLowerCase();
+          let front = App.getCardFront(c).toLowerCase();
+          let back = App.getCardBack(c).toLowerCase();
           let pos = (c.pos || '').toLowerCase();
           let key = front + '|' + deck.id;
           if (seen.has(key)) return;
@@ -360,8 +357,8 @@ var FlashcardApp = window.FlashcardApp || {};
       } else {
         results.innerHTML = hits.slice(0, 20).map(function (h) {
           let c = h.card;
-          let front = App.escHtml(c.front || c.word);
-          let back = App.escHtml(c.back || (c.definitions || [''])[0]);
+          let front = App.escHtml(App.getCardFront(c));
+          let back = App.escHtml(App.getCardBack(c));
           let posBadge = c.pos ? '<span class="gsr-pos">' + App.escHtml(c.pos) + '</span>' : '';
           let phonetic = c.phonetic ? '<span class="gsr-phonetic">' + App.escHtml(c.phonetic) + '</span>' : '';
           return '<div class="gsr-item" data-deck="' + h.deckId + '" data-word="' + front + '">' +
@@ -415,10 +412,6 @@ var FlashcardApp = window.FlashcardApp || {};
       App.cycleOrder();
       App.startStudy();
     });
-    document.getElementById('btnTypingOrder').addEventListener('click', function () {
-      App.cycleOrder();
-      App.startTyping();
-    });
 
     /* 词书导入 */
     document.getElementById('btnImportBook').addEventListener('click', function () {
@@ -464,6 +457,9 @@ var FlashcardApp = window.FlashcardApp || {};
 
     /* ========== 启动 ========== */
     App.seedDemoData();
+    App.migrateCardsEbbinghaus();
+    App.migrateCardsSchema();
+    App.migrateToIDB();
     App.renderAll();
 
     /* 恢复主题 */
@@ -490,17 +486,30 @@ var FlashcardApp = window.FlashcardApp || {};
     /* 启动学习提醒定时器 */
     App._setupReminderTimer();
 
+    /* 页面关闭/刷新时保存学习进度 */
+    window.addEventListener('beforeunload', function () {
+      App.saveStudyProgress();
+    });
+
+    /* 页面隐藏时也保存（移动端切换 app） */
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) App.saveStudyProgress();
+    });
+
     /* 页面加载时显示待复习提示 */
     setTimeout(function () {
       var today = new Date().toISOString().slice(0, 10);
       var dueCount = 0;
+      var newCount = 0;
       App.state.decks.forEach(function (d) {
         d.cards.forEach(function (c) {
-          if (c.nextReview && c.nextReview <= today) dueCount++;
+          App.initEbbinghaus(c);
+          if (App.isDueToday(c)) dueCount++;
+          if (App.isNewWord(c)) newCount++;
         });
       });
       if (dueCount > 0) {
-        App.showToast('📖 今日有 ' + dueCount + ' 个待复习词汇，开始学习吧！', 'info', 4000);
+        App.showToast('📖 今日有 ' + dueCount + ' 个词待复习，' + newCount + ' 个新词可学', 'info', 4000);
       }
     }, 1500);
   };

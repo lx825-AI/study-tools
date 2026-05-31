@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/deck.css">
 <link rel="stylesheet" href="css/study.css">
-<link rel="stylesheet" href="css/typing.css">
+<link rel="stylesheet" href="css/mode.css">
 <link rel="stylesheet" href="css/preview.css">
 <link rel="stylesheet" href="css/stats.css">
 <style>
@@ -119,8 +119,7 @@
 
   <nav>
     <button data-tab="decks" class="active">📦 牌组</button>
-    <button data-tab="study">🔄 翻卡</button>
-    <button data-tab="typing">⌨️ 打字</button>
+    <button data-tab="study">🔄 学习</button>
     <button data-tab="preview">📖 预览</button>
     <button data-tab="cards">✏️ 卡片</button>
     <button data-tab="stats">📊 统计</button>
@@ -150,6 +149,7 @@
     </div>
     <div id="studyContent" style="display:none">
       <div class="study-header">
+        <button class="btn-back-mode" id="btnBackToMode" title="返回模式选择">← 返回</button>
         <div class="study-deck-name" id="studyDeckName"></div>
         <button class="order-toggle" id="btnStudyOrder" title="点击切换排序：智能复习 → 乱序 → 正序"><span class="order-icon">⚡</span><span class="order-label">智能复习</span><span class="order-arrow">▾</span></button>
         <div class="study-progress" id="studyProgress"></div>
@@ -184,6 +184,20 @@
         <button class="btn btn-fail" id="btnFail">✗ 不会</button>
         <button class="btn btn-pass" id="btnPass">✓ 会了</button>
       </div>
+      <!-- 拼写模式 -->
+      <div class="spell-mode-section" id="spellModeSection" style="display:none">
+        <div class="spell-toggle-row">
+          <button class="btn btn-outline btn-sm" id="btnToggleSpell">⌨️ 拼写模式</button>
+        </div>
+        <div class="spell-input-area" id="spellInputArea" style="display:none">
+          <div class="spell-hint">输入英文单词拼写：</div>
+          <div class="spell-input-row">
+            <input type="text" id="spellInput" placeholder="输入英文单词..." autocomplete="off" autocomplete="off">
+            <button class="btn btn-primary btn-sm" id="btnSpellCheck">确认</button>
+          </div>
+          <div class="spell-feedback" id="spellFeedback"></div>
+        </div>
+      </div>
     </div>
     <div id="studyComplete" style="display:none">
       <div class="study-complete">
@@ -194,51 +208,6 @@
       </div>
     </div>
     <div id="studyEmpty" class="empty-state" style="display:none">
-      <div class="icon">📝</div>
-      <p>这个牌组还没有卡片<br>切换到「卡片」标签页添加一些吧</p>
-    </div>
-  </div>
-
-  <!-- 打字模式面板 -->
-  <div id="panelTyping" class="panel">
-    <div id="typingNoDeck" class="empty-state">
-      <div class="icon">👆</div>
-      <p>请先在顶部选择一个牌组</p>
-    </div>
-    <div id="typingContent" style="display:none">
-      <div class="study-header">
-        <div class="study-deck-name" id="typingDeckName"></div>
-        <button class="order-toggle" id="btnTypingOrder" title="点击切换排序：智能复习 → 乱序 → 正序"><span class="order-icon">⚡</span><span class="order-label">智能复习</span><span class="order-arrow">▾</span></button>
-        <button class="btn btn-outline btn-sm review-failed-btn" id="btnTypingReviewFailed" style="margin-top:4px;">📋 错题打字</button>
-        <div class="typing-score">
-          <span>✅ <span class="correct-count" id="typingCorrect">0</span></span>
-          <span>❌ <span class="wrong-count" id="typingWrong">0</span></span>
-        </div>
-        <div class="progress-bar"><div class="progress-bar-fill" id="typingProgressFill"></div></div>
-      </div>
-      <div class="typing-area">
-        <div class="typing-word" id="typingWord"></div>
-        <div class="typing-speak-row">
-          <button class="speak-btn-sm" id="btnTypingSpeak" title="朗读单词发音">🔊</button>
-          <span class="typing-speak-hint">听发音后再拼写</span>
-        </div>
-        <div class="typing-input-row">
-          <input type="text" id="typingInput" placeholder="输入英文单词..." autocomplete="off">
-          <button class="btn btn-primary" id="btnTypingSubmit">确认</button>
-        </div>
-        <div class="typing-feedback" id="typingFeedback"></div>
-        <button class="btn btn-primary" id="btnTypingNext" style="display:none">下一题 →</button>
-      </div>
-    </div>
-    <div id="typingComplete" style="display:none">
-      <div class="study-complete">
-        <div class="icon">🏆</div>
-        <h2 id="typingCompleteTitle"></h2>
-        <p id="typingCompleteStats"></p>
-        <button class="btn btn-primary" id="btnTypingRestart">再来一轮</button>
-      </div>
-    </div>
-    <div id="typingEmpty" class="empty-state" style="display:none">
       <div class="icon">📝</div>
       <p>这个牌组还没有卡片<br>切换到「卡片」标签页添加一些吧</p>
     </div>
@@ -325,13 +294,14 @@
 
 <!-- JS 加载顺序：依赖关系 -->
 <script src="js/storage.js"></script>
+<script src="js/idb-storage.js"></script>
 <script src="js/state.js"></script>
 <script src="js/models.js"></script>
 <script src="js/utils.js"></script>
+<script src="js/ebbinghaus.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/deck-panel.js"></script>
 <script src="js/study-panel.js"></script>
-<script src="js/typing-panel.js"></script>
 <script src="js/preview-panel.js"></script>
 <script src="js/cards-panel.js"></script>
 <script src="js/import.js"></script>
@@ -341,7 +311,7 @@
 <script>
 /* 注册 Service Worker */
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(function () {});
+  try { navigator.serviceWorker.register('./sw.js').catch(function () {}); } catch (e) {}
 }
 
 /* 朗读按钮点击 */
