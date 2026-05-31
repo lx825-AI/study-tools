@@ -21,7 +21,7 @@ var FlashcardApp = window.FlashcardApp || {};
 
   /* 验证一个词条是否为新格式 */
   App.isExtendedWord = function (item) {
-    return item && typeof item === 'object' && !Array.isArray(item) && typeof item.word === 'string';
+    return !!(item && typeof item === 'object' && !Array.isArray(item) && typeof item.word === 'string');
   };
 
   /* 确保 definitions 字段始终为数组 */

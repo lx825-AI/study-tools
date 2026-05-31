@@ -10,10 +10,13 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // 依赖顺序加载
 const files = [
+  'idb-storage.js',
+  'state.js',
   'models.js',
   'utils.js',
+  'ebbinghaus.js',
+  '../data/word-schema.js',
   'study-panel.js',
-  'idb-storage.js',
 ];
 
 files.forEach(f => {
