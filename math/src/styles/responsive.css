@@ -72,13 +72,19 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    flex-wrap: wrap;
-    padding-right: 52px;
+    padding-right: 48px;
     margin-bottom: 20px;
   }
 
   .main-header h1 {
     font-size: 22px;
+    word-break: keep-all;
+    overflow-wrap: normal;
+  }
+
+  .section-title {
+    word-break: keep-all;
+    overflow-wrap: normal;
   }
 
   .formula-grid.grid-view {
@@ -295,6 +301,26 @@
 
   .formula-grid.grid-view {
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+}
+
+/* 超小屏适配（≤360px，如 iPhone SE） */
+@media (max-width: 360px) {
+  .main-header h1 {
+    font-size: 18px;
+  }
+
+  .main-header {
+    padding-right: 44px;
+  }
+
+  .section-title {
+    font-size: 17px;
+  }
+
+  .search-wrap input {
+    font-size: 14px;
+    padding: 10px 12px 10px 38px;
   }
 }
 
