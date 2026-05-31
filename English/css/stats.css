@@ -158,6 +158,57 @@
   cursor: not-allowed;
 }
 
+/* 艾宾浩斯阶段分布 */
+.eb-distribution {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xs);
+}
+.eb-dist-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.eb-dist-count {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary);
+  width: 32px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.eb-dist-item.eb-mastered .eb-dist-count {
+  color: var(--success);
+}
+.eb-dist-bar-wrap {
+  flex: 1;
+  height: 8px;
+  background: var(--border-light);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.eb-dist-bar {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+  min-width: 2px;
+}
+.eb-dist-item.eb-mastered .eb-dist-bar {
+  background: var(--success);
+}
+.eb-dist-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  width: 56px;
+  flex-shrink: 0;
+}
+
 /* 错题统计 */
 .failed-words-list {
   background: var(--surface);

@@ -29,19 +29,24 @@ var FlashcardApp = window.FlashcardApp || {};
     }
     empty.style.display = 'none';
     grid.innerHTML = App.state.decks.map(function (d) {
-      let diffHtml = '';
-      if (d.cards.length > 0) {
-        let avg = App.avgDifficulty(d);
-        let level = Math.ceil(avg / (App.DIFFICULTY_MAX / 5));
-        diffHtml = Array.from({ length: 5 }, function (_, i) {
-          return '<span' + (i < level ? ' class="active"' : '') + '></span>';
-        }).join('');
+      var ebStats = d.cards.length > 0 ? App.getEbbinghausStats(d) : null;
+      var ebInfo = '';
+      if (ebStats) {
+        var progressPct = d.cards.length > 0
+          ? Math.round((d.cards.length - ebStats.newWords) / d.cards.length * 100) : 0;
+        ebInfo = '<div class="deck-eb-stats">' +
+          '<span class="deck-stat-item" title="新词">📖' + ebStats.newWords + '</span>' +
+          '<span class="deck-stat-item" title="待复习"' +
+            (ebStats.dueToday > 0 ? ' style="color:var(--danger-text);font-weight:700"' : '') + '>🔁' + ebStats.dueToday + '</span>' +
+          '<span class="deck-stat-item" title="已掌握">✅' + ebStats.mastered + '</span>' +
+          '<div class="deck-eb-progress"><div class="deck-eb-fill" style="width:' + progressPct + '%"></div></div>' +
+        '</div>';
       }
       return '<div class="deck-card">' +
         '<div class="deck-info">' +
           '<div class="deck-name">' + App.escHtml(d.name) + '</div>' +
           '<div class="deck-count">' + d.cards.length + ' 张卡片</div>' +
-          '<div class="deck-difficulty">' + diffHtml + '</div>' +
+          ebInfo +
         '</div>' +
         '<div class="deck-actions">' +
           '<button class="btn btn-outline btn-sm" data-action="study" data-deck="' + d.id + '">学习</button>' +
@@ -60,19 +65,12 @@ var FlashcardApp = window.FlashcardApp || {};
     if (tabBtn) tabBtn.classList.add('active');
 
     document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('visible'); });
-    let panelMap = { decks: 'panelDecks', study: 'panelStudy', typing: 'panelTyping', preview: 'panelPreview', cards: 'panelCards', stats: 'panelStats' };
+    let panelMap = { decks: 'panelDecks', study: 'panelStudy', preview: 'panelPreview', cards: 'panelCards', stats: 'panelStats' };
     let panelId = panelMap[tab];
     if (panelId) document.getElementById(panelId).classList.add('visible');
 
     if (tab === 'study') {
-      let deck = App.getCurrentDeck();
-      if (deck && deck.cards.length > 0) App.startStudy();
-      else App.renderStudyPanel();
-    }
-    if (tab === 'typing') {
-      let d = App.getCurrentDeck();
-      if (d && d.cards.length > 0) App.startTyping();
-      else App.renderTypingPanel();
+      App.renderStudyPanel();
     }
     if (tab === 'preview') App.renderPreviewPanel();
     if (tab === 'cards') App.renderCardsPanel();
@@ -108,7 +106,6 @@ var FlashcardApp = window.FlashcardApp || {};
     App.renderDeckPanel();
     App.renderCardsPanel();
     App.renderStudyPanel();
-    App.renderTypingPanel();
     App.renderPreviewPanel();
     if (App.renderStatsPanel) App.renderStatsPanel();
     App.updateNavBadges();

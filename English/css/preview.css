@@ -93,16 +93,29 @@
 }
 
 /* 卡片编辑 */
-.card-list { display: grid; gap: 8px; margin-bottom: 24px; }
+.card-list {
+  display: block;
+  margin-bottom: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-secondary);
+  /* 虚拟滚动时 JS 会设置 overflow-y:auto + height；小列表保持自然高度 */
+}
+.card-list > .empty-state { border: none; }
 .edit-card-item {
   background: var(--surface);
-  border-radius: var(--radius);
+  border-bottom: 1px solid var(--border-light);
   padding: 12px 16px;
   display: flex;
   align-items: center;
   gap: 12px;
-  box-shadow: var(--shadow-xs);
+  will-change: transform;
+  contain: layout style;
 }
+.edit-card-item:last-child { border-bottom: none; }
+
+/* 虚拟滚动时的性能提示 */
+#cardListInner { contain: layout style; }
 .edit-card-content {
   flex: 1;
   min-width: 0;

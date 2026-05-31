@@ -107,16 +107,19 @@ var FlashcardApp = window.FlashcardApp || {};
     let totalCards = allCards.length;
     let masteredCount = allCards.filter(function (c) { return (c.easeFactor || 2.5) >= 2.8; }).length;
 
-    /* SM-2 统计 */
-    let dueToday = allCards.filter(function (c) {
-      return c.nextReview && c.nextReview <= todayKey;
-    }).length;
-    let dueTomorrow = allCards.filter(function (c) {
-      return c.nextReview && c.nextReview === tomorrowKey;
-    }).length;
-    let avgEF = allCards.length > 0
-      ? (allCards.reduce(function (s, c) { return s + (c.easeFactor || 2.5); }, 0) / allCards.length).toFixed(1)
-      : '2.5';
+    /* SM-2 + 艾宾浩斯 统计 */
+    /* 艾宾浩斯阶段分布 */
+    var ebDistribution = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 };
+    var dueToday = 0, dueTomorrow = 0;
+    allCards.forEach(function (c) {
+      App.initEbbinghaus(c);
+      var stage = c.ebbinghausStage || 0;
+      if (ebDistribution[stage] !== undefined) ebDistribution[stage]++;
+      if (App.isDueToday(c)) dueToday++;
+      if (c.ebbinghausNextReview === tomorrowKey) dueTomorrow++;
+    });
+    var totalEB = allCards.length;
+    var reviewedCount = totalEB - (ebDistribution[0] || 0);
 
     /* 连续打卡 */
     let streak = App.calcStreak(log);
@@ -157,11 +160,24 @@ var FlashcardApp = window.FlashcardApp || {};
         '</div>' +
       '</div>' +
 
-      /* SM-2 概览 */
-      '<div class="section-title" style="margin-top:24px;">🧠 间隔重复状态</div>' +
+      /* 艾宾浩斯阶段分布 */
+      '<div class="section-title" style="margin-top:24px;">🧠 艾宾浩斯遗忘曲线</div>' +
+      '<div class="eb-distribution">' +
+        App.EB_STAGES.map(function (s) {
+          var count = ebDistribution[s.stage] || 0;
+          var pct = totalEB > 0 ? Math.round(count / totalEB * 100) : 0;
+          var isNew = s.stage === 0;
+          var isMastered = s.stage >= App.EB_MASTERED_STAGE;
+          return '<div class="eb-dist-item' + (isMastered ? ' eb-mastered' : isNew ? '' : '') + '">' +
+            '<div class="eb-dist-count">' + count + '</div>' +
+            '<div class="eb-dist-bar-wrap"><div class="eb-dist-bar" style="width:' + pct + '%"></div></div>' +
+            '<div class="eb-dist-label">' + s.label + '</div>' +
+          '</div>';
+        }).join('') +
+      '</div>' +
       '<div class="stats-grid">' +
         '<div class="stat-card">' +
-          '<div class="stat-value" style="color:' + (dueToday > 0 ? 'var(--danger)' : 'var(--success)') + '">' + dueToday + '</div>' +
+          '<div class="stat-value" style="color:' + (dueToday > 0 ? 'var(--danger-text)' : 'var(--success)') + '">' + dueToday + '</div>' +
           '<div class="stat-label">今日待复习</div>' +
         '</div>' +
         '<div class="stat-card">' +
@@ -169,8 +185,8 @@ var FlashcardApp = window.FlashcardApp || {};
           '<div class="stat-label">明日待复习</div>' +
         '</div>' +
         '<div class="stat-card">' +
-          '<div class="stat-value">' + avgEF + '</div>' +
-          '<div class="stat-label">平均难度系数</div>' +
+          '<div class="stat-value">' + reviewedCount + '</div>' +
+          '<div class="stat-label">复习进行中</div>' +
         '</div>' +
         '<div class="stat-card">' +
           '<div class="stat-value" style="font-size:20px;">' + (dueToday > 0 ? '📖 去复习' : dueToday === 0 && totalCards > 0 ? '✅ 已清空' : '📝 去添加') + '</div>' +

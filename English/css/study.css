@@ -2,10 +2,34 @@
 .study-header {
   text-align: center;
   margin-bottom: 20px;
+  position: relative;
 }
 .study-deck-name {
   font-size: 18px;
   font-weight: 700;
+}
+
+/* 返回模式选择按钮 */
+.btn-back-mode {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-back-mode:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: var(--primary-bg);
 }
 .study-deck-name .review-mode-badge {
   display: inline-block;
@@ -29,9 +53,9 @@
 
 /* 卡片翻转 */
 .card-scene {
-  perspective: 800px;
+  perspective: 1000px;
   width: 100%;
-  height: 280px;
+  height: 300px;
   margin-bottom: 24px;
 }
 .flashcard {
@@ -39,10 +63,13 @@
   height: 100%;
   position: relative;
   transform-style: preserve-3d;
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
 .flashcard.flipped { transform: rotateY(180deg); }
+.flashcard:hover {
+  filter: brightness(0.98);
+}
 .card-face {
   position: absolute;
   inset: 0;
@@ -54,17 +81,24 @@
   justify-content: center;
   padding: 32px;
   text-align: center;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
   overflow-y: auto;
+  transition: box-shadow 0.3s;
 }
 .card-front {
-  background: var(--surface);
-  border: 2px solid var(--border);
+  background: linear-gradient(135deg, #fff, #f8fafc);
+  border: 1.5px solid var(--border);
+}
+[data-theme="dark"] .card-front {
+  background: linear-gradient(135deg, #1e293b, #1a2332);
 }
 .card-back {
-  background: var(--primary-bg);
-  border: 2px solid var(--primary-border);
+  background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+  border: 1.5px solid var(--primary-border);
   transform: rotateY(180deg);
+}
+[data-theme="dark"] .card-back {
+  background: linear-gradient(135deg, #1e1b4b, #172042);
 }
 .card-label {
   font-size: 12px;
@@ -76,29 +110,55 @@
   flex-shrink: 0;
 }
 .card-text {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 26px;
+  font-weight: 700;
   line-height: 1.5;
   word-break: break-word;
   font-family: var(--font-word);
+  max-width: 100%;
 }
 .card-hint {
   font-size: 13px;
   color: var(--text-muted);
   margin-top: 20px;
   flex-shrink: 0;
+  opacity: 0.7;
 }
 
 /* 学习操作按钮 */
 .study-actions {
   display: flex;
-  gap: 12px;
+  gap: 16px;
 }
-.study-actions .btn { flex: 1; padding: 14px; font-size: 16px; }
-.btn-fail { background: var(--danger-bg); color: var(--danger-text); border: 2px solid var(--danger-border); }
-.btn-fail:hover { background: var(--danger-hover); }
-.btn-pass { background: var(--success-bg); color: var(--success); border: 2px solid var(--success-border); }
-.btn-pass:hover { background: var(--success-hover); }
+.study-actions .btn {
+  flex: 1;
+  padding: 16px;
+  font-size: 17px;
+  border-radius: var(--radius);
+  transition: all 0.2s ease;
+  font-weight: 700;
+}
+.btn-fail {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  border: 2px solid var(--danger-border);
+}
+.btn-fail:hover {
+  background: var(--danger-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239,68,68,0.15);
+}
+.btn-pass {
+  background: var(--success-bg);
+  color: var(--success);
+  border: 2px solid var(--success-border);
+}
+.btn-pass:hover {
+  background: var(--success-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(22,163,74,0.15);
+}
+.btn-fail:active, .btn-pass:active { transform: scale(0.97); }
 
 /* 学习完成 */
 .study-complete {

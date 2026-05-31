@@ -1,0 +1,317 @@
+/* mode.css —— 学习模式选择 + UI 增强 */
+
+/* ========== 模式引导界面 ========== */
+.mode-guide {
+  padding: 8px 0 16px;
+  animation: modeFadeIn 0.4s ease;
+}
+@keyframes modeFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.mode-guide-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.mode-guide-subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+/* 模式卡片 */
+.mode-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+@media (max-width: 500px) {
+  .mode-cards { grid-template-columns: 1fr; }
+}
+
+.mode-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 16px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.mode-card:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.mode-card:active { transform: scale(0.98); }
+
+.mode-card-primary {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+}
+.mode-card-primary:hover {
+  box-shadow: 0 4px 20px rgba(79, 70, 229, 0.2);
+}
+
+.mode-card-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-secondary);
+  border-radius: var(--radius);
+}
+.mode-card-primary .mode-card-icon {
+  background: var(--primary);
+  color: #fff;
+  font-size: 28px;
+}
+
+.mode-card-body { flex: 1; min-width: 0; }
+.mode-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+.mode-card-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+.mode-card-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary);
+}
+.mode-card-count.count-urgent {
+  color: var(--danger-text);
+}
+.mode-card-count.count-empty {
+  color: var(--text-muted);
+}
+
+.mode-card-arrow {
+  font-size: 20px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.mode-card:hover .mode-card-arrow {
+  transform: translateX(4px);
+  color: var(--primary);
+}
+
+/* 学习概览 */
+.mode-overview {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 14px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+}
+.mode-overview-item {
+  flex: 1;
+  text-align: center;
+}
+.overview-num {
+  display: block;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.overview-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.overview-new      { color: var(--primary); }
+.overview-review   { color: var(--warning); }
+.overview-mastered { color: var(--success); }
+.overview-progress { color: var(--text-primary); }
+
+/* 新词数量设置 */
+.mode-setting {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 10px 14px;
+  background: var(--surface-secondary);
+  border-radius: var(--radius-sm);
+}
+.mode-setting input[type="number"] {
+  width: 56px;
+  padding: 4px 8px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  text-align: center;
+  background: var(--surface);
+  color: var(--text-primary);
+  font-family: inherit;
+}
+.mode-setting input[type="number"]:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+/* ========== 模式标签 ========== */
+.mode-tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+.mode-new    { background: var(--primary-bg); color: var(--primary); }
+.mode-review { background: #fefce8; color: #ca8a04; }
+.mode-mixed  { background: #f0fdf4; color: #16a34a; }
+.mode-failed { background: var(--danger-bg); color: var(--danger-text); }
+
+[data-theme="dark"] .mode-review { background: #422006; color: #fbbf24; }
+[data-theme="dark"] .mode-mixed  { background: #052e16; color: #4ade80; }
+
+/* 完成页模式徽章 */
+.complete-mode-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 99px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--primary-bg);
+  color: var(--primary);
+  margin-bottom: 12px;
+}
+
+/* ========== 艾宾浩斯阶段徽章 ========== */
+.eb-stage-badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #eef2ff;
+  color: #6366f1;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.eb-stage-badge.eb-mastered {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+[data-theme="dark"] .eb-stage-badge {
+  background: #1e1b4b;
+  color: #818cf8;
+}
+[data-theme="dark"] .eb-stage-badge.eb-mastered {
+  background: #052e16;
+  color: #4ade80;
+}
+
+/* ========== 拼写模式 ========== */
+.spell-mode-section {
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-light);
+}
+.spell-toggle-row {
+  text-align: center;
+  margin-bottom: 8px;
+}
+#btnToggleSpell {
+  font-size: 13px;
+  transition: all 0.2s;
+}
+#btnToggleSpell.spell-active {
+  background: var(--primary-bg);
+  color: var(--primary);
+  border-color: var(--primary);
+  font-weight: 700;
+}
+
+.spell-input-area {
+  animation: spellSlideIn 0.25s ease;
+}
+@keyframes spellSlideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.spell-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  text-align: center;
+}
+.spell-input-row {
+  display: flex;
+  gap: 8px;
+}
+.spell-input-row input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 16px;
+  font-family: var(--font-word);
+  background: var(--surface);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s;
+  letter-spacing: 1px;
+}
+.spell-input-row input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-bg);
+}
+.spell-input-row input.spell-input-correct {
+  border-color: var(--success);
+  background: var(--success-bg);
+  color: var(--success);
+  font-weight: 700;
+}
+.spell-input-row input.spell-input-wrong {
+  border-color: var(--danger-text);
+  background: var(--danger-bg);
+  animation: shake 0.4s ease;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+.spell-feedback {
+  text-align: center;
+  margin-top: 8px;
+  font-size: 14px;
+  min-height: 22px;
+  transition: all 0.2s;
+}
+.spell-feedback.spell-correct {
+  color: var(--success);
+  font-weight: 700;
+}
+.spell-feedback.spell-wrong {
+  color: var(--danger-text);
+  font-weight: 600;
+}
