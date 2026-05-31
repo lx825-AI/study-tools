@@ -121,7 +121,6 @@
     <button data-tab="decks" class="active">📦 牌组</button>
     <button data-tab="study">🔄 学习</button>
     <button data-tab="preview">📖 预览</button>
-    <button data-tab="typing">⌨️ 打字</button>
     <button data-tab="cards">✏️ 卡片</button>
     <button data-tab="stats">📊 统计</button>
   </nav>
@@ -229,7 +228,7 @@
         <input type="text" id="previewSearch" placeholder="搜索单词...">
         <button class="btn btn-outline btn-sm" id="btnToggleAnswer">🙈 隐藏释义</button>
       </div>
-      <div style="overflow-x:auto">
+      <div class="preview-scroll" style="overflow-x:auto">
         <table class="preview-table">
           <thead>
             <tr><th class="col-idx">#</th><th class="col-front">英文</th><th class="col-back">释义</th></tr>
@@ -237,47 +236,6 @@
           <tbody id="previewTbody"></tbody>
         </table>
       </div>
-    </div>
-  </div>
-
-  <!-- 打字练习面板 -->
-  <div id="panelTyping" class="panel">
-    <div id="typingNoDeck" class="empty-state">
-      <div class="icon">👆</div>
-      <p>请先在顶部选择一个牌组</p>
-    </div>
-    <div id="typingContent" style="display:none">
-      <div class="study-header">
-        <div class="study-deck-name" id="typingDeckName"></div>
-        <button class="order-toggle" id="btnTypingOrder" title="点击切换排序：智能复习 → 乱序 → 正序"><span class="order-icon">⚡</span><span class="order-label">智能排序</span><span class="order-arrow">▾</span></button>
-        <div class="progress-bar"><div class="progress-bar-fill" id="typingProgressFill"></div></div>
-      </div>
-      <div class="typing-area">
-        <div class="typing-score">
-          <span>✅ 正确：<span class="correct-count" id="typingCorrect">0</span></span>
-          <span>❌ 错误：<span class="wrong-count" id="typingWrong">0</span></span>
-        </div>
-        <div class="typing-word" id="typingWord"></div>
-        <div class="typing-input-row">
-          <input type="text" id="typingInput" placeholder="输入英文单词..." autocomplete="off">
-          <button class="btn btn-primary btn-sm" id="btnTypingSubmit">确认</button>
-          <button class="btn btn-outline btn-sm" id="btnTypingNext" style="display:none">下一题 →</button>
-        </div>
-        <div class="typing-feedback" id="typingFeedback"></div>
-        <div class="typing-hint">💡 看到中文释义，输入对应的英文单词</div>
-      </div>
-    </div>
-    <div id="typingComplete" style="display:none">
-      <div class="study-complete">
-        <div class="icon" id="typingCompleteTitle">🎉</div>
-        <p id="typingCompleteStats"></p>
-        <button class="btn btn-primary" id="btnTypingRestart">再来一轮</button>
-        <button class="btn btn-outline" id="btnTypingFailed" style="margin-top:8px;">📋 错题打字复习</button>
-      </div>
-    </div>
-    <div id="typingEmpty" class="empty-state" style="display:none">
-      <div class="icon">📝</div>
-      <p>这个牌组还没有卡片<br>切换到「卡片」标签页添加一些吧</p>
     </div>
   </div>
 
@@ -335,10 +293,6 @@
     <button data-tab="preview">
       <span class="bottom-nav-icon">📖</span>
       <span class="bottom-nav-label">预览</span>
-    </button>
-    <button data-tab="typing">
-      <span class="bottom-nav-icon">⌨️</span>
-      <span class="bottom-nav-label">打字</span>
     </button>
     <button data-tab="cards">
       <span class="bottom-nav-icon">✏️</span>

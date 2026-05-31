@@ -887,11 +887,8 @@ var FlashcardApp = window.FlashcardApp || {};
       if (passBtn) passBtn.style.display = '';
       if (failBtn) failBtn.textContent = '✗ 不会';
 
-      /* 2秒后可重新输入或手动作答 */
-      setTimeout(function () {
-        input.disabled = false;
-        input.focus();
-      }, 1500);
+      /* 保持输入框禁用，用户需通过按钮或快捷键作答 */
+      input.disabled = true;
     }
   };
 
@@ -913,7 +910,7 @@ var FlashcardApp = window.FlashcardApp || {};
       sequential: { icon: '📋', label: '正序' }
     };
     var info = labels[App.studyOrder];
-    ['btnStudyOrder', 'btnTypingOrder'].forEach(function (btnId) {
+    ['btnStudyOrder'].forEach(function (btnId) {
       var btn = document.getElementById(btnId);
       if (!btn) return;
       btn.innerHTML = '<span class="order-icon">' + info.icon + '</span><span class="order-label">' + info.label + '</span><span class="order-arrow">▾</span>';

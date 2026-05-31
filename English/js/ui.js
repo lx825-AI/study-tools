@@ -50,7 +50,6 @@ var FlashcardApp = window.FlashcardApp || {};
         '</div>' +
         '<div class="deck-actions">' +
           '<button class="btn btn-outline btn-sm" data-action="study" data-deck="' + d.id + '">学习</button>' +
-          '<button class="btn btn-outline btn-sm" data-action="typing" data-deck="' + d.id + '">打字</button>' +
           '<button class="btn btn-outline btn-sm" data-action="edit" data-deck="' + d.id + '">编辑</button>' +
           '<button class="btn btn-outline btn-sm" data-action="export" data-deck="' + d.id + '" title="导出为JSON">导出</button>' +
           '<button class="btn btn-danger btn-sm" data-action="delete" data-deck="' + d.id + '">删除</button>' +
@@ -72,7 +71,7 @@ var FlashcardApp = window.FlashcardApp || {};
     if (bottomBtn) bottomBtn.classList.add('active');
 
     document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('visible'); });
-    let panelMap = { decks: 'panelDecks', study: 'panelStudy', preview: 'panelPreview', typing: 'panelTyping', cards: 'panelCards', stats: 'panelStats' };
+    let panelMap = { decks: 'panelDecks', study: 'panelStudy', preview: 'panelPreview', cards: 'panelCards', stats: 'panelStats' };
     let panelId = panelMap[tab];
     if (panelId) document.getElementById(panelId).classList.add('visible');
 
@@ -80,7 +79,6 @@ var FlashcardApp = window.FlashcardApp || {};
       App.renderStudyPanel();
     }
     if (tab === 'preview') App.renderPreviewPanel();
-    if (tab === 'typing') App.renderTypingPanel();
     if (tab === 'cards') App.renderCardsPanel();
     if (tab === 'stats') App.renderStatsPanel();
   };
@@ -129,7 +127,6 @@ var FlashcardApp = window.FlashcardApp || {};
     App.renderDeckPanel();
     App.renderCardsPanel();
     App.renderStudyPanel();
-    App.renderTypingPanel();
     App.renderPreviewPanel();
     if (App.renderStatsPanel) App.renderStatsPanel();
     App.updateNavBadges();

@@ -204,9 +204,10 @@ var FlashcardApp = window.FlashcardApp || {};
       App.renderAll();
     });
 
-    /* 翻卡 */
+    /* 翻卡（拼写已作答时不翻转，由拼写模式控制） */
     document.getElementById('flashcard').addEventListener('click', function () {
       if (App.studyQueue.length === 0 || App.studyIndex >= App.studyQueue.length) return;
+      if (App.spellMode && App.spellAnswered) return;
       document.getElementById('flashcard').classList.toggle('flipped');
       App.isFlipped = !App.isFlipped;
     });
@@ -397,7 +398,7 @@ var FlashcardApp = window.FlashcardApp || {};
       /* 学习中 */
       if (document.activeElement.tagName === 'INPUT') return;
       if (App.studyQueue.length > 0 && App.studyIndex < App.studyQueue.length) {
-        if (e.key === ' ' || e.key === 'ArrowUp') {
+        if ((e.key === ' ' || e.key === 'ArrowUp') && !(App.spellMode && App.spellAnswered)) {
           e.preventDefault();
           document.getElementById('flashcard').classList.toggle('flipped');
           App.isFlipped = !App.isFlipped;
@@ -518,48 +519,6 @@ var FlashcardApp = window.FlashcardApp || {};
       App.cycleOrder();
       App.startStudy();
     });
-
-    /* 打字模式事件绑定 */
-    var btnTypingOrder = document.getElementById('btnTypingOrder');
-    if (btnTypingOrder) {
-      btnTypingOrder.addEventListener('click', function () {
-        App.cycleOrder();
-        if (App.typingQueue.length > 0 && App.typingIndex < App.typingQueue.length) {
-          App.startTyping();
-        } else {
-          App.renderTypingPanel();
-        }
-      });
-    }
-    var btnTypingSubmit = document.getElementById('btnTypingSubmit');
-    if (btnTypingSubmit) {
-      btnTypingSubmit.addEventListener('click', App.submitTyping);
-    }
-    var btnTypingNext = document.getElementById('btnTypingNext');
-    if (btnTypingNext) {
-      btnTypingNext.addEventListener('click', App.nextTyping);
-    }
-    var btnTypingRestart = document.getElementById('btnTypingRestart');
-    if (btnTypingRestart) {
-      btnTypingRestart.addEventListener('click', App.startTyping);
-    }
-    var btnTypingFailed = document.getElementById('btnTypingFailed');
-    if (btnTypingFailed) {
-      btnTypingFailed.addEventListener('click', App.startTypingFailed);
-    }
-    var typingInput = document.getElementById('typingInput');
-    if (typingInput) {
-      typingInput.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          if (document.getElementById('btnTypingNext').style.display !== 'none') {
-            App.nextTyping();
-          } else {
-            App.submitTyping();
-          }
-        }
-      });
-    }
 
     /* 词书导入 */
     document.getElementById('btnImportBook').addEventListener('click', function () {

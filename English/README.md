@@ -5,10 +5,9 @@
 ## 功能
 
 - **翻卡学习** — SM-2 + 艾宾浩斯遗忘曲线双算法，四种学习模式（新词/复习/混合/错题），三种排序（智能/乱序/正序）
-- **拼写模式** — 学习中内嵌拼写验证，看释义输入英文，自动判断正误
-- **打字练习** — 独立打字面板，看中文释义拼写英文，支持全牌组/错题打字，自动更新 SM-2 和艾宾浩斯状态
+- **拼写模式** — 学习中内嵌拼写验证，看释义输入英文，自动判断正误，支持快捷键作答
 - **TTS 发音** — 单词朗读，支持英式/美式口音一键切换
-- **预览浏览** — 表格模式快速浏览词库，支持搜索、高亮和单词朗读
+- **预览浏览** — 表格模式快速浏览词库，大量卡片自动启用虚拟滚动（200+），支持搜索、高亮
 - **卡片编辑** — 增删卡片、批量粘贴导入
 - **学习统计** — 每日学习量、连续打卡、周热力图、学习用时统计
 - **学习提醒** — 可设置每日定时提醒，支持系统通知
@@ -51,7 +50,7 @@ A spaced-repetition English vocabulary learning tool for Chinese CET-4/CET-6 exa
 
 - SM-2 + Ebbinghaus dual-algorithm spaced repetition with four study modes (new/review/mixed/failed)
 - TTS pronunciation with British/American accent switching
-- Multiple study modes: flashcard flip + spell check, independent typing panel, table preview with search
+- Study modes: flashcard flip + inline spell check, table preview with virtual scrolling and search
 - Built-in wordbooks: Senior High (3500), CET-4 (4541), CET-6 core (2138), CET-6 full (6363), Postgraduate (5500)
 - Custom wordbook import: file (JSON/CSV/TXT), paste JSON, fetch from URL
 - Learning statistics with daily goals, heatmaps, and session timing
