@@ -16,8 +16,7 @@ index.html          -- SPA 入口
 js/
   app.js            -- init()、全局搜索、语音朗读、彩带、快捷键、beforeunload
   state.js          -- 全局状态、getDeck/getCurrentDeck
-  storage.js        -- localStorage 轻量设置（保留兼容）
-  idb-storage.js    -- IndexedDB 主存储（突破5MB限制，数据精简压缩）
+  idb-storage.js    -- IndexedDB 主存储 + localStorage 降级备份（突破5MB限制，数据精简压缩）
   models.js         -- ID 生成、难度计算、词规范化
   utils.js          -- HTML 转义、CSV 解析、Levenshtein 模糊搜索、getCardFront/getCardBack 安全取值
   ebbinghaus.js     -- 艾宾浩斯遗忘曲线：8阶段复习调度、到期检测、逾期排序

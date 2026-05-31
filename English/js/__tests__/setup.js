@@ -13,7 +13,7 @@ const files = [
   'models.js',
   'utils.js',
   'study-panel.js',
-  'storage.js',
+  'idb-storage.js',
 ];
 
 files.forEach(f => {
@@ -28,6 +28,8 @@ files.forEach(f => {
 
 // 每个测试初始状态
 beforeEach(() => {
+  // 重置 IndexedDB 缓存，确保 loadData 每次从 localStorage 重新读取
+  window.FlashcardApp._idbCache = undefined;
   window.FlashcardApp.state = window.FlashcardApp.state || {};
   window.FlashcardApp.state.decks = window.FlashcardApp.state.decks || [];
 });
