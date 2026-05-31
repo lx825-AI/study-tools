@@ -54,15 +54,19 @@ var FlashcardApp = window.FlashcardApp || {};
 
     /* 大量卡片：虚拟滚动 */
     list.style.overflowY = 'auto';
-    list.style.height = Math.min(deck.cards.length * ITEM_HEIGHT, window.innerHeight * 0.7) + 'px';
+    var listHeight = Math.min(deck.cards.length * ITEM_HEIGHT, window.innerHeight * 0.7);
+    list.style.height = listHeight + 'px';
     list.scrollTop = App._cardListScrollTop || 0;
+    App._cardListRendered = [];   /* 重置，确保首次渲染不被跳过 */
 
     /* 设置总高度占位 */
     list.innerHTML = '<div style="height:' + (deck.cards.length * ITEM_HEIGHT) + 'px;position:relative;" id="cardListInner">' +
       '<div id="cardListWindow" style="position:absolute;left:0;right:0;top:0;"></div></div>';
 
-    /* 首次渲染可见区域 */
-    App._renderVisibleCards();
+    /* 延迟到浏览器重排后渲染，确保 clientHeight 已生效（面板从隐藏切换时高度为 0） */
+    requestAnimationFrame(function () {
+      App._renderVisibleCards();
+    });
 
     /* 绑定滚动事件（仅绑定一次） */
     if (!list._hasScrollListener) {
@@ -107,7 +111,8 @@ var FlashcardApp = window.FlashcardApp || {};
     if (!list || !windowEl) return;
 
     var scrollTop = list.scrollTop;
-    var viewHeight = list.clientHeight || 400;
+    /* 面板刚从隐藏切换时 clientHeight 可能为 0，用显式设置的高度兜底 */
+    var viewHeight = list.clientHeight || parseInt(list.style.height) || 400;
     var firstVisible = Math.max(0, Math.floor(scrollTop / ITEM_HEIGHT) - BUFFER);
     var lastVisible = Math.min(deck.cards.length, Math.ceil((scrollTop + viewHeight) / ITEM_HEIGHT) + BUFFER);
 
