@@ -315,3 +315,19 @@
   color: var(--danger-text);
   font-weight: 600;
 }
+
+/* 移动端拼写模式 */
+@media (max-width: 480px) {
+  .spell-input-row input {
+    font-size: 17px;
+    padding: 12px 14px;
+  }
+  .spell-input-row {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .spell-input-row .btn {
+    width: 100%;
+    min-height: 44px;
+  }
+}

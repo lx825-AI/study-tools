@@ -135,6 +135,75 @@ nav button:hover:not(.active) {
   margin-bottom: 12px;
 }
 
+/* 底部导航栏 —— 桌面端隐藏，移动端显示 */
+.bottom-nav {
+  display: none;
+}
+@media (max-width: 768px) {
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 90;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 4px 0 calc(4px + var(--safe-bottom));
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+  }
+  .bottom-nav button {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 6px 4px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--tab-text);
+    font-size: 11px;
+    font-weight: 500;
+    min-height: 52px;
+    font-family: inherit;
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.15s;
+  }
+  .bottom-nav button.active { color: var(--primary); }
+  .bottom-nav-icon { font-size: 20px; line-height: 1; }
+  .bottom-nav-label { font-size: 10px; line-height: 1; }
+  .bottom-nav .nav-badge {
+    position: absolute;
+    top: 4px;
+    right: calc(50% - 24px);
+    min-width: 16px;
+    height: 16px;
+    font-size: 9px;
+  }
+  /* 移动端隐藏顶部导航 */
+  .top-nav { display: none; }
+}
+
+/* 触屏设备触摸目标最小 44px */
+@media (hover: none) and (pointer: coarse) {
+  .btn, nav button, .order-toggle, .btn-back-mode,
+  .theme-toggle, .speak-btn, .accent-toggle {
+    min-width: var(--touch-target-min);
+    min-height: var(--touch-target-min);
+  }
+  .speak-btn-sm, .gsr-speak-btn {
+    min-width: var(--touch-target-sm);
+    min-height: var(--touch-target-sm);
+  }
+  .deck-actions { gap: 8px; }
+  .study-actions { gap: 12px; }
+}
+
 /* 顺序切换按钮 */
 .order-toggle {
   display: inline-flex;
@@ -163,3 +232,14 @@ nav button:hover:not(.active) {
 .order-toggle .order-icon { font-size: 15px; line-height: 1; }
 .order-toggle .order-label { line-height: 1; }
 .order-toggle .order-arrow { font-size: 10px; opacity: 0.6; margin-left: 2px; }
+
+/* 面板切换动画（尊重用户偏好） */
+@media (prefers-reduced-motion: no-preference) {
+  .panel.visible {
+    animation: panelSlideIn 0.25s ease;
+  }
+  @keyframes panelSlideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+}

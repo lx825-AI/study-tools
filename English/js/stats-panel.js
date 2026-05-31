@@ -260,14 +260,45 @@ var FlashcardApp = window.FlashcardApp || {};
       '<div class="heatmap">' + App._renderHeatmap(log) + '</div>' +
 
       /* 数据备份 */
-      '<div class="section-title" style="margin-top:24px;">💾 数据备份</div>' +
-      '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-        '<button id="btnExportAll" class="btn btn-outline btn-sm">📥 导出全部数据</button>' +
-        '<button id="btnImportAll" class="btn btn-outline btn-sm">📤 导入数据恢复</button>' +
-        '<button id="btnExportFailed" class="btn btn-outline btn-sm">📋 导出错题集</button>' +
-        '<input type="file" id="importFileInput" accept=".json" style="display:none;">' +
-      '</div>' +
-      '<div style="font-size:12px;color:var(--text-muted);margin-top:4px;">导出包含所有牌组、学习进度和偏好设置。导入将<strong>替换</strong>当前全部数据。错题集导出为CSV格式，可在Excel中打开。</div>' +
+      (function () {
+        var lastBackup = App.getLastBackupDate ? App.getLastBackupDate() : null;
+        var backupInfo = '';
+        if (lastBackup) {
+          var daysAgo = Math.floor((new Date() - new Date(lastBackup)) / 86400000);
+          backupInfo = '<span>上次备份: ' + lastBackup + '</span>';
+          if (daysAgo > 7) {
+            backupInfo += '<span class="backup-warn">（' + daysAgo + ' 天前，建议立即备份）</span>';
+          } else {
+            backupInfo += '<span>（' + daysAgo + ' 天前）</span>';
+          }
+        } else {
+          backupInfo = '<span class="backup-warn">尚未备份，建议导出数据以防丢失</span>';
+        }
+        return '<div class="section-title" style="margin-top:24px;">💾 数据备份</div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+          '<button id="btnExportAll" class="btn btn-outline btn-sm">📥 导出全部数据</button>' +
+          '<button id="btnImportAll" class="btn btn-outline btn-sm">📤 导入数据恢复</button>' +
+          '<button id="btnExportFailed" class="btn btn-outline btn-sm">📋 导出错题集</button>' +
+          '<input type="file" id="backupImportFileInput" accept=".json" style="display:none;">' +
+        '</div>' +
+        '<div class="backup-info">' + backupInfo + '</div>' +
+        '<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">导出包含所有牌组、学习进度和偏好设置。导入将<strong>替换</strong>当前全部数据。</div>';
+      })();
+
+      /* 云同步入口 */
+      (function () {
+        return '<div class="section-title" style="margin-top:24px;">☁️ 云端同步</div>' +
+        '<div class="sync-section">' +
+          '<div class="sync-status sync-ok">' +
+            '<span class="sync-dot sync-dot-ok"></span>' +
+            '<span>数据保存在本地浏览器中。导出备份文件后，可在其他设备上导入恢复。</span>' +
+          '</div>' +
+          '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">' +
+            '<button id="btnSyncFromURL" class="btn btn-outline btn-sm">🔗 从 URL 导入</button>' +
+          '</div>' +
+          '<div style="font-size:12px;color:var(--text-muted);margin-top:4px;">将备份 JSON 文件托管在任意 HTTPS 服务器上，即可跨设备同步数据。</div>' +
+        '</div>';
+      })() +
 
       /* 学习提醒 */
       (function () {
@@ -284,7 +315,10 @@ var FlashcardApp = window.FlashcardApp || {};
             '<span>提醒时间:</span>' +
             '<input type="time" id="reminderTime" value="' + settings.time + '"' + disabled + '>' +
           '</div>' +
-          '<button class="btn btn-outline btn-sm" id="btnTestReminder">🔔 测试提醒</button>' +
+          '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+            '<button class="btn btn-outline btn-sm" id="btnTestReminder">🔔 测试提醒</button>' +
+            '<button class="btn btn-outline btn-sm" id="btnNotifyGuide">🔔 通知权限引导</button>' +
+          '</div>' +
           '<div style="font-size:12px;color:var(--text-muted);margin-top:6px;">提醒仅在安装为桌面应用后支持系统通知。页面打开时会在设定时间弹出提示。</div>' +
         '</div>';
       })();
@@ -303,7 +337,7 @@ var FlashcardApp = window.FlashcardApp || {};
 
     /* 绑定导入按钮 → 触发文件选择 */
     let btnImport = document.getElementById('btnImportAll');
-    let importInput = document.getElementById('importFileInput');
+    let importInput = document.getElementById('backupImportFileInput');
     if (btnImport && importInput) {
       btnImport.addEventListener('click', function () { importInput.click(); });
       importInput.addEventListener('change', function () {
@@ -361,6 +395,22 @@ var FlashcardApp = window.FlashcardApp || {};
           App._fireReminder();
         });
       }
+
+      /* 绑定通知引导按钮 */
+      var notifyGuideBtn = document.getElementById('btnNotifyGuide');
+      if (notifyGuideBtn) {
+        notifyGuideBtn.addEventListener('click', function () {
+          App.showNotificationGuide();
+        });
+      }
+
+      /* 绑定云同步按钮 */
+      var syncUrlBtn = document.getElementById('btnSyncFromURL');
+      if (syncUrlBtn) {
+        syncUrlBtn.addEventListener('click', function () {
+          App.syncFromURL();
+        });
+      }
   };
 
   App._renderHeatmap = function (log) {
@@ -398,6 +448,7 @@ var FlashcardApp = window.FlashcardApp || {};
     a.download = 'flashcard-backup-' + new Date().toISOString().slice(0, 10) + '.json';
     a.click();
     URL.revokeObjectURL(url);
+    if (App.recordBackup) App.recordBackup();
     App.showToast('数据已导出', 'success');
   };
 

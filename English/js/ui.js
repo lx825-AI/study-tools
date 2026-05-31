@@ -50,6 +50,7 @@ var FlashcardApp = window.FlashcardApp || {};
         '</div>' +
         '<div class="deck-actions">' +
           '<button class="btn btn-outline btn-sm" data-action="study" data-deck="' + d.id + '">学习</button>' +
+          '<button class="btn btn-outline btn-sm" data-action="typing" data-deck="' + d.id + '">打字</button>' +
           '<button class="btn btn-outline btn-sm" data-action="edit" data-deck="' + d.id + '">编辑</button>' +
           '<button class="btn btn-outline btn-sm" data-action="export" data-deck="' + d.id + '" title="导出为JSON">导出</button>' +
           '<button class="btn btn-danger btn-sm" data-action="delete" data-deck="' + d.id + '">删除</button>' +
@@ -60,12 +61,18 @@ var FlashcardApp = window.FlashcardApp || {};
 
   /* Tab 切换 */
   App.switchTab = function (tab) {
-    document.querySelectorAll('nav button').forEach(function (b) { b.classList.remove('active'); });
-    let tabBtn = document.querySelector('nav button[data-tab="' + tab + '"]');
-    if (tabBtn) tabBtn.classList.add('active');
+    /* 顶部导航 */
+    document.querySelectorAll('.top-nav button').forEach(function (b) { b.classList.remove('active'); });
+    var topBtn = document.querySelector('.top-nav button[data-tab="' + tab + '"]');
+    if (topBtn) topBtn.classList.add('active');
+
+    /* 底部导航同步 */
+    document.querySelectorAll('.bottom-nav button').forEach(function (b) { b.classList.remove('active'); });
+    var bottomBtn = document.querySelector('.bottom-nav button[data-tab="' + tab + '"]');
+    if (bottomBtn) bottomBtn.classList.add('active');
 
     document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('visible'); });
-    let panelMap = { decks: 'panelDecks', study: 'panelStudy', preview: 'panelPreview', cards: 'panelCards', stats: 'panelStats' };
+    let panelMap = { decks: 'panelDecks', study: 'panelStudy', preview: 'panelPreview', typing: 'panelTyping', cards: 'panelCards', stats: 'panelStats' };
     let panelId = panelMap[tab];
     if (panelId) document.getElementById(panelId).classList.add('visible');
 
@@ -73,29 +80,45 @@ var FlashcardApp = window.FlashcardApp || {};
       App.renderStudyPanel();
     }
     if (tab === 'preview') App.renderPreviewPanel();
+    if (tab === 'typing') App.renderTypingPanel();
     if (tab === 'cards') App.renderCardsPanel();
     if (tab === 'stats') App.renderStatsPanel();
   };
 
   /* 更新导航标签上的待复习角标 */
   App.updateNavBadges = function () {
-    let today = new Date().toISOString().slice(0, 10);
-    let dueCount = 0;
+    var today = new Date().toISOString().slice(0, 10);
+    var dueCount = 0;
     App.state.decks.forEach(function (d) {
       d.cards.forEach(function (c) {
-        if (c.nextReview && c.nextReview <= today) dueCount++;
+        App.initEbbinghaus(c);
+        if (c.ebbinghausNextReview && c.ebbinghausNextReview <= today) dueCount++;
       });
     });
 
-    let studyBtn = document.querySelector('nav button[data-tab="study"]');
-    if (studyBtn) {
-      let existing = studyBtn.querySelector('.nav-badge');
+    var badgeText = dueCount > 99 ? '99+' : String(dueCount);
+
+    /* 顶部导航角标 */
+    var topBtn = document.querySelector('.top-nav button[data-tab="study"]');
+    if (topBtn) {
+      var existing = topBtn.querySelector('.nav-badge');
       if (existing) existing.remove();
       if (dueCount > 0) {
-        let badge = document.createElement('span');
+        var badge = document.createElement('span');
         badge.className = 'nav-badge';
-        badge.textContent = dueCount > 99 ? '99+' : dueCount;
-        studyBtn.appendChild(badge);
+        badge.textContent = badgeText;
+        topBtn.appendChild(badge);
+      }
+    }
+
+    /* 底部导航角标同步 */
+    var mobileBadge = document.getElementById('studyBadgeMobile');
+    if (mobileBadge) {
+      if (dueCount > 0) {
+        mobileBadge.textContent = badgeText;
+        mobileBadge.style.display = '';
+      } else {
+        mobileBadge.style.display = 'none';
       }
     }
   };
@@ -106,6 +129,7 @@ var FlashcardApp = window.FlashcardApp || {};
     App.renderDeckPanel();
     App.renderCardsPanel();
     App.renderStudyPanel();
+    App.renderTypingPanel();
     App.renderPreviewPanel();
     if (App.renderStatsPanel) App.renderStatsPanel();
     App.updateNavBadges();

@@ -10,6 +10,8 @@ var FlashcardApp = window.FlashcardApp || {};
   App.typingDone = false;
 
   App.renderTypingPanel = function () {
+    /* 打字面板 DOM 未挂载时安全退出 */
+    if (!document.getElementById('panelTyping')) return;
     let deck = App.getCurrentDeck();
     document.getElementById('typingNoDeck').style.display = 'none';
     document.getElementById('typingContent').style.display = 'none';
@@ -28,6 +30,8 @@ var FlashcardApp = window.FlashcardApp || {};
           rate >= 90 ? '🏆 太棒了！' : rate >= 60 ? '👍 继续加油！' : '💪 多多练习！';
         document.getElementById('typingCompleteStats').textContent =
           '正确 ' + App.typingCorrect + ' / ' + total + '（' + rate + '%），错误 ' + App.typingWrong;
+        var btnFailed = document.getElementById('btnTypingFailed');
+        if (btnFailed) btnFailed.style.display = App.typingWrong > 0 ? '' : 'none';
         return;
       }
       return;
@@ -64,9 +68,23 @@ var FlashcardApp = window.FlashcardApp || {};
   };
 
   App.startTyping = function () {
+    if (!document.getElementById('panelTyping')) return;
     let deck = App.getCurrentDeck();
     if (!deck || deck.cards.length === 0) return;
-    App.typingQueue = App.buildStudyQueue(deck);
+    /* 打字模式使用全部卡片，按当前排序方式排列 */
+    var cards = deck.cards.slice();
+    if (App.studyOrder === 'random') {
+      for (var i = cards.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = cards[i]; cards[i] = cards[j]; cards[j] = tmp;
+      }
+    } else if (App.studyOrder === 'difficulty') {
+      cards.sort(function (a, b) {
+        return (a.easeFactor || 2.5) - (b.easeFactor || 2.5);
+      });
+    }
+    /* 顺序模式保持原序 */
+    App.typingQueue = cards;
     App.typingIndex = 0;
     App.typingCorrect = 0;
     App.typingWrong = 0;
@@ -76,6 +94,7 @@ var FlashcardApp = window.FlashcardApp || {};
 
   /* 错题打字复习 */
   App.startTypingFailed = function () {
+    if (!document.getElementById('panelTyping')) return;
     var failedCards = App.collectFailedCards();
     if (failedCards.length === 0) {
       App.showToast('暂无需要复习的错题！🎉', 'success', 2000);
@@ -90,15 +109,8 @@ var FlashcardApp = window.FlashcardApp || {};
     App.typingCorrect = 0;
     App.typingWrong = 0;
     App.typingDone = false;
-    /* 直接切换到打字面板 */
-    document.querySelectorAll('nav button').forEach(function (b) { b.classList.remove('active'); });
-    var tabBtn = document.querySelector('nav button[data-tab="typing"]');
-    if (tabBtn) tabBtn.classList.add('active');
-    document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('visible'); });
-    document.getElementById('panelTyping').classList.add('visible');
-    /* 隐藏空状态提示，渲染打字内容 */
-    document.getElementById('typingNoDeck').style.display = 'none';
-    document.getElementById('typingEmpty').style.display = 'none';
+    /* 切换到打字面板 */
+    App.switchTab('typing');
     App.typingIndex = 0;
     App.typingDone = false;
     App.renderTypingPanel();
@@ -106,6 +118,7 @@ var FlashcardApp = window.FlashcardApp || {};
   };
 
   App.submitTyping = function () {
+    if (!document.getElementById('panelTyping')) return;
     if (App.typingQueue.length === 0 || App.typingIndex >= App.typingQueue.length) return;
     let input = document.getElementById('typingInput').value.trim();
     if (!input) return;
@@ -125,7 +138,10 @@ var FlashcardApp = window.FlashcardApp || {};
       feedback.className = 'typing-feedback correct';
       var d = card._deckId ? App.getDeck(card._deckId) : App.getCurrentDeck();
       var dc = d ? d.cards.find(function (c) { return c.id === card.id; }) : null;
-      if (dc) App.applySM2(dc, true);
+      if (dc) {
+        App.applySM2(dc, true);
+        App.applyEbbinghaus(dc, true);
+      }
       App.trackLearning(1);
       App.saveData();
       App.updateNavBadges();
@@ -143,7 +159,10 @@ var FlashcardApp = window.FlashcardApp || {};
       feedback.className = 'typing-feedback wrong';
       var d2 = card._deckId ? App.getDeck(card._deckId) : App.getCurrentDeck();
       var dc2 = d2 ? d2.cards.find(function (c) { return c.id === card.id; }) : null;
-      if (dc2) App.applySM2(dc2, false);
+      if (dc2) {
+        App.applySM2(dc2, false);
+        App.applyEbbinghaus(dc2, false);
+      }
       App.trackLearning(0);
       App.updateNavBadges();
       document.getElementById('btnTypingNext').style.display = '';

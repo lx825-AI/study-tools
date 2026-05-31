@@ -189,10 +189,183 @@ mark {
 
 /* 移动端响应式 */
 @media (max-width: 480px) {
-  #app { padding: 12px 12px 32px; }
-  header h1 { font-size: 22px; }
-  nav button { font-size: 12px; padding: 8px 10px; }
-  .deck-actions .btn { font-size: 12px; padding: 4px 10px; }
-  .deck-card { flex-wrap: wrap; }
-  .deck-actions { width: 100%; justify-content: flex-end; margin-top: 4px; }
+  #app {
+    padding: 12px 12px calc(80px + var(--safe-bottom));
+  }
+  header h1 { font-size: 20px; }
+
+  /* Toast 在移动端抬高避免遮挡底部导航 */
+  .toast {
+    bottom: 90px;
+    left: 12px;
+    right: 12px;
+    transform: none;
+    max-width: none;
+  }
+
+  /* 全局搜索 */
+  .global-search-wrap input {
+    padding: 12px 14px;
+    font-size: 16px;
+  }
+  .global-search-results {
+    max-height: 50vh;
+  }
+  .gsr-item {
+    padding: 12px 14px;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 44px;
+  }
+
+  /* 牌组选择器和网格 */
+  .deck-selector {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .deck-selector select {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+  }
+  .deck-selector .btn {
+    width: 100%;
+    min-height: 44px;
+  }
+  .deck-grid {
+    grid-template-columns: 1fr;
+  }
+  .deck-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 14px;
+  }
+  .deck-actions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 4px;
+  }
+  .deck-actions .btn {
+    font-size: 12px;
+    padding: 6px 12px;
+    min-height: 40px;
+  }
+
+  /* 新建牌组表单 */
+  .add-deck-form {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .add-deck-form input {
+    width: 100%;
+    padding: 12px;
+  }
+  .add-deck-form .btn {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  /* 学习头部 */
+  .study-header {
+    padding-top: 8px;
+  }
+  .btn-back-mode {
+    position: static;
+    transform: none;
+    margin-bottom: 8px;
+    display: inline-block;
+    min-height: 36px;
+  }
+
+  /* 快捷键提示 */
+  .shortcut-hint {
+    gap: 8px;
+    font-size: 11px;
+  }
+  .shortcut-hint kbd {
+    font-size: 10px;
+    padding: 1px 5px;
+  }
+
+  /* 模式选择 */
+  .mode-cards { gap: 8px; }
+  .mode-card { padding: 14px 12px; }
+  .mode-overview {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px;
+  }
+
+  /* 卡片编辑 */
+  .edit-card-item {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .add-card-form {
+    padding: 16px 14px;
+  }
+  .add-card-form input {
+    padding: 12px 14px;
+    font-size: 16px;
+  }
+}
+
+/* 超小屏设备 */
+@media (max-width: 374px) {
+  #app {
+    padding: 8px 8px calc(80px + var(--safe-bottom));
+  }
+  header h1 {
+    font-size: 18px;
+  }
+}
+
+/* PWA 安装横幅 */
+.install-banner {
+  position: fixed;
+  bottom: calc(80px + var(--safe-bottom));
+  left: 12px;
+  right: 12px;
+  background: var(--surface);
+  border: 2px solid var(--primary);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-lg);
+  z-index: 95;
+  font-size: 14px;
+  animation: toastIn 0.3s ease;
+}
+.install-banner span {
+  flex: 1;
+  font-weight: 500;
+}
+.install-banner button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  font-family: inherit;
+}
+#btnInstall {
+  background: var(--primary);
+  color: #fff;
+}
+#btnDismissInstall {
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+@media (max-width: 480px) {
+  .install-banner {
+    left: 8px;
+    right: 8px;
+    bottom: calc(76px + var(--safe-bottom));
+  }
 }

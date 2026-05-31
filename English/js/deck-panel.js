@@ -9,11 +9,23 @@ var FlashcardApp = window.FlashcardApp || {};
       App.isReviewMode = false;
       App.reviewSourceDeckId = null;
       App.studyOrder = 'difficulty';
-      document.getElementById('btnStudyOrder').innerHTML = '<span class="order-icon">⚡</span><span class="order-label">智能复习</span><span class="order-arrow">▾</span>';
-      document.getElementById('btnTypingOrder').innerHTML = '<span class="order-icon">⚡</span><span class="order-label">智能复习</span><span class="order-arrow">▾</span>';
+      document.getElementById('btnStudyOrder').innerHTML = '<span class="order-icon">⚡</span><span class="order-label">智能排序</span><span class="order-arrow">▾</span>';
+      var typingOrderBtn = document.getElementById('btnTypingOrder');
+      if (typingOrderBtn) typingOrderBtn.innerHTML = '<span class="order-icon">⚡</span><span class="order-label">智能排序</span><span class="order-arrow">▾</span>';
       App.saveData();
       App.startStudy();
       App.switchTab('study');
+      App.renderDeckSelect();
+    } else if (action === 'typing') {
+      App.state.currentDeckId = deckId;
+      App.isReviewMode = false;
+      App.reviewSourceDeckId = null;
+      App.studyOrder = 'difficulty';
+      var typingOrderBtn2 = document.getElementById('btnTypingOrder');
+      if (typingOrderBtn2) typingOrderBtn2.innerHTML = '<span class="order-icon">⚡</span><span class="order-label">智能排序</span><span class="order-arrow">▾</span>';
+      App.saveData();
+      App.startTyping();
+      App.switchTab('typing');
       App.renderDeckSelect();
     } else if (action === 'edit') {
       App.state.currentDeckId = deckId;

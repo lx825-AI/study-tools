@@ -54,6 +54,7 @@ var FlashcardApp = window.FlashcardApp || {};
     if (!card.ebbinghausNextReview) return 0;
     var today = new Date();
     var reviewDate = new Date(card.ebbinghausNextReview + 'T00:00:00');
+    if (isNaN(reviewDate.getTime())) return 0;
     return Math.max(0, Math.floor((today - reviewDate) / (1000 * 60 * 60 * 24)));
   };
 
@@ -116,6 +117,7 @@ var FlashcardApp = window.FlashcardApp || {};
    * 按逾期天数降序排列（最紧急的优先）
    */
   App.getReviewCards = function (deck) {
+    if (!deck || !deck.cards) return [];
     var today = new Date().toISOString().slice(0, 10);
     return deck.cards
       .filter(function (c) {
@@ -136,6 +138,7 @@ var FlashcardApp = window.FlashcardApp || {};
    * 从牌组中获取新词（尚未开始学习的）
    */
   App.getNewWordCards = function (deck, limit) {
+    if (!deck || !deck.cards) return [];
     limit = limit || 10;
     return deck.cards
       .filter(function (c) { return App.isNewWord(c); })
@@ -145,6 +148,7 @@ var FlashcardApp = window.FlashcardApp || {};
   /** 统计牌组的艾宾浩斯阶段分布 */
   App.getEbbinghausStats = function (deck) {
     var stats = { newWords: 0, reviewing: 0, dueToday: 0, mastered: 0, overdue: 0 };
+    if (!deck || !deck.cards) return stats;
     var today = new Date().toISOString().slice(0, 10);
 
     deck.cards.forEach(function (c) {

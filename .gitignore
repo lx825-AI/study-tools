@@ -6,3 +6,6 @@ Thumbs.db
 .claude/
 *.tsbuildinfo
 tmp/
+.playwright-mcp/
+test-results/
+.vscode/

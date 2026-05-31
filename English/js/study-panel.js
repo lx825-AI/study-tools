@@ -85,7 +85,7 @@ var FlashcardApp = window.FlashcardApp || {};
     var failed = [];
     App.state.decks.forEach(function (deck) {
       deck.cards.forEach(function (c) {
-        if ((typeof c.easeFactor === 'number' && c.easeFactor <= 1.8) || c.repetitions === 0) {
+        if (typeof c.easeFactor === 'number' && c.easeFactor <= 1.8 && c.repetitions > 0) {
           failed.push({ card: c, deckName: deck.name, deckId: deck.id });
         }
       });
@@ -913,7 +913,7 @@ var FlashcardApp = window.FlashcardApp || {};
       sequential: { icon: '📋', label: '正序' }
     };
     var info = labels[App.studyOrder];
-    ['btnStudyOrder'].forEach(function (btnId) {
+    ['btnStudyOrder', 'btnTypingOrder'].forEach(function (btnId) {
       var btn = document.getElementById(btnId);
       if (!btn) return;
       btn.innerHTML = '<span class="order-icon">' + info.icon + '</span><span class="order-label">' + info.label + '</span><span class="order-arrow">▾</span>';

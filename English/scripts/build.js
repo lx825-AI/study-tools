@@ -13,7 +13,7 @@ fs.mkdirSync(path.join(DIST, 'wordbooks'), { recursive: true });
 /* ========== CSS 合并 ========== */
 const CSS_ORDER = [
   'variables.css', 'base.css', 'components.css', 'deck.css',
-  'study.css', 'mode.css', 'preview.css', 'stats.css'
+  'study.css', 'mode.css', 'typing.css', 'preview.css', 'stats.css'
 ];
 
 const cssContent = CSS_ORDER
@@ -28,6 +28,7 @@ const JS_ORDER = [
   'js/idb-storage.js', 'js/state.js',
   'js/models.js', 'js/utils.js', 'js/ebbinghaus.js',
   'js/ui.js', 'js/deck-panel.js', 'js/study-panel.js',
+  'js/typing-panel.js',
   'js/preview-panel.js', 'js/cards-panel.js',
   'js/import.js', 'js/stats-panel.js',
   'data/word-schema.js', 'js/app.js'

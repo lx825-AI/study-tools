@@ -74,7 +74,21 @@
   --shadow-xl: 0 16px 48px rgba(0,0,0,0.5);
 }
 
+/* 触控目标最小尺寸 */
+:root {
+  --touch-target-min: 44px;
+  --touch-target-sm: 40px;
+}
+
 /* 移动端安全区 */
 :root {
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* 移动端变量覆盖 */
+@media (max-width: 480px) {
+  :root {
+    --touch-target-min: 48px;
+    --touch-target-sm: 44px;
+  }
 }

@@ -150,7 +150,12 @@ var FlashcardApp = window.FlashcardApp || {};
     });
 
     /* Tab 导航 */
-    document.querySelectorAll('nav button').forEach(function (btn) {
+    document.querySelectorAll('.top-nav button').forEach(function (btn) {
+      btn.addEventListener('click', function () { App.switchTab(btn.dataset.tab); });
+    });
+
+    /* 底部导航 Tab 切换 */
+    document.querySelectorAll('.bottom-nav button').forEach(function (btn) {
       btn.addEventListener('click', function () { App.switchTab(btn.dataset.tab); });
     });
 
@@ -206,45 +211,129 @@ var FlashcardApp = window.FlashcardApp || {};
       App.isFlipped = !App.isFlipped;
     });
 
-    /* 移动端滑动翻卡 */
+    /* 移动端滑动翻卡（增强版：视觉拖拽反馈 + 防页面滚动） */
     (function () {
-      let card = document.getElementById('flashcard');
-      let startX = 0, startY = 0, moved = false;
+      var card = document.getElementById('flashcard');
+      var startX = 0, startY = 0, currentX = 0, currentY = 0;
+      var isDragging = false, isHorizontalSwipe = false;
+      var SWIPE_THRESHOLD = 80;
+
+      function resetCardTransform() {
+        card.style.transform = App.isFlipped ? 'rotateY(180deg)' : '';
+        card.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease';
+        card.style.opacity = '1';
+      }
 
       card.addEventListener('touchstart', function (e) {
         if (App.studyQueue.length === 0 || App.studyIndex >= App.studyQueue.length) return;
-        let t = e.touches[0];
+        var t = e.touches[0];
         startX = t.clientX;
         startY = t.clientY;
-        moved = false;
+        currentX = 0;
+        currentY = 0;
+        isDragging = false;
+        isHorizontalSwipe = false;
+        card.style.transition = 'none';
       }, { passive: true });
 
       card.addEventListener('touchmove', function (e) {
-        let t = e.touches[0];
+        var t = e.touches[0];
         if (!t) return;
-        let dx = t.clientX - startX;
-        let dy = t.clientY - startY;
-        if (Math.abs(dx) > 5 && Math.abs(dx) > Math.abs(dy)) {
-          moved = true;
-          card.style.transform = 'translateX(' + dx + 'px) rotateY(' + (App.isFlipped ? 180 : 0) + 'deg)';
-          card.style.transition = 'none';
+        currentX = t.clientX - startX;
+        currentY = t.clientY - startY;
+
+        if (!isDragging && Math.abs(currentX) > 8 && Math.abs(currentX) > Math.abs(currentY) * 1.5) {
+          isDragging = true;
+          isHorizontalSwipe = true;
+          if (e.cancelable) e.preventDefault();
+        }
+
+        if (isDragging && isHorizontalSwipe) {
+          var rotY = App.isFlipped ? 180 : 0;
+          var translateX = currentX * 0.6;
+          var rotateZ = currentX * 0.05;
+          var opacity = 1 - Math.abs(currentX) / 300;
+          card.style.transform =
+            'translateX(' + translateX + 'px) ' +
+            'rotateY(' + rotY + 'deg) ' +
+            'rotateZ(' + rotateZ + 'deg)';
+          card.style.opacity = Math.max(0.5, opacity);
+        }
+      }, { passive: false });
+
+      card.addEventListener('touchend', function () {
+        card.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease';
+        card.style.opacity = '1';
+
+        if (isDragging && isHorizontalSwipe && Math.abs(currentX) > SWIPE_THRESHOLD) {
+          if (App.isFlipped) {
+            App.answerStudy(currentX > 0);
+          } else {
+            document.getElementById('flashcard').classList.toggle('flipped');
+            App.isFlipped = !App.isFlipped;
+            resetCardTransform();
+          }
+        } else {
+          resetCardTransform();
+        }
+
+        isDragging = false;
+        isHorizontalSwipe = false;
+      });
+
+      card.addEventListener('touchcancel', function () {
+        card.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease';
+        card.style.opacity = '1';
+        resetCardTransform();
+        isDragging = false;
+        isHorizontalSwipe = false;
+      });
+    })();
+
+    /* 手势扩展：竖滑朗读 + 长按震动翻转 */
+    (function () {
+      var card = document.getElementById('flashcard');
+      var longPressTimer = null;
+      var touchStartY = 0;
+      var touchEndY = 0;
+      var hasMoved = false;
+
+      card.addEventListener('touchstart', function (e) {
+        if (App.studyQueue.length === 0 || App.studyIndex >= App.studyQueue.length) return;
+        var t = e.touches[0];
+        touchStartY = t.clientY;
+        hasMoved = false;
+
+        /* 长按检测：600ms 后触发翻转 + 震动 */
+        clearTimeout(longPressTimer);
+        longPressTimer = setTimeout(function () {
+          if (!hasMoved && !App.isFlipped) {
+            document.getElementById('flashcard').classList.toggle('flipped');
+            App.isFlipped = !App.isFlipped;
+            if (navigator.vibrate) { navigator.vibrate(15); }
+          }
+        }, 600);
+      }, { passive: true });
+
+      card.addEventListener('touchmove', function (e) {
+        var t = e.touches[0];
+        if (t && Math.abs(t.clientY - touchStartY) > 8) {
+          hasMoved = true;
+          clearTimeout(longPressTimer);
         }
       }, { passive: true });
 
       card.addEventListener('touchend', function (e) {
-        card.style.transition = 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
-        card.style.transform = App.isFlipped ? 'rotateY(180deg)' : '';
-        let ct = e.changedTouches[0];
-        let dx = ct ? ct.clientX - startX : 0;
-        if (moved && Math.abs(dx) > 60) {
-          if (App.isFlipped) {
-            App.answerStudy(dx > 0);
-          } else {
-            document.getElementById('flashcard').classList.toggle('flipped');
-            App.isFlipped = !App.isFlipped;
-          }
+        clearTimeout(longPressTimer);
+        var ct = e.changedTouches[0];
+        if (ct) touchEndY = ct.clientY;
+
+        /* 竖滑向上 >60px 触发朗读 */
+        if (!hasMoved && (touchStartY - touchEndY) > 60) {
+          var wordNode = document.getElementById('cardFrontText').childNodes[0];
+          var text = wordNode ? wordNode.textContent.trim() : '';
+          if (text) App.speak(text);
         }
-        moved = false;
       });
     })();
 
@@ -268,6 +357,23 @@ var FlashcardApp = window.FlashcardApp || {};
         e.preventDefault();
         App.checkSpelling();
       }
+    });
+
+    /* 拼写模式键盘避让（移动端） */
+    document.getElementById('spellInput').addEventListener('focus', function () {
+      var input = this;
+      setTimeout(function () {
+        if (window.visualViewport) {
+          var viewportHeight = window.visualViewport.height;
+          var inputBottom = input.getBoundingClientRect().bottom;
+          var offset = inputBottom - viewportHeight + 20;
+          if (offset > 0) {
+            window.scrollBy({ top: offset, behavior: 'smooth' });
+          }
+        } else {
+          input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 300);
     });
 
     /* 返回模式选择 */
@@ -381,7 +487,7 @@ var FlashcardApp = window.FlashcardApp || {};
             if (deck) {
               let query = document.getElementById('previewSearch');
               query.value = word;
-              App._renderPreviewTable(App._filterPreviewCards(deck, word));
+              App._renderPreviewTable(App._filterPreviewCards(deck, word), word);
             }
             document.getElementById('globalSearch').value = '';
             results.style.display = 'none';
@@ -407,11 +513,53 @@ var FlashcardApp = window.FlashcardApp || {};
       }
     });
 
-    /* 顺序切换 */
+    /* 顺序切换（学习模式） */
     document.getElementById('btnStudyOrder').addEventListener('click', function () {
       App.cycleOrder();
       App.startStudy();
     });
+
+    /* 打字模式事件绑定 */
+    var btnTypingOrder = document.getElementById('btnTypingOrder');
+    if (btnTypingOrder) {
+      btnTypingOrder.addEventListener('click', function () {
+        App.cycleOrder();
+        if (App.typingQueue.length > 0 && App.typingIndex < App.typingQueue.length) {
+          App.startTyping();
+        } else {
+          App.renderTypingPanel();
+        }
+      });
+    }
+    var btnTypingSubmit = document.getElementById('btnTypingSubmit');
+    if (btnTypingSubmit) {
+      btnTypingSubmit.addEventListener('click', App.submitTyping);
+    }
+    var btnTypingNext = document.getElementById('btnTypingNext');
+    if (btnTypingNext) {
+      btnTypingNext.addEventListener('click', App.nextTyping);
+    }
+    var btnTypingRestart = document.getElementById('btnTypingRestart');
+    if (btnTypingRestart) {
+      btnTypingRestart.addEventListener('click', App.startTyping);
+    }
+    var btnTypingFailed = document.getElementById('btnTypingFailed');
+    if (btnTypingFailed) {
+      btnTypingFailed.addEventListener('click', App.startTypingFailed);
+    }
+    var typingInput = document.getElementById('typingInput');
+    if (typingInput) {
+      typingInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (document.getElementById('btnTypingNext').style.display !== 'none') {
+            App.nextTyping();
+          } else {
+            App.submitTyping();
+          }
+        }
+      });
+    }
 
     /* 词书导入 */
     document.getElementById('btnImportBook').addEventListener('click', function () {
@@ -512,6 +660,69 @@ var FlashcardApp = window.FlashcardApp || {};
         App.showToast('📖 今日有 ' + dueCount + ' 个词待复习，' + newCount + ' 个新词可学', 'info', 4000);
       }
     }, 1500);
+
+    /* 网络状态监听 */
+    window.addEventListener('online', function () {
+      App.showToast('🌐 已恢复网络连接', 'success', 2000);
+      var badge = document.getElementById('offlineBadge');
+      if (badge) badge.remove();
+    });
+    window.addEventListener('offline', function () {
+      App.showToast('📡 您已离线，学习数据将保存在本地', 'warn', 3000);
+      if (!document.getElementById('offlineBadge')) {
+        var badge = document.createElement('div');
+        badge.id = 'offlineBadge';
+        badge.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999;background:#f59e0b;color:#1e293b;text-align:center;padding:4px;font-size:12px;font-weight:600;';
+        badge.textContent = '📡 离线模式 - 数据保存本地';
+        document.body.prepend(badge);
+      }
+    });
+    if (!navigator.onLine) {
+      var badge = document.createElement('div');
+      badge.id = 'offlineBadge';
+      badge.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999;background:#f59e0b;color:#1e293b;text-align:center;padding:4px;font-size:12px;font-weight:600;';
+      badge.textContent = '📡 离线模式 - 数据保存本地';
+      document.body.prepend(badge);
+    }
+
+    /* PWA 安装横幅 */
+    var deferredPrompt;
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      App._deferredInstallPrompt = deferredPrompt;
+    });
+    App.showInstallBanner = function () {
+      if (!App._deferredInstallPrompt) return;
+      if (document.querySelector('.install-banner')) return;
+      var banner = document.createElement('div');
+      banner.className = 'install-banner';
+      banner.innerHTML = '<span>📱 安装到桌面，随时随地学习</span>' +
+        '<button id="btnInstall">安装</button>' +
+        '<button id="btnDismissInstall">✕</button>';
+      document.body.appendChild(banner);
+      document.getElementById('btnInstall').onclick = function () {
+        App._deferredInstallPrompt.prompt();
+        App._deferredInstallPrompt.userChoice.then(function (choice) {
+          App._deferredInstallPrompt = null;
+        });
+        banner.remove();
+      };
+      document.getElementById('btnDismissInstall').onclick = function () {
+        banner.remove();
+      };
+    };
+
+    /* 学习完成时提示安装（用户有学习行为后更愿意安装） */
+    var origShowStudyComplete = App.showStudyComplete;
+    App.showStudyComplete = function () {
+      origShowStudyComplete.apply(this, arguments);
+      if (App._deferredInstallPrompt && App.state.decks.some(function (d) {
+        return d.cards.some(function (c) { return c.ebbinghausStage > 0; });
+      })) {
+        setTimeout(function () { App.showInstallBanner(); }, 2000);
+      }
+    };
   };
 
   /* ========== 快捷键弹窗 ========== */
@@ -522,13 +733,17 @@ var FlashcardApp = window.FlashcardApp || {};
     let overlay = document.createElement('div');
     overlay.className = 'shortcut-overlay';
     overlay.innerHTML = '<div class="shortcut-modal">' +
-      '<h3>⌨️ 快捷键</h3>' +
+      '<h3>⌨️ 快捷键 & 手势</h3>' +
       '<table>' +
         '<tr><td>Space / ↑</td><td>翻转卡片</td></tr>' +
         '<tr><td>←</td><td>标记"不会"</td></tr>' +
         '<tr><td>→</td><td>标记"会了"</td></tr>' +
         '<tr><td>Enter</td><td>打字模式：确认 / 下一题</td></tr>' +
         '<tr><td>?</td><td>显示/关闭此面板</td></tr>' +
+        '<tr><td style="color:var(--text-muted);font-weight:400;font-size:12px" colspan="2">📱 移动端手势</td></tr>' +
+        '<tr><td>← → 滑动</td><td>翻转卡片 / 作答</td></tr>' +
+        '<tr><td>↑ 上滑</td><td>朗读单词</td></tr>' +
+        '<tr><td>长按卡片</td><td>翻转并震动</td></tr>' +
       '</table>' +
       '<button class="modal-close-btn">关闭</button>' +
     '</div>';
@@ -611,6 +826,193 @@ var FlashcardApp = window.FlashcardApp || {};
     var voice = App._getBestVoice();
     if (voice) utterance.voice = voice;
     window.speechSynthesis.speak(utterance);
+  };
+
+  /* 分享学习成果 */
+  App.shareAchievement = function () {
+    var today = new Date().toISOString().slice(0, 10);
+    var log = {};
+    try { log = JSON.parse(localStorage.getItem('flashcard-learning-log') || '{}'); } catch (e) {}
+    var todayData = log[today] || { correct: 0, wrong: 0 };
+    var total = todayData.correct + todayData.wrong;
+    var rate = total > 0 ? Math.round(todayData.correct / total * 100) : 0;
+    var text = '我今天学习了 ' + total + ' 个英语单词，正确率 ' + rate + '%！📚 #Flashcard抽认卡';
+    if (navigator.share) {
+      navigator.share({ title: '我的学习成果', text: text, url: window.location.href }).catch(function () {});
+    } else if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        App.showToast('已复制分享内容', 'success');
+      });
+    } else {
+      App.showToast(text, 'info', 4000);
+    }
+  };
+
+  /* ========== 通知权限引导弹窗 ========== */
+  App.showNotificationGuide = function () {
+    /* 已有通知权限则跳过 */
+    if ('Notification' in window && Notification.permission === 'granted') {
+      App.showToast('通知权限已开启，学习提醒功能正常工作中 📚', 'success', 3000);
+      return;
+    }
+    /* 已被拒绝：引导用户去系统设置 */
+    if ('Notification' in window && Notification.permission === 'denied') {
+      App.showToast('通知权限已被拒绝。请在浏览器设置中手动开启通知权限。', 'warn', 5000);
+      return;
+    }
+
+    var overlay = document.createElement('div');
+    overlay.className = 'notify-guide-overlay';
+    overlay.innerHTML = '<div class="notify-guide-modal">' +
+      '<div class="ng-icon">🔔</div>' +
+      '<h3>开启学习提醒</h3>' +
+      '<p>在设定时间收到复习提醒，帮助养成每日学习习惯。</p>' +
+      '<div class="ng-benefits">' +
+        '<div><span>✓</span> 每日定时提醒，不错过复习</div>' +
+        '<div><span>✓</span> 仅在设定时间发送，不打扰</div>' +
+        '<div><span>✓</span> 可随时关闭，无任何负担</div>' +
+      '</div>' +
+      '<div class="ng-buttons">' +
+        '<button class="ng-btn-primary" id="ngBtnAllow">🔔 开启通知</button>' +
+        '<button class="ng-btn-secondary" id="ngBtnLater">以后再说</button>' +
+      '</div>' +
+    '</div>';
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) overlay.remove();
+    });
+
+    document.getElementById('ngBtnAllow').addEventListener('click', function () {
+      Notification.requestPermission().then(function (perm) {
+        if (perm === 'granted') {
+          App.showToast('✅ 通知已开启！学习提醒将在设定时间弹出', 'success', 3000);
+          /* 自动开启提醒 */
+          var settings = App._loadReminderSettings();
+          if (!settings.enabled) {
+            settings.enabled = true;
+            App._saveReminderSettings(settings);
+            App._setupReminderTimer();
+            App.showToast('已自动开启每日学习提醒', 'success', 3000);
+          }
+        }
+      });
+      overlay.remove();
+    });
+
+    document.getElementById('ngBtnLater').addEventListener('click', function () {
+      overlay.remove();
+    });
+  };
+
+  /* ========== 数据备份里程碑提醒 ========== */
+  App._BACKUP_DATE_KEY = 'flashcard-last-backup-date';
+  App._BACKUP_COUNT_KEY = 'flashcard-backup-count';
+
+  App.getLastBackupDate = function () {
+    return localStorage.getItem(App._BACKUP_DATE_KEY) || null;
+  };
+
+  App.recordBackup = function () {
+    localStorage.setItem(App._BACKUP_DATE_KEY, new Date().toISOString().slice(0, 10));
+    var count = parseInt(localStorage.getItem(App._BACKUP_COUNT_KEY) || '0', 10);
+    localStorage.setItem(App._BACKUP_COUNT_KEY, String(count + 1));
+  };
+
+  App.checkBackupReminder = function () {
+    var today = new Date().toISOString().slice(0, 10);
+    var lastBackup = App.getLastBackupDate();
+    if (!lastBackup) return; /* 从未备份，在统计面板显示引导 */
+
+    /* 计算距上次备份的天数 */
+    var daysSince = Math.floor((new Date(today) - new Date(lastBackup)) / 86400000);
+    /* 每学习 7 天且距上次备份超 7 天时提醒 */
+    var log = App.loadLearningLog();
+    var learningDays = Object.keys(log).length;
+    if (learningDays > 0 && learningDays % 7 === 0 && daysSince >= 7) {
+      App.showToast('💾 已学习 ' + learningDays + ' 天，建议备份数据以防丢失', 'warn', 5000);
+    }
+  };
+
+  /* 包装 trackLearning 以触发备份提醒 */
+  var origTrackLearning = App.trackLearning;
+  App.trackLearning = function (correct) {
+    origTrackLearning.call(App, correct);
+    /* 每 50 次学习后检查一次 */
+    var log = App.loadLearningLog();
+    var total = 0;
+    Object.keys(log).forEach(function (k) {
+      total += (log[k].correct || 0) + (log[k].wrong || 0);
+    });
+    if (total % 50 === 0) App.checkBackupReminder();
+  };
+
+  /* ========== 云同步抽象层 ========== */
+  App.SyncProvider = {
+    /* 注册表：{ name: { save(json), load() } } */
+    _providers: {},
+
+    register: function (name, provider) {
+      this._providers[name] = provider;
+    },
+
+    getProvider: function (name) {
+      return this._providers[name] || null;
+    },
+
+    listProviders: function () {
+      return Object.keys(this._providers);
+    }
+  };
+
+  /* 通用同步执行 */
+  App.syncToCloud = function (providerName) {
+    var provider = App.SyncProvider.getProvider(providerName);
+    if (!provider) {
+      App.showToast('同步服务不可用: ' + providerName, 'error');
+      return Promise.reject(new Error('Provider not found: ' + providerName));
+    }
+    var backup = {
+      version: 1,
+      syncedAt: new Date().toISOString(),
+      decks: App.state.decks,
+      currentDeckId: App.state.currentDeckId,
+      learningLog: App.loadLearningLog(),
+      dailyGoal: parseInt(localStorage.getItem('flashcard-daily-goal') || '20', 10),
+      theme: localStorage.getItem('flashcard-theme') || 'auto',
+    };
+    return provider.save(JSON.stringify(backup)).then(function () {
+      App.showToast('☁️ 数据已同步', 'success');
+      App.recordBackup();
+    }).catch(function (err) {
+      App.showToast('同步失败: ' + (err.message || '未知错误'), 'error');
+      throw err;
+    });
+  };
+
+  App.syncFromCloud = function (providerName) {
+    var provider = App.SyncProvider.getProvider(providerName);
+    if (!provider) {
+      App.showToast('同步服务不可用: ' + providerName, 'error');
+      return Promise.reject(new Error('Provider not found: ' + providerName));
+    }
+    return provider.load().then(function (raw) {
+      App.importAllData(raw);
+    }).catch(function (err) {
+      App.showToast('加载失败: ' + (err.message || '未知错误'), 'error');
+      throw err;
+    });
+  };
+
+  /* 手动同步：弹出输入 URL 并尝试远程拉取（已有的远程导入能力） */
+  App.syncFromURL = function () {
+    var url = prompt('请输入备份 JSON 文件的 URL（用于从其他设备恢复数据）：');
+    if (!url) return;
+    App.showToast('正在获取数据...', 'info', 10000);
+    fetch(url)
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+      .then(function (text) { App.importAllData(text); })
+      .catch(function (err) { App.showToast('获取失败: ' + (err.message || '网络错误'), 'error'); });
   };
 
 })(FlashcardApp);

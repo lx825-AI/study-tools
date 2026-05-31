@@ -182,3 +182,90 @@
   color: var(--text-primary);
 }
 .add-card-form input:focus { border-color: var(--primary); }
+
+/* 移动端：导入弹窗底部弹出式 + 表格卡片化 */
+@media (max-width: 480px) {
+  .import-modal-overlay {
+    align-items: flex-end;
+  }
+  .import-modal {
+    padding: 20px 16px;
+    width: calc(100% - 24px);
+    max-width: 100%;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    position: fixed;
+    bottom: 0;
+    margin: 0;
+  }
+  .import-modal .modal-options button {
+    padding: 14px 16px;
+    min-height: 48px;
+  }
+  .import-modal .modal-cancel {
+    min-height: 48px;
+  }
+
+  /* 表格转为卡片布局 */
+  .preview-table,
+  .preview-table thead,
+  .preview-table tbody,
+  .preview-table tr,
+  .preview-table th,
+  .preview-table td {
+    display: block;
+  }
+  .preview-table thead {
+    display: none;
+  }
+  .preview-table tr {
+    background: var(--surface);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    padding: 12px 14px;
+    box-shadow: var(--shadow-xs);
+    border: 1px solid var(--border-light);
+  }
+  .preview-table td {
+    padding: 4px 0;
+    border-bottom: none;
+    font-size: 14px;
+  }
+  .preview-table .col-idx {
+    display: none;
+  }
+  .preview-table .col-front {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    padding-bottom: 4px;
+  }
+  .preview-table .col-back {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+  .preview-table .col-back.hidden-answer {
+    background: var(--border-light);
+    border-radius: 4px;
+    color: transparent;
+    display: inline-block;
+    min-width: 60%;
+  }
+  .preview-table .col-pos {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--primary-bg);
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .preview-table tr:hover td {
+    background: transparent;
+  }
+  .speak-btn-sm {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+}

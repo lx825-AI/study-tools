@@ -374,9 +374,50 @@
   box-shadow: var(--shadow-xs);
 }
 
-/* 移动端卡片高度 */
+/* 移动端卡片高度和布局 */
 @media (max-width: 480px) {
-  .card-scene { height: 320px; }
-  .card-face { padding: 16px 14px; justify-content: flex-start; padding-top: 20px; }
-  .card-def-item { font-size: 16px; }
+  .card-scene {
+    height: 380px;
+    margin-bottom: 16px;
+  }
+  .card-face {
+    padding: 20px 16px;
+    justify-content: flex-start;
+    padding-top: 28px;
+  }
+  .card-text {
+    font-size: 28px;
+  }
+  .card-def-item {
+    font-size: 16px;
+  }
+  .card-label {
+    margin-bottom: 12px;
+  }
+  .card-hint {
+    font-size: 12px;
+    margin-top: 16px;
+  }
+  .study-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .study-actions .btn {
+    padding: 14px;
+    font-size: 16px;
+  }
+}
+
+/* 超小屏手机 (iPhone SE 等) */
+@media (max-width: 374px) {
+  .card-scene {
+    height: 340px;
+  }
+  .card-text {
+    font-size: 24px;
+  }
+  .card-face {
+    padding: 16px 12px;
+    padding-top: 22px;
+  }
 }

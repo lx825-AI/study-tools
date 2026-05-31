@@ -241,3 +241,136 @@
   font-size: 11px;
   margin-left: auto;
 }
+
+/* 通知引导弹窗 */
+.notify-guide-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.3);
+  display: flex; align-items: center; justify-content: center; z-index: 200;
+}
+.notify-guide-modal {
+  background: var(--surface); border-radius: var(--radius-lg);
+  padding: 28px; max-width: 380px; width: calc(100% - 32px);
+  box-shadow: var(--shadow-xl);
+  text-align: center;
+}
+.notify-guide-modal .ng-icon {
+  font-size: 48px; margin-bottom: 12px;
+}
+.notify-guide-modal h3 {
+  font-size: 18px; margin-bottom: 8px; color: var(--text-primary);
+}
+.notify-guide-modal p {
+  font-size: 14px; color: var(--text-secondary);
+  margin-bottom: 20px; line-height: 1.6;
+}
+.notify-guide-modal .ng-benefits {
+  text-align: left; margin-bottom: 20px;
+  font-size: 13px; color: var(--text-secondary); line-height: 1.8;
+}
+.notify-guide-modal .ng-benefits span { color: var(--primary); font-weight: 600; }
+.notify-guide-modal .ng-buttons {
+  display: flex; gap: 8px; flex-direction: column;
+}
+.notify-guide-modal .ng-buttons button {
+  width: 100%; padding: 12px; border: none; border-radius: var(--radius);
+  font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
+  transition: all 0.15s;
+}
+.ng-btn-primary {
+  background: var(--primary); color: #fff;
+}
+.ng-btn-primary:hover { background: var(--primary-hover); }
+.ng-btn-secondary {
+  background: var(--surface-secondary); color: var(--text-secondary);
+}
+.ng-btn-secondary:hover { background: var(--border); }
+
+/* 备份信息提示 */
+.backup-info {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--text-muted); margin-top: 4px;
+  flex-wrap: wrap;
+}
+.backup-info .backup-warn {
+  color: var(--warning); font-weight: 600;
+}
+
+/* 同步状态 */
+.sync-section {
+  margin-top: 20px;
+}
+.sync-status {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; color: var(--text-muted);
+  padding: 10px 14px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+.sync-status.sync-ok { border-color: var(--success-border); color: var(--success); }
+.sync-status .sync-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.sync-dot-ok { background: var(--success); }
+.sync-dot-never { background: var(--warning); }
+
+/* 移动端统计面板 */
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .stat-card {
+    padding: 14px 12px;
+  }
+  .stat-value {
+    font-size: 24px;
+  }
+
+  .week-chart {
+    height: 80px;
+    gap: 4px;
+    padding: 0 2px;
+  }
+  .week-bar-col {
+    max-width: 40px;
+    gap: 2px;
+  }
+  .week-bar {
+    max-width: 28px;
+  }
+  .week-bar-label {
+    font-size: 10px;
+  }
+  .week-bar-num {
+    font-size: 10px;
+  }
+
+  .heatmap {
+    gap: 2px;
+  }
+  .heat-cell {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+  }
+
+  .eb-distribution {
+    padding: 10px 12px;
+    gap: 4px;
+  }
+
+  .failed-words-list {
+    padding: 10px 12px;
+  }
+  .failed-word-item {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 0;
+  }
+
+  .daily-goal-settings {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+}
