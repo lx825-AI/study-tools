@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef } from 'react';
+import { useState, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
 import formulaData, { SECTION_ORDER } from '../data/formulas';
 import type { Section } from '../data/types';
 import useHashRoute from '../hooks/useHashRoute';
@@ -14,12 +14,14 @@ import SearchBar from './SearchBar';
 import SearchFilters from './SearchFilters';
 import FormulaGrid from './FormulaGrid';
 import FormulaCard from './FormulaCard';
-import PracticePanel from './PracticePanel';
 import ThemeToggle from './ThemeToggle';
 import BackToTop from './BackToTop';
 import OfflineBanner from './OfflineBanner';
 import MobileSidebarToggle from './MobileSidebarToggle';
+import MobileTabBar from './MobileTabBar';
 import { ToastProvider, useToast } from './Toast';
+
+const PracticePanel = lazy(() => import('./PracticePanel'));
 import '../styles/sidebar.css';
 import '../styles/search.css';
 import '../styles/practice.css';
@@ -41,13 +43,15 @@ function AppInner() {
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
   const [searchExpandedCards, setSearchExpandedCards] = useState<Set<string>>(new Set());
   const [isGridView, setIsGridView] = useState(false);
+  const [isMobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(true);
 
   const handleToggleCard = useCallback((sectionId: string, index: number) => {
     const isExpanding = !expandedCards.has(index);
     setExpandedCards(prev => {
       const next = new Set(prev);
-      if (next.has(index)) next.delete(index);
-      else next.add(index);
+      next.has(index) ? next.delete(index) : next.add(index);
       return next;
     });
     if (isExpanding) {
@@ -61,8 +65,7 @@ function AppInner() {
     const isExpanding = !searchExpandedCards.has(key);
     setSearchExpandedCards(prev => {
       const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
+      next.has(key) ? next.delete(key) : next.add(key);
       return next;
     });
     if (isExpanding) {
@@ -103,6 +106,10 @@ function AppInner() {
       setSearchExpandedCards(new Set());
       search.setQuery('');
       navigate(sectionId);
+      // 移动端导航后关闭侧边栏
+      if (window.innerWidth <= 768) {
+        setIsMobileSidebarOpen(false);
+      }
     },
     [navigate, search],
   );
@@ -202,9 +209,15 @@ function AppInner() {
         onRandom={handleRandom}
         onPrint={handlePrint}
         onResetProgress={handleResetProgress}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed(prev => !prev)}
+        isMobileOpen={isMobileSidebarOpen}
       />
-      <MobileSidebarToggle />
-      <main className="main">
+      <MobileSidebarToggle
+        visible={!isMobileSidebarOpen}
+        onOpen={() => setIsMobileSidebarOpen(true)}
+      />
+      <main className={`main${isSidebarCollapsed ? ' sidebar-collapsed' : ''}`}>
         <div className="main-header">
           <h1>AI 数学公式速查表</h1>
           <ThemeToggle theme={theme} onToggle={() => cycleTheme()} />
@@ -224,12 +237,18 @@ function AppInner() {
         )}
 
         {currentSection === '__practice__' && (
-          <PracticePanel
-            favorites={favorites}
-            onFav={handleFav}
-            onCopy={handleCopy}
-            onClose={() => handleNavigate('calc-limit')}
-          />
+          <Suspense fallback={
+            <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
+              加载中...
+            </div>
+          }>
+            <PracticePanel
+              favorites={favorites}
+              onFav={handleFav}
+              onCopy={handleCopy}
+              onClose={() => handleNavigate('calc-limit')}
+            />
+          </Suspense>
         )}
 
         <div id="formulaContainer">
@@ -280,10 +299,40 @@ function AppInner() {
             </div>
           ) : (
             <div>
-              <h2 className="section-title">
-                {currentSection === '__favorites__'
-                  ? `⭐ 我的收藏（${specialList.length} 条）`
-                  : `🕐 最近浏览（${specialList.length} 条）`}
+              <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                <span>
+                  {currentSection === '__favorites__'
+                    ? `⭐ 我的收藏（${specialList.length} 条）`
+                    : `🕐 最近浏览（${specialList.length} 条）`}
+                </span>
+                {currentSection === '__favorites__' && specialList.length > 0 && (
+                  <span style={{ display: 'flex', gap: 6 }}>
+                    <button
+                      className="btn btn-sm btn-outline"
+                      onClick={() => {
+                        const lines = specialList.map(item => {
+                          const section = formulaData[item.sectionId];
+                          const f = section?.formulas[item.formulaIndex];
+                          return f ? `## ${f.name}\n\n$$${f.latex}$$\n\n> ${f.note}` : '';
+                        }).filter(Boolean);
+                        navigator.clipboard.writeText(lines.join('\n\n---\n\n')).then(() => {
+                          toast.show('已复制全部收藏公式 (Markdown)');
+                        }).catch(() => toast.show('复制失败'));
+                      }}
+                    >
+                      📝 复制全部
+                    </button>
+                    <button
+                      className="btn btn-sm btn-outline"
+                      onClick={() => {
+                        document.querySelectorAll('#formulaContainer .formula-card').forEach(c => c.classList.add('expanded'));
+                        setTimeout(() => window.print(), 200);
+                      }}
+                    >
+                      🖨 打印
+                    </button>
+                  </span>
+                )}
               </h2>
               <div className={`formula-grid${isGridView ? ' grid-view' : ''}`}>
                 {specialList.map(item => {
@@ -312,6 +361,20 @@ function AppInner() {
         </div>
       </main>
       <BackToTop />
+      <MobileTabBar
+        currentSection={currentSection}
+        onNavigate={handleNavigate}
+        favoritesCount={favorites.size}
+        onOpenDrawer={() => setMobileDrawerOpen(true)}
+      />
+      {/* 移动端导航抽屉遮罩 */}
+      {isMobileDrawerOpen && (
+        <div
+          className="mobile-drawer-overlay"
+          onClick={() => setMobileDrawerOpen(false)}
+          role="presentation"
+        />
+      )}
     </>
   );
 }

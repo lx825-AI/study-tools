@@ -38,11 +38,36 @@
   --badge-important-text: #ea580c;
   --badge-advanced-bg: #eff6ff;
   --badge-advanced-text: #2563eb;
+  --success: #16a34a;
+  --danger: #dc2626;
+  --warning: #f59e0b;
+  --card-bg: #fff;
   --tool-btn-bg: #fff;
   --tool-btn-text: #64748b;
   --tool-btn-active-bg: #eef2ff;
   --tool-btn-active-border: #c7d2fe;
   --sort-btn-text: #475569;
+
+  /* 学科专属色 */
+  --subject-calc: #2563eb;
+  --subject-calc-light: #dbeafe;
+  --subject-calc-border: #bfdbfe;
+  --subject-linalg: #7c3aed;
+  --subject-linalg-light: #ede9fe;
+  --subject-linalg-border: #ddd6fe;
+  --subject-disc: #059669;
+  --subject-disc-light: #d1fae5;
+  --subject-disc-border: #a7f3d0;
+  --subject-prob: #ea580c;
+  --subject-prob-light: #fff7ed;
+  --subject-prob-border: #fed7aa;
+  --subject-num: #0891b2;
+  --subject-num-light: #ecfeff;
+  --subject-num-border: #a5f3fc;
+
+  /* KaTeX 暗色模式适配 */
+  --katex-color: #1e293b;
+  --katex-bg: transparent;
 }
 
 /* 暗色主题：只写一次，由 useTheme hook 通过 .dark 类切换 */
@@ -85,9 +110,34 @@
   --badge-important-text: #fdba74;
   --badge-advanced-bg: #172554;
   --badge-advanced-text: #93c5fd;
+  --success: #22c55e;
+  --danger: #ef4444;
+  --warning: #fbbf24;
+  --card-bg: #1e293b;
   --tool-btn-bg: #1e293b;
   --tool-btn-text: #94a3b8;
   --tool-btn-active-bg: #3730a3;
   --tool-btn-active-border: #6366f1;
   --sort-btn-text: #cbd5e1;
+
+  /* 学科专属色（暗色模式） */
+  --subject-calc: #60a5fa;
+  --subject-calc-light: #1e3a5f;
+  --subject-calc-border: #3b82f6;
+  --subject-linalg: #a78bfa;
+  --subject-linalg-light: #2e1065;
+  --subject-linalg-border: #7c3aed;
+  --subject-disc: #34d399;
+  --subject-disc-light: #064e3b;
+  --subject-disc-border: #10b981;
+  --subject-prob: #fb923c;
+  --subject-prob-light: #431407;
+  --subject-prob-border: #ea580c;
+  --subject-num: #22d3ee;
+  --subject-num-light: #083344;
+  --subject-num-border: #0891b2;
+
+  /* KaTeX 暗色模式适配 */
+  --katex-color: #e2e8f0;
+  --katex-bg: transparent;
 }

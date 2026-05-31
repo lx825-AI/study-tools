@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useRef } from 'react';
+import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import '../styles/responsive.css';
 
@@ -16,12 +16,23 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const [message, setMessage] = useState('');
   const [visible, setVisible] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      clearTimeout(timerRef.current);
+    };
+  }, []);
 
   const show = useCallback((msg: string) => {
     setMessage(msg);
     setVisible(true);
     clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => setVisible(false), 1800);
+    timerRef.current = setTimeout(() => {
+      if (mountedRef.current) setVisible(false);
+    }, 1800);
   }, []);
 
   return (

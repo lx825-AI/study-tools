@@ -1,8 +1,5 @@
 /* ===== 响应式 ===== */
 @media (max-width: 768px) {
-  body {
-    flex-direction: column;
-  }
   .sidebar {
     position: static;
     width: 100%;
@@ -59,6 +56,245 @@
 @media (min-width: 769px) {
   .mobile-sidebar-toggle {
     display: none;
+  }
+}
+
+/* 移动端：始终显示复制/收藏按钮（触摸屏无 hover） */
+@media (max-width: 768px) {
+  .formula-card .copy-btn,
+  .formula-card .favorite-btn,
+  .formula-card .export-btn,
+  .formula-card .copy-btn-group {
+    opacity: 1;
+  }
+
+  .main-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-right: 52px;
+    margin-bottom: 20px;
+  }
+
+  .main-header h1 {
+    font-size: 22px;
+  }
+
+  .formula-grid.grid-view {
+    grid-template-columns: 1fr;
+  }
+
+  .formula-card {
+    padding: 16px;
+  }
+
+  .formula-name {
+    font-size: 14px;
+    padding-right: 70px;
+  }
+
+  .formula-latex {
+    padding: 14px 16px;
+    font-size: 15px;
+  }
+
+  /* 练习面板移动端适配 */
+  .practice-options {
+    flex-direction: column;
+  }
+
+  .practice-options .btn {
+    width: 100%;
+  }
+
+  .practice-question {
+    padding: 16px;
+  }
+
+  .practice-choice {
+    padding: 12px 16px;
+    font-size: 16px;
+  }
+
+  /* 主内容区内边距 */
+  .main {
+    padding: 16px 12px;
+  }
+
+  /* 搜索筛选器移动端 */
+  #searchFilters {
+    flex-direction: column;
+  }
+
+  #searchFilters select {
+    width: 100%;
+  }
+
+  /* Back to top 位置调整，避免与 toast 重叠 */
+  .back-to-top {
+    bottom: 24px;
+    right: 16px;
+  }
+
+  /* 详情内容更大高度 */
+  .formula-card.expanded .formula-detail {
+    max-height: 800px;
+  }
+}
+
+/* ===== 移动端底部 Tab Bar ===== */
+.mobile-tab-bar {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-tab-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    z-index: 200;
+    justify-content: space-around;
+    align-items: center;
+    padding: 4px 0;
+    padding-bottom: calc(4px + env(safe-area-inset-bottom));
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
+  }
+
+  .mobile-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 4px 8px;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 10px;
+    min-width: 48px;
+    min-height: 48px;
+    border-radius: 8px;
+    transition: color 0.2s, background 0.2s;
+  }
+
+  .mobile-tab.active {
+    color: var(--primary);
+  }
+
+  .mobile-tab:active {
+    background: var(--surface-hover);
+  }
+
+  .mobile-tab-icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .mobile-tab-label {
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  /* 主内容区为底部 TabBar 留出空间 */
+  .main {
+    padding-bottom: 80px;
+  }
+
+  /* 回到顶部按钮避开 TabBar */
+  .back-to-top {
+    bottom: 80px;
+  }
+
+  /* Toast 避开 TabBar */
+  .toast {
+    bottom: 80px;
+  }
+}
+
+/* ===== 移动端导航抽屉遮罩 ===== */
+@media (max-width: 768px) {
+  .mobile-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 250;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+
+/* 触摸设备通用优化 */
+@media (hover: none) and (pointer: coarse) {
+  .formula-card:active {
+    transform: scale(0.98);
+    transition: transform 0.1s;
+  }
+
+  .sidebar .sub {
+    min-height: 40px;
+    padding: 10px 16px;
+  }
+
+  .sidebar-tools button {
+    min-height: 36px;
+    padding: 8px;
+  }
+
+  .formula-card .copy-btn,
+  .formula-card .favorite-btn {
+    min-width: 36px;
+    min-height: 36px;
+  }
+}
+
+/* 刘海屏安全区域 */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .sidebar {
+    padding-bottom: calc(32px + env(safe-area-inset-bottom));
+  }
+
+  .back-to-top {
+    bottom: calc(32px + env(safe-area-inset-bottom));
+  }
+
+  .toast {
+    bottom: calc(32px + env(safe-area-inset-bottom));
+  }
+
+  @media (max-width: 768px) {
+    .main {
+      padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    }
+
+    .sidebar {
+      padding-left: calc(16px + env(safe-area-inset-left));
+      padding-right: calc(16px + env(safe-area-inset-right));
+    }
+  }
+}
+
+/* 平板适配 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .main {
+    margin-left: 260px;
+    padding: 24px 28px;
+    max-width: 680px;
+  }
+
+  .formula-grid.grid-view {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   }
 }
 

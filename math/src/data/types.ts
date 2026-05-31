@@ -1,4 +1,4 @@
-export type Subject = '高等数学' | '线性代数' | '离散数学' | '概率统计';
+export type Subject = '高等数学' | '线性代数' | '离散数学' | '概率统计' | '数值分析';
 
 export type Level = 'basic' | 'important' | 'advanced';
 

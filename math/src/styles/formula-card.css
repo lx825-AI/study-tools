@@ -35,7 +35,8 @@
   padding: 20px 24px;
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border-light);
-  transition: box-shadow 0.2s, border-color 0.2s;
+  border-left: 4px solid var(--border-light);
+  transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
   cursor: pointer;
   position: relative;
 }
@@ -43,6 +44,7 @@
 .formula-card:hover {
   box-shadow: var(--shadow-md);
   border-color: var(--primary-border);
+  transform: translateY(-1px);
 }
 
 .formula-card.expanded {
@@ -106,17 +108,29 @@
 }
 
 .formula-card.expanded .formula-detail {
-  max-height: 600px;
+  max-height: 2000px;
   border-top-width: 1px;
   margin-top: 12px;
   padding-top: 12px;
 }
 
-/* 复制按钮 */
-.copy-btn {
+/* 复制按钮组 */
+.copy-btn-group {
   position: absolute;
   top: 12px;
   right: 12px;
+  display: flex;
+  gap: 4px;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.formula-card:hover .copy-btn-group {
+  opacity: 1;
+}
+
+.copy-btn {
   width: 32px;
   height: 32px;
   border: 1px solid var(--border);
@@ -127,18 +141,33 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
-  transition: opacity 0.2s, background 0.15s, border-color 0.15s;
-  z-index: 1;
-}
-
-.formula-card:hover .copy-btn {
-  opacity: 1;
+  transition: background 0.15s, border-color 0.15s;
 }
 
 .copy-btn:hover {
   background: var(--copy-hover-bg);
   border-color: var(--primary-border);
+}
+
+.copy-mode-toggle {
+  width: 22px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--copy-bg);
+  cursor: pointer;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.copy-mode-toggle:hover {
+  background: var(--copy-hover-bg);
+  border-color: var(--primary-border);
+  color: var(--primary);
 }
 
 /* 收藏按钮 */
@@ -176,6 +205,40 @@
   border-color: var(--fav-active-border);
 }
 
+/* 导出图片按钮 */
+.export-btn {
+  position: absolute;
+  top: 12px;
+  right: 88px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--copy-bg);
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s, background 0.15s, border-color 0.15s;
+  z-index: 1;
+}
+
+.formula-card:hover .export-btn {
+  opacity: 1;
+}
+
+.export-btn:hover {
+  background: var(--copy-hover-bg);
+  border-color: var(--primary-border);
+}
+
+.export-btn:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
 /* 难度标签 */
 .level-badge {
   display: inline-block;
@@ -201,4 +264,169 @@
 .level-badge.advanced {
   background: var(--badge-advanced-bg);
   color: var(--badge-advanced-text);
+}
+
+/* ===== 学科色左边框 ===== */
+.formula-card.subject-calc {
+  border-left-color: var(--subject-calc);
+}
+
+.formula-card.subject-calc.expanded {
+  border-color: var(--subject-calc-border);
+  border-left-color: var(--subject-calc);
+}
+
+.formula-card.subject-linalg {
+  border-left-color: var(--subject-linalg);
+}
+
+.formula-card.subject-linalg.expanded {
+  border-color: var(--subject-linalg-border);
+  border-left-color: var(--subject-linalg);
+}
+
+.formula-card.subject-disc {
+  border-left-color: var(--subject-disc);
+}
+
+.formula-card.subject-disc.expanded {
+  border-color: var(--subject-disc-border);
+  border-left-color: var(--subject-disc);
+}
+
+.formula-card.subject-prob {
+  border-left-color: var(--subject-prob);
+}
+
+.formula-card.subject-prob.expanded {
+  border-color: var(--subject-prob-border);
+  border-left-color: var(--subject-prob);
+}
+
+.formula-card.subject-num {
+  border-left-color: var(--subject-num);
+}
+
+.formula-card.subject-num.expanded {
+  border-color: var(--subject-num-border);
+  border-left-color: var(--subject-num);
+}
+
+/* ===== 暗色模式 KaTeX 适配 ===== */
+:root.dark .formula-latex {
+  color: var(--katex-color);
+}
+
+:root.dark .formula-latex .katex {
+  color: var(--katex-color);
+}
+
+/* 网格视图中隐藏左边框颜色（保持简洁） */
+.formula-grid.grid-view .formula-card {
+  border-left-width: 1px;
+}
+
+.formula-grid.grid-view .formula-card.expanded {
+  border-left-width: 4px;
+}
+
+/* ===== 关联公式推荐 ===== */
+.formula-related {
+  margin-top: 12px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.formula-related-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  padding: 8px 10px;
+  background: var(--surface-hover);
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.formula-related-label {
+  color: var(--hint);
+  font-weight: 500;
+  font-size: 11px;
+}
+
+.formula-related-name {
+  color: var(--text);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* ===== 笔记编辑器 ===== */
+.formula-note-section {
+  margin-top: 12px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.formula-note-trigger {
+  font-size: 13px;
+  color: var(--hint);
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.formula-note-trigger:hover {
+  border-color: var(--primary-border);
+  background: var(--primary-light);
+}
+
+.formula-note-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formula-note-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface);
+  resize: vertical;
+  min-height: 72px;
+}
+
+.formula-note-textarea:focus {
+  outline: none;
+  border-color: var(--primary-border);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.formula-note-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.formula-note-preview {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  padding: 8px 12px;
+  background: var(--surface-hover);
+  border-radius: 8px;
+  white-space: pre-wrap;
+  word-break: break-word;
 }

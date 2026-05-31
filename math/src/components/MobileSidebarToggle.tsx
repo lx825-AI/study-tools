@@ -1,32 +1,15 @@
-import { useState, useEffect } from 'react';
+interface MobileSidebarToggleProps {
+  visible: boolean;
+  onOpen: () => void;
+}
 
-export default function MobileSidebarToggle() {
-  const [sidebarHidden, setSidebarHidden] = useState(false);
-
-  useEffect(() => {
-    const sidebar = document.querySelector('.sidebar');
-    if (!sidebar) return;
-
-    const check = () => {
-      setSidebarHidden(sidebar.classList.contains('mobile-collapsed'));
-    };
-
-    const observer = new MutationObserver(check);
-    observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
-    check();
-
-    return () => observer.disconnect();
-  }, []);
-
-  if (!sidebarHidden) return null;
+export default function MobileSidebarToggle({ visible, onOpen }: MobileSidebarToggleProps) {
+  if (!visible) return null;
 
   return (
     <button
       className="mobile-sidebar-toggle"
-      onClick={() => {
-        const sidebar = document.querySelector('.sidebar');
-        if (sidebar) sidebar.classList.remove('mobile-collapsed');
-      }}
+      onClick={onOpen}
       title="显示侧边栏"
       aria-label="显示侧边栏"
     >

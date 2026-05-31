@@ -13,6 +13,9 @@ interface SidebarProps {
   onRandom: () => void;
   onPrint: () => void;
   onResetProgress: () => void;
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
+  isMobileOpen: boolean;
 }
 
 const SUBJECTS: { subject: Subject; prefix: string }[] = [
@@ -20,6 +23,7 @@ const SUBJECTS: { subject: Subject; prefix: string }[] = [
   { subject: '线性代数', prefix: 'linalg-' },
   { subject: '离散数学', prefix: 'disc-' },
   { subject: '概率统计', prefix: 'prob-' },
+  { subject: '数值分析', prefix: 'num-' },
 ];
 
 export default function Sidebar({
@@ -33,13 +37,13 @@ export default function Sidebar({
   onRandom,
   onPrint,
   onResetProgress,
+  isCollapsed,
+  onToggleCollapse,
+  isMobileOpen,
 }: SidebarProps) {
   const handleClick = useCallback(
     (sectionId: string) => {
       onNavigate(sectionId);
-      // 在移动端收起侧边栏
-      const sidebar = document.querySelector('.sidebar');
-      if (sidebar) sidebar.classList.add('mobile-collapsed');
     },
     [onNavigate],
   );
@@ -47,9 +51,18 @@ export default function Sidebar({
   const isActive = (id: string) => currentSection === id;
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar${isCollapsed ? ' collapsed' : ''}${!isMobileOpen ? ' mobile-collapsed' : ''}`}>
+      <button
+        className="sidebar-collapse-btn"
+        onClick={onToggleCollapse}
+        title={isCollapsed ? '展开侧边栏' : '收起侧边栏'}
+        aria-label={isCollapsed ? '展开侧边栏' : '收起侧边栏'}
+      >
+        {isCollapsed ? '▶' : '◀'}
+      </button>
       <div className="sidebar-title">
-        <span aria-hidden="true">📐</span> 数学公式速查
+        <span aria-hidden="true">📐</span>
+        {!isCollapsed && ' 数学公式速查'}
       </div>
 
       <div className="sidebar-tools">

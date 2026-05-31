@@ -8,5 +8,10 @@ export function getItem<T>(key: string, fallback: T): T {
 }
 
 export function setItem<T>(key: string, value: T): void {
-  localStorage.setItem(key, JSON.stringify(value));
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // localStorage 已满或被禁用，静默失败
+    console.warn(`[math] 无法写入 localStorage key="${key}"`);
+  }
 }

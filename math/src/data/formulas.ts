@@ -23,7 +23,7 @@ const formulaData: FormulaMap = {
       },
       {
         name: '等价无穷小替换（x→0）',
-        latex: '\\begin{aligned} &\\sin x \\sim x,\\ \\tan x \\sim x,\\ \\arcsin x \\sim x,\\ \\arctan x \\sim x \\\\[6pt] &1-\\cos x \\sim \\frac{x^2}{2},\\ \\ln(1+x) \\sim x,\\ e^x-1 \\sim x \\\\[6pt] &(1+x)^a-1 \\sim ax,\\ a^x-1 \\sim x\\ln a \\end{aligned}',
+        latex: '\\begin{aligned} &\\sin x \\sim x,\\ \\tan x \\sim x,\\ \\arcsin x \\sim x,\\ \\arctan x \\sim x \\ &1-\\cos x \\sim \\frac{x^2}{2},\\ \\ln(1+x) \\sim x,\\ e^x-1 \\sim x \\ &(1+x)^a-1 \\sim ax,\\ a^x-1 \\sim x\\ln a \\end{aligned}',
         note: '必考！仅限乘除法中使用，加减法中不可直接替换。',
         detail: '经典错误：lim(x→0) (tanx - sinx)/x³ 中直接把 tanx 和 sinx 都替换成 x，分子变 0 得极限 0——错误！正确做法：tanx - sinx = tanx(1-cosx) ~ x·x²/2 = x³/2，极限为 1/2。加减法中只有同阶抵消后才可替换高阶项。记住：乘除放心换，加减要谨慎。',
         level: 'important',
@@ -80,7 +80,7 @@ const formulaData: FormulaMap = {
       },
       {
         name: '基本初等函数求导公式',
-        latex: '\\begin{aligned} &(C)\' = 0,\\ (x^n)\' = nx^{n-1},\\ (e^x)\' = e^x,\\ (a^x)\' = a^x\\ln a \\\\[6pt] &(\\ln x)\' = \\frac{1}{x},\\ (\\log_a x)\' = \\frac{1}{x\\ln a} \\\\[6pt] &(\\sin x)\' = \\cos x,\\ (\\cos x)\' = -\\sin x,\\ (\\tan x)\' = \\sec^2 x \\\\[6pt] &(\\arcsin x)\' = \\frac{1}{\\sqrt{1-x^2}},\\ (\\arctan x)\' = \\frac{1}{1+x^2} \\end{aligned}',
+        latex: '\\begin{aligned} &(C)\' = 0,\\ (x^n)\' = nx^{n-1},\\ (e^x)\' = e^x,\\ (a^x)\' = a^x\\ln a \\ &(\\ln x)\' = \\frac{1}{x},\\ (\\log_a x)\' = \\frac{1}{x\\ln a} \\ &(\\sin x)\' = \\cos x,\\ (\\cos x)\' = -\\sin x,\\ (\\tan x)\' = \\sec^2 x \\ &(\\arcsin x)\' = \\frac{1}{\\sqrt{1-x^2}},\\ (\\arctan x)\' = \\frac{1}{1+x^2} \\end{aligned}',
         note: '必须滚瓜烂熟，所有求导题的基础。注意 ln|x| 的导数也是 1/x。',
         detail: '记忆技巧：①指数函数求导后还是自己（eˣ 完全不变，aˣ 多乘 ln a）；②三角函数的导数循环：sin→cos→-sin→-cos→sin；③反三角函数的导数分母都有 √ 或 1+x²，特别注意 arcsin 和 arccos 差一个负号；④对数求导 ln|x| 的导数 = 1/x（含绝对值也一样）。',
       },
@@ -154,7 +154,7 @@ const formulaData: FormulaMap = {
       },
       {
         name: '常用麦克劳林展开式',
-        latex: '\\begin{aligned} e^x &= 1 + x + \\frac{x^2}{2!} + \\frac{x^3}{3!} + o(x^3) \\\\[6pt] \\sin x &= x - \\frac{x^3}{3!} + \\frac{x^5}{5!} + o(x^5) \\\\[6pt] \\cos x &= 1 - \\frac{x^2}{2!} + \\frac{x^4}{4!} + o(x^4) \\\\[6pt] \\ln(1+x) &= x - \\frac{x^2}{2} + \\frac{x^3}{3} + o(x^3) \\\\[6pt] \\frac{1}{1-x} &= 1 + x + x^2 + x^3 + o(x^3) \\end{aligned}',
+        latex: '\\begin{aligned} e^x &= 1 + x + \\frac{x^2}{2!} + \\frac{x^3}{3!} + o(x^3) \\ \\sin x &= x - \\frac{x^3}{3!} + \\frac{x^5}{5!} + o(x^5) \\ \\cos x &= 1 - \\frac{x^2}{2!} + \\frac{x^4}{4!} + o(x^4) \\ \\ln(1+x) &= x - \\frac{x^2}{2} + \\frac{x^3}{3} + o(x^3) \\ \\frac{1}{1-x} &= 1 + x + x^2 + x^3 + o(x^3) \\end{aligned}',
         note: '期末考试大题高频考点！求极限、证明不等式时直接展开。',
         detail: '记忆规律：①eˣ 全正、分母阶乘递增；②sinx 奇次项、正负交替、分母奇数阶乘；③cosx 偶次项、正负交替、分母偶数阶乘；④ln(1+x) 正负交替、分母无阶乘；⑤1/(1-x) 全正无阶乘即等比数列。求极限时展开到分子分母最低非零阶即可。常见组合：(1+x)^α = 1+αx+α(α-1)/2!·x²+... 也要记。',
       },
@@ -168,7 +168,7 @@ const formulaData: FormulaMap = {
     formulas: [
       {
         name: '基本积分公式',
-        latex: '\\begin{aligned} &\\int x^n dx = \\frac{x^{n+1}}{n+1}+C\\ (n \\neq -1),\\ \\int \\frac{1}{x}dx = \\ln|x|+C \\\\[6pt] &\\int e^x dx = e^x+C,\\ \\int a^x dx = \\frac{a^x}{\\ln a}+C \\\\[6pt] &\\int \\sin x\\,dx = -\\cos x+C,\\ \\int \\cos x\\,dx = \\sin x+C \\\\[6pt] &\\int \\frac{1}{1+x^2}dx = \\arctan x+C,\\ \\int \\frac{1}{\\sqrt{1-x^2}}dx = \\arcsin x+C \\end{aligned}',
+        latex: '\\begin{aligned} &\\int x^n dx = \\frac{x^{n+1}}{n+1}+C\\ (n \\neq -1),\\ \\int \\frac{1}{x}dx = \\ln|x|+C \\ &\\int e^x dx = e^x+C,\\ \\int a^x dx = \\frac{a^x}{\\ln a}+C \\ &\\int \\sin x\\,dx = -\\cos x+C,\\ \\int \\cos x\\,dx = \\sin x+C \\ &\\int \\frac{1}{1+x^2}dx = \\arctan x+C,\\ \\int \\frac{1}{\\sqrt{1-x^2}}dx = \\arcsin x+C \\end{aligned}',
         note: '反向记导数公式。注意 1/x 积分要加绝对值 ln|x|。',
         detail: '积分是求导的逆运算，每个求导公式反过来就是一个积分公式。最容易忘的两个：∫tanx dx = -ln|cosx|+C，∫secx dx = ln|secx+tanx|+C。注意 ∫1/x dx 必须加绝对值 ln|x|，因为 ln 定义域是正数。∫1/(a²+x²) dx = (1/a)arctan(x/a)+C 是 arctan 公式的推广。',
       },
@@ -289,6 +289,49 @@ const formulaData: FormulaMap = {
         latex: 'y\' + P(x)y = Q(x)y^n \\ (n \\neq 0,1) \\xrightarrow{z = y^{1-n}} z\' + (1-n)P(x)z = (1-n)Q(x)',
         note: '非线性 → 线性：令 z=y^{1-n}，化为一阶线性方程用通解公式。注意 n=0 是线性、n=1 是可分离。',
         detail: '伯努利方程是少数可解析求解的非线性一阶方程。标准形式：y\' + P(x)y = Q(x)y^n。解法三步：①令 z = y^{1-n}，求导得 z\' = (1-n)y^{-n}·y\'；②原方程两边同乘 (1-n)y^{-n}，替换后得 z\' + (1-n)Pz = (1-n)Q（一阶线性！）；③用一阶线性通解公式求 z，最后代回 y = z^{1/(1-n)}。陷阱：n>0 时 y≡0 总是方程的解（可能是奇解，不一定包含在通解中），需单独验证。常考：判断方程类型并选择合适解法。',
+      },
+    ],
+  },
+
+  'calc-ode-advanced': {
+    id: 'calc-ode-advanced',
+    title: '微分方程进阶',
+    subject: '高等数学',
+    formulas: [
+      {
+        name: '可降阶的高阶方程（y\'\'=f(x) 型）',
+        latex: 'y^{(n)} = f(x) \\Rightarrow \\text{连续积分 } n \\text{ 次，每次加一个积分常数}',
+        note: '最简形式，直接逐次积分。如 y\'\'=sinx → y\'=-cosx+C₁ → y=-sinx+C₁x+C₂。',
+        detail: '不显含 y 和低阶导数的方程：y^{(n)}=f(x)。直接对 x 积分 n 次，每次积分产生一个独立常数。例如 y\'\'=6x：积分一次得 y\'=3x²+C₁，再积分得 y=x³+C₁x+C₂。这是高阶方程中最简单的情形——不需要任何技巧，只需逐次积分。考试中常需要代入初始条件（如 y(0)=a, y\'(0)=b）确定常数。',
+        level: 'basic',
+      },
+      {
+        name: '可降阶方程（不显含 y 型）',
+        latex: 'y\'\' = f(x, y\') \\xrightarrow{p=y\'} p\' = f(x, p) \\ \\text{（关于 } p \\text{ 的一阶方程）}',
+        note: '令 p=y\'，则 y\'\'=p\'。方程降为关于 p 的一阶方程。解出 p 后再积分得 y。',
+        detail: '不显含 y 的方程：F(x, y\', y\'\')=0。解法：①令 p=y\'，则 y\'\'=p\'=dp/dx；②代入得关于 x 和 p 的一阶方程 F(x,p,p\')=0；③解此一阶方程得 p=φ(x,C₁)；④积分 y=∫p dx+C₂。经典例题：y\'\'=y\'+x（令 p=y\' 得 p\'-p=x，一阶线性方程）。注意：解出 p 后务必再积分一次得 y。',
+        level: 'important',
+      },
+      {
+        name: '可降阶方程（不显含 x 型）',
+        latex: 'y\'\' = f(y, y\') \\xrightarrow{p=y\',\\ y\'\'=p\\frac{dp}{dy}} p\\frac{dp}{dy} = f(y, p)',
+        note: '令 p=y\'，关键变换：y\'\'=dp/dx=(dp/dy)(dy/dx)=p·dp/dy。方程降为 y 和 p 的一阶方程。',
+        detail: '不显含自变量 x 的方程：F(y, y\', y\'\')=0。关键步骤：令 p=y\'，则 y\'\' = dp/dx = (dp/dy)(dy/dx) = p·dp/dy（链式法则）。代入得关于 y 和 p 的一阶方程 F(y, p, p·dp/dy)=0。解出 p=ψ(y,C₁) 后，再由 dy/dx = ψ(y,C₁)（可分离变量）积分得隐式通解。经典例题：y·y\'\'=(y\')²。',
+        level: 'important',
+      },
+      {
+        name: '欧拉方程（Euler）',
+        latex: 'x^ny^{(n)} + a_1 x^{n-1}y^{(n-1)} + \\cdots + a_ny = f(x) \\xrightarrow{x=e^t} \\text{常系数线性方程}',
+        note: '令 x=e^t（或 t=ln x），x·y\'→y\'_t，x²y\'\'→y\'\'_t - y\'_t。化为常系数！',
+        detail: '欧拉方程的特征：各项是 x^k·y^{(k)} 的形式，系数为常数。解法：令 x=e^t (x>0)，则 x·dy/dx = dy/dt，x²·d²y/dx² = d²y/dt² - dy/dt。变换后原方程变为关于 t 的常系数线性方程，用特征方程法求解。最终将 t=ln x 代回。若 x<0 则令 x=-e^t。考试中通常只需处理 x>0 的情况。二阶欧拉方程：x²y\'\'+ax·y\'+by=f(x) 是最常考形式。',
+        level: 'advanced',
+      },
+      {
+        name: '常系数线性微分方程组',
+        latex: '\\begin{cases} x\' = a_{11}x + a_{12}y \\\\ y\' = a_{21}x + a_{22}y \\end{cases} \\xrightarrow{|A-\\lambda I|=0} \\text{通解 = } C_1 e^{\\lambda_1 t}\\mathbf{v}_1 + C_2 e^{\\lambda_2 t}\\mathbf{v}_2',
+        note: '写为矩阵形式 X\'=AX。特征值和特征向量 → 通解。方法与常系数方程完全对应。',
+        detail: '一阶常系数线性方程组 X\'=AX 的解法与单个方程类似，但用矩阵形式。步骤：①写系数矩阵 A；②求特征方程 |A-λI|=0 的根 λ₁,λ₂；③求每个 λ_i 对应的特征向量 v_i；④通解 X = C₁e^{λ₁t}v₁ + C₂e^{λ₂t}v₂。复特征根情形：λ=α±iβ → e^{αt}[C₁(cosβt·Re(v)-sinβt·Im(v)) + C₂(…)]。应用背景：①耦合振子（弹簧系统）；②种群竞争模型（Lotka-Volterra）；③电路中的 RLC 网络。',
+        level: 'advanced',
       },
     ],
   },
@@ -431,6 +474,149 @@ const formulaData: FormulaMap = {
     ],
   },
 
+  'calc-curve-integral': {
+    id: 'calc-curve-integral',
+    title: '曲线积分与格林公式',
+    subject: '高等数学',
+    formulas: [
+      {
+        name: '第一类曲线积分（对弧长）',
+        latex: '\\int_L f(x,y)\\,ds = \\int_\\alpha^\\beta f(x(t),y(t)) \\sqrt{[x\'(t)]^2+[y\'(t)]^2}\\,dt',
+        note: '弧长微元 ds = √(dx²+dy²)。积分值与方向无关（对称性可用于简化）。',
+        detail: '对弧长的曲线积分（标量积分）计算步骤：①写出曲线参数方程；②计算弧长微元 ds=√(x\'²+y\'²)dt；③代入积分。性质：与积分路径方向无关（∫_L fds = ∫_{-L} fds）。常见应用：求曲线质量（线密度×弧长）、曲线质心。记忆口诀："沿着曲线走，每段弧长乘以函数值求和"。计算技巧：若曲线对称且 f 是奇函数，可利用对称性简化。圆形边界用极坐标参数化更方便。',
+        level: 'important',
+      },
+      {
+        name: '第二类曲线积分（对坐标）',
+        latex: '\\int_L P(x,y)\\,dx + Q(x,y)\\,dy = \\int_\\alpha^\\beta \\left[P\\,x\'(t) + Q\\,y\'(t)\\right]dt',
+        note: '变力沿曲线做功的数学表达。积分值与方向有关：反向积分变号！',
+        detail: '第二类曲线积分表示变力 F=(P,Q) 沿曲线 L 做的功。关键性质：方向性——∫_{-L} = -∫_L（反向积分变号）。计算步骤：①将曲线参数化；②代入 P,Q 和 dx=x\'dt, dy=y\'dt；③化为对 t 的定积分。注意 dx, dy 的正负号！若曲线由方程 y=y(x) 给出，可直接以 x 为参数。两类曲线积分可通过 cos 方向角互化：∫_L Pdx+Qdy = ∫_L (P cosα + Q cosβ) ds。',
+        level: 'important',
+      },
+      {
+        name: '格林公式（Green）',
+        latex: '\\oint_L P\\,dx + Q\\,dy = \\iint_D \\left(\\frac{\\partial Q}{\\partial x} - \\frac{\\partial P}{\\partial y}\\right)dx\\,dy',
+        note: '封闭曲线积分 ↔ 二重积分！L 取正向（逆时针，内部在左侧）。计算面积：A = ½∮ xdy - ydx。',
+        detail: '格林公式是曲线积分计算的核心工具——将封闭曲线积分转化为区域内的二重积分。条件：①L 是封闭光滑曲线；②P,Q 在 D 内有一阶连续偏导；③L 取正向（逆时针——沿 L 走时区域 D 在左手边）。应用场景：①封闭曲线积分直接算二重积分；②非封闭曲线可通过补线变成封闭再减补线；③计算平面区域面积：A = ∬_D 1 dxdy = ½∮_L xdy-ydx = ∮_L xdy = -∮_L ydx。重要推论：若 ∂Q/∂x = ∂P/∂y（积分与路径无关），则沿任意闭曲线的积分为 0。',
+        level: 'important',
+      },
+      {
+        name: '曲线积分与路径无关的条件',
+        latex: '\\frac{\\partial P}{\\partial y} = \\frac{\\partial Q}{\\partial x} \\text{（在单连通域 } D \\text{ 内成立）} \\Rightarrow \\int_L P\\,dx+Q\\,dy \\text{ 与路径无关}',
+        note: '∂P/∂y = ∂Q/∂x 且 D 单连通 → 积分只与起点终点有关！可求原函数 u(x,y)。',
+        detail: '四个等价条件（在单连通域内）：①∂P/∂y = ∂Q/∂x；②沿 D 内任意闭曲线积分为 0；③积分 ∫_L Pdx+Qdy 只与起终点有关；④存在 u(x,y) 使得 du = Pdx+Qdy（即 P=∂u/∂x, Q=∂u/∂y）。求原函数方法：①偏积分法：u=∫Pdx+φ(y)，再对 y 求导确定 φ\'；②线积分法（选简便路径）：u(x,y)=∫_{(x₀,y₀)}^{(x,y)} Pdx+Qdy，可沿折线积分。注意"单连通"是关键——有洞的区域不适用！',
+        level: 'important',
+      },
+      {
+        name: '斯托克斯公式（Stokes）',
+        latex: '\\oint_L P\\,dx+Q\\,dy+R\\,dz = \\iint_\\Sigma \\begin{vmatrix} \\cos\\alpha & \\cos\\beta & \\cos\\gamma \\\\ \\frac{\\partial}{\\partial x} & \\frac{\\partial}{\\partial y} & \\frac{\\partial}{\\partial z} \\\\ P & Q & R \\end{vmatrix} dS',
+        note: '格林公式的三维推广：空间闭曲线积分 → 曲面积分。L 方向与 Σ 法向量满足右手定则。',
+        detail: '斯托克斯公式是格林公式向三维空间的自然推广。行列式形式便于记忆——第一行是方向余弦，第三行是向量分量。右手定则：右手四指沿 L 方向弯曲，拇指指向 Σ 的正法向。注意曲面的侧/定向必须与曲线方向协调。退化情况：若曲面在 xy 平面上（z=0），Stokes 公式退化为格林公式。这是场论中旋度定理的基础形式。',
+        level: 'advanced',
+      },
+      {
+        name: '高斯公式（散度定理）',
+        latex: '\\oiint_\\Sigma P\\,dydz + Q\\,dzdx + R\\,dxdy = \\iiint_\\Omega \\left(\\frac{\\partial P}{\\partial x} + \\frac{\\partial Q}{\\partial y} + \\frac{\\partial R}{\\partial z}\\right)dV',
+        note: '封闭曲面积分 ↔ 三重积分！右侧被积函数是散度 div F。Σ 取外侧为正。',
+        detail: '高斯公式（散度定理）是格林公式在三维空间的另一推广：将封闭曲面上的通量积分转化为体积分。条件：①Σ 是封闭光滑曲面；②P,Q,R 在 Ω 内有一阶连续偏导；③Σ 取外侧（法向量指向外部）。物理意义：通过封闭曲面的净通量 = 内部源的总和（散度的体积分）。应用：①直接计算封闭曲面积分；②非封闭曲面可先补面再用高斯公式；③求向量场的散度。这是电磁学、流体力学的基本定理。',
+        level: 'advanced',
+      },
+    ],
+  },
+
+  'calc-triple-integral': {
+    id: 'calc-triple-integral',
+    title: '三重积分',
+    subject: '高等数学',
+    formulas: [
+      {
+        name: '直角坐标三重积分',
+        latex: '\\iiint_\\Omega f(x,y,z)\\,dV = \\int_a^b dx \\int_{y_1(x)}^{y_2(x)} dy \\int_{z_1(x,y)}^{z_2(x,y)} f(x,y,z)\\,dz',
+        note: '先对 z 积分（从下曲面到上曲面），再对 y（投影区域），最后对 x。顺序可换。',
+        detail: '直角坐标系下三重积分化为三次积分（累次积分）。最常用顺序（先 z 后 y 后 x）：①将 Ω 向 xOy 面投影得 D_xy；②对每个 (x,y)∈D_xy，z 从下曲面 z₁(x,y) 到上曲面 z₂(x,y)；③在 D_xy 上做二重积分。换序原则与二重积分类似，关键是正确写出各变量的上下限。适合"柱体"型区域（上下为曲面、侧面为柱面）。',
+        level: 'important',
+      },
+      {
+        name: '柱坐标三重积分',
+        latex: '\\iiint_\\Omega f\\,dV = \\iiint f(r\\cos\\theta, r\\sin\\theta, z)\\,r\\,dr\\,d\\theta\\,dz',
+        note: 'x=r cosθ, y=r sinθ, z=z。雅可比行列式 = r（别忘了乘 r！）。适合圆柱、旋转抛物面。',
+        detail: '柱坐标 = 极坐标 (r,θ) + 直角坐标 z。体积微元 dV = r dr dθ dz（来自二重积分极坐标的 r）。适用场景：①区域在 xy 面投影是圆/扇形；②被积函数含 x²+y² → 变为 r²。计算步骤：确定 θ 范围 → 确定 r 范围（可能依赖 z）→ 确定 z 范围。经典例题：计算抛物面 z=x²+y² 与平面 z=4 围成的体积。',
+        level: 'important',
+      },
+      {
+        name: '球坐标三重积分',
+        latex: '\\iiint_\\Omega f\\,dV = \\iiint f(\\rho\\sin\\phi\\cos\\theta, \\rho\\sin\\phi\\sin\\theta, \\rho\\cos\\phi)\\,\\rho^2\\sin\\phi\\,d\\rho\\,d\\phi\\,d\\theta',
+        note: '雅可比 = ρ² sinφ。x=ρ sinφ cosθ, y=ρ sinφ sinθ, z=ρ cosφ。适合球、锥体。',
+        detail: '球坐标参数：ρ≥0（到原点距离），0≤φ≤π（与 z 轴正半轴夹角），0≤θ<2π（xOy 面方位角）。体积微元 dV = ρ² sinφ dρ dφ dθ。适用：区域是球体/球冠/锥体。经典题型：计算球体 x²+y²+z²≤R² 的体积 = 4πR³/3（用球坐标直接得到）。注意 φ 范围：若区域包含 z 轴正半轴附近，φ 从 0 开始；圆锥 z≥√(x²+y²) 对应 0≤φ≤π/4。',
+        level: 'important',
+      },
+      {
+        name: '三重积分换元（一般变量变换）',
+        latex: '\\iiint_\\Omega f(x,y,z)\\,dxdydz = \\iiint_{\\Omega\'} f(x(u,v,w),y(u,v,w),z(u,v,w))\\,|J|\\,dudvdw',
+        note: '雅可比行列式 J = ∂(x,y,z)/∂(u,v,w)。柱坐标 |J|=r，球坐标 |J|=ρ² sinφ。',
+        detail: '一般变量变换 (x,y,z)→(u,v,w) 时，dxdydz = |J| dudvdw。雅可比矩阵是三阶矩阵，|J| 是其行列式的绝对值。柱坐标：x=r cosθ, y=r sinθ, z=z → |J| = r。球坐标：x=ρ sinφ cosθ, y=ρ sinφ sinθ, z=ρ cosφ → |J| = ρ² sinφ。应用场景：截面为椭圆的柱体（广义柱坐标）、旋转椭球体等。计算 |J| 时注意偏导顺序。',
+        level: 'advanced',
+      },
+      {
+        name: '三重积分对称性',
+        latex: '\\begin{aligned} &\\Omega \\text{ 关于 } xOy \\text{ 面对称：} f \\text{ 关于 } z \\text{ 为奇} \\Rightarrow \\iiint f = 0 \\\\ &\\Omega \\text{ 关于 } xOy \\text{ 面对称：} f \\text{ 关于 } z \\text{ 为偶} \\Rightarrow \\iiint f = 2\\iiint_{\\Omega_{\\text{上}}} f \\end{aligned}',
+        note: '与二重积分类似：奇函数在对称区域积分为零，偶函数 = 2 倍一半区域。',
+        detail: '对称性是简化计算的重要技巧。使用前提：积分区域 Ω 具有对称性，且被积函数关于相应变量有确定的奇偶性。常见对称类型：①关于坐标平面对称（如 xOy 面）；②关于坐标轴对称（如 z 轴）；③轮换对称（x,y,z 互换后 Ω 不变）。轮换对称下：∭x²dV = ∭y²dV = ∭z²dV。解题时先观察区域和被积函数的对称性，可大幅减少计算甚至直接得出零。',
+        level: 'important',
+      },
+    ],
+  },
+
+  'calc-surface-field': {
+    id: 'calc-surface-field',
+    title: '曲面积分与场论',
+    subject: '高等数学',
+    formulas: [
+      {
+        name: '第一类曲面积分（对面积）',
+        latex: '\\iint_\\Sigma f(x,y,z)\\,dS = \\iint_{D_{xy}} f(x,y,z(x,y)) \\sqrt{1+z_x^2+z_y^2}\\,dxdy',
+        note: '面积微元 dS = √(1+z_x²+z_y²) dxdy。也可向 xOz 或 yOz 面投影（注意雅可比不同）。',
+        detail: '对面积的曲面积分（标量积分）计算步骤：①写出曲面方程（通常 z=z(x,y)）；②计算面积微元 dS = √(1+(∂z/∂x)²+(∂z/∂y)²) dxdy；③确定投影区域 D_xy；④化为二重积分。关键：若曲面向 yOz 面投影更方便（如圆柱面 x²+y²=R²），dS = √(1+x_y²+x_z²) dydz。常见应用：求曲面质量（面密度×面积）、曲面质心。',
+        level: 'important',
+      },
+      {
+        name: '第二类曲面积分（对坐标）',
+        latex: '\\iint_\\Sigma P\\,dydz + Q\\,dzdx + R\\,dxdy = \\iint_\\Sigma (P\\cos\\alpha + Q\\cos\\beta + R\\cos\\gamma)\\,dS',
+        note: '有向曲面上的向量场通量。积分值与曲面的侧（方向）有关——反向积分变号！',
+        detail: '第二类曲面积分表示向量场 F=(P,Q,R) 通过有向曲面 Σ 的通量。计算步骤：①确定曲面的侧（上侧/下侧、前侧/后侧等）；②向坐标面投影（如 dxdy 项向 xOy 面投影）；③注意正负号：上侧取正，下侧取负。合矢量投影法：∬_Σ Pdydz+Qdzdx+Rdxdy = ∬_Σ (P cosα+Q cosβ+R cosγ) dS（cosα,cosβ,cosγ 是法向量的方向余弦）。关键区别：第一类与方向无关，第二类与方向有关（反向积分变号！）。',
+        level: 'important',
+      },
+      {
+        name: '梯度、散度与旋度',
+        latex: '\\begin{aligned} &\\operatorname{grad} f = \\nabla f = \\left(\\frac{\\partial f}{\\partial x}, \\frac{\\partial f}{\\partial y}, \\frac{\\partial f}{\\partial z}\\right) \\\\ &\\operatorname{div} \\mathbf{F} = \\nabla \\cdot \\mathbf{F} = \\frac{\\partial P}{\\partial x} + \\frac{\\partial Q}{\\partial y} + \\frac{\\partial R}{\\partial z} \\\\ &\\operatorname{rot} \\mathbf{F} = \\nabla \\times \\mathbf{F} = \\begin{vmatrix} \\mathbf{i} & \\mathbf{j} & \\mathbf{k} \\\\ \\frac{\\partial}{\\partial x} & \\frac{\\partial}{\\partial y} & \\frac{\\partial}{\\partial z} \\\\ P & Q & R \\end{vmatrix} \\end{aligned}',
+        note: '梯度指向函数增长最快的方向；散度衡量源的强度；旋度衡量旋转趋势。',
+        detail: '梯度 grad f = (f_x, f_y, f_z)：标量场的方向导数最大化方向，指向 f 增长最快的方向。散度 div F = ∂P/∂x+∂Q/∂y+∂R/∂z：向量场在一点的"源"强度，div F>0 表示流出（源），div F<0 表示流入（汇），div F=0 称为无源场（管量场）。旋度 rot F：向量场在一点的旋转趋势，rot F=0 称为无旋场（保守场）。梯度场必无旋（rot(grad f) ≡ 0），旋度场必无散（div(rot F) ≡ 0）。',
+        level: 'important',
+      },
+      {
+        name: '保守场与势函数',
+        latex: '\\mathbf{F} \\text{ 为保守场} \\iff \\operatorname{rot}\\mathbf{F} = \\mathbf{0} \\text{（单连通域）} \\iff \\oint \\mathbf{F}\\cdot d\\mathbf{r} = 0 \\iff \\mathbf{F} = \\nabla u',
+        note: '保守场 = 梯度场 = 无旋场（在单连通域内三者等价）。势函数 u 满足 ∂u/∂x=P 等。',
+        detail: '四个等价条件（在单连通域内）：①rot F = 0（无旋）；②沿任意闭曲线积分为 0；③曲线积分与路径无关；④存在势函数 u 使得 F = ∇u（即 P=∂u/∂x, Q=∂u/∂y, R=∂u/∂z）。求势函数的方法：偏积分法（u=∫Pdx+φ(y,z)，再对 y 求导确定 φ_y 等）或线积分法（选从原点出发的折线积分）。验证保守场的最简单方法：计算旋度是否为零。',
+        level: 'important',
+      },
+      {
+        name: '三大定理统一：格林/斯托克斯/高斯',
+        latex: '\\begin{aligned} &\\text{Green（平面）：} \\oint_L \\!=\\! \\iint_D \\left(\\frac{\\partial Q}{\\partial x}-\\frac{\\partial P}{\\partial y}\\right) \\\\ &\\text{Stokes（空间）：} \\oint_L \\!=\\! \\iint_\\Sigma (\\operatorname{rot}\\mathbf{F})\\cdot d\\mathbf{S} \\\\ &\\text{Gauss（空间）：} \\oiint_\\Sigma \\!=\\! \\iiint_\\Omega \\operatorname{div}\\mathbf{F}\\,dV \\end{aligned}',
+        note: 'Green: 线积分↔面积分；Stokes: 线积分↔曲面积分（旋度通量）；Gauss: 曲面积分↔体积分（散度体积分）。',
+        detail: '这三大定理是微积分中最重要的统一性结果，它们将边界上的积分与内部区域上的积分联系起来：①格林公式（2D）：封闭曲线积分 = 内部区域二重积分（被积式 = ∂Q/∂x-∂P/∂y = 旋度的 z 分量）；②斯托克斯公式（3D）：空间封闭曲线积分 = 张在该曲线上曲面的面积分（被积式 = rot F·n）；③高斯公式（3D）：封闭曲面积分 = 内部区域三重积分（被积式 = div F）。统一定理：∫_{∂Ω} ω = ∫_Ω dω（广义斯托克斯）。',
+        level: 'advanced',
+      },
+      {
+        name: '方向导数与梯度',
+        latex: '\\frac{\\partial f}{\\partial \\mathbf{l}} = \\nabla f \\cdot \\mathbf{l}_0 = f_x\\cos\\alpha + f_y\\cos\\beta + f_z\\cos\\gamma',
+        note: '方向导数的最大值 = |∇f|（梯度的模），方向 = 梯度方向。梯度方向是函数增长最快的方向。',
+        detail: '方向导数 ∂f/∂l 衡量函数在指定方向 l 上的变化率。计算公式 = ∇f·l₀（梯度与单位方向向量的点积）。重要结论：①方向导数的最大值 = |∇f|（沿梯度方向）；②最小值 = -|∇f|（沿负梯度方向）；③等值面法线方向 = 梯度方向；④等高线上方向导数为 0（沿等值线的切线方向）。几何意义：梯度向量垂直于等值面，指向 f 增长最快的方向。',
+        level: 'important',
+      },
+    ],
+  },
+
   // ===== 线性代数 =====
   'linalg-det': {
     id: 'linalg-det',
@@ -445,7 +631,7 @@ const formulaData: FormulaMap = {
       },
       {
         name: '行列式核心性质',
-        latex: '\\begin{aligned} &\\text{① 转置不变：} |A^T| = |A| \\\\[6pt] &\\text{② 交换两行（列）变号} \\\\[6pt] &\\text{③ 某行乘 } k \\text{，行列式乘 } k \\\\[6pt] &\\text{④ 某行加到另一行，值不变} \\\\[6pt] &\\text{⑤ } |AB| = |A|\\cdot|B| \\end{aligned}',
+        latex: '\\begin{aligned} &\\text{① 转置不变：} |A^T| = |A| \\ &\\text{② 交换两行（列）变号} \\ &\\text{③ 某行乘 } k \\text{，行列式乘 } k \\ &\\text{④ 某行加到另一行，值不变} \\ &\\text{⑤ } |AB| = |A|\\cdot|B| \\end{aligned}',
         note: '性质④是行列式计算的核心工具，目标化为上三角行列式。',
         detail: '这五条性质是行列式计算的全部工具。核心思路——用性质④（倍加变换）把行列式化为上三角形式，则行列式 = 主对角线元素之积。注意：①倍加变换不改值；②交换两行要变号（别漏了）；③某行提取公因子，k 提到行列式外面；④两行成比例 → 行列式为 0；⑤|kA| = k^n|A|（不是 k|A|！n 是阶数）。',
       },
@@ -547,7 +733,7 @@ const formulaData: FormulaMap = {
       },
       {
         name: '特征值与迹、行列式的关系',
-        latex: '\\sum \\lambda_i = \\operatorname{tr}(A) = \\sum a_{ii},\\quad \\prod \\lambda_i = |A|',
+        latex: '\\sum \\lambda_i = \\mathrm{tr}(A) = \\sum a_{ii},\\quad \\prod \\lambda_i = |A|',
         note: '所有特征值之和=迹，之积=行列式。常用于验证计算结果。',
         detail: '这是两个超实用的验证公式：①Σλ_i = tr(A) = 主对角线元素之和；②Πλ_i = |A| = 行列式。算出特征值后，用这两条快速验证计算是否正确。重要推论：|A|=0 ⟺ 至少一个特征值为 0 ⟺ A 不可逆；所有特征值 ≠ 0 ⟺ A 可逆。A 的逆矩阵的特征值是 1/λ_i，A^k 的特征值是 λ_i^k。',
       },
@@ -604,6 +790,49 @@ const formulaData: FormulaMap = {
     ],
   },
 
+  'linalg-space': {
+    id: 'linalg-space',
+    title: '线性空间与线性变换',
+    subject: '线性代数',
+    formulas: [
+      {
+        name: '线性空间的八条公理',
+        latex: '\\begin{aligned} &\\text{加法：封闭、交换、结合、零元、负元} \\\\ &\\text{数乘：封闭、分配律 }(k+l)\\alpha=k\\alpha+l\\alpha,\\ k(\\alpha+\\beta)=k\\alpha+k\\beta \\\\ &\\text{数乘结合：}k(l\\alpha)=(kl)\\alpha,\\ 1\\cdot\\alpha=\\alpha \\end{aligned}',
+        note: '满足八条公理的集合即为线性空间（向量空间）。验证子空间只需证非空 + 对加法和数乘封闭。',
+        detail: '线性空间是现代线性代数的公理化基础。八条公理分为：加法四条（封闭、交换律、结合律、零元存在、负元存在），数乘四条（封闭、分配律×2、结合律、单位元）。验证子空间的三步法：①非空（通常取零向量）；②对加法封闭（α,β∈W⇒α+β∈W）；③对数乘封闭（α∈W,k∈R⇒kα∈W）。常见线性空间：R^n（n 维实向量）、P_n[x]（次数≤n 的多项式）、C[a,b]（连续函数）。',
+        level: 'important',
+      },
+      {
+        name: '基变换与坐标变换',
+        latex: '\\begin{aligned} &(\\beta_1,\\dots,\\beta_n) = (\\alpha_1,\\dots,\\alpha_n)P \\\\ &\\text{坐标变换：} x = P\\,y \\quad\\text{（其中 } P \\text{ 为过渡矩阵）} \\end{aligned}',
+        note: '过渡矩阵 P 的列是 β 在旧基 α 下的坐标。P 必可逆，新旧坐标关系 x=Py。',
+        detail: '基变换是理解线性变换矩阵表示的关键。若旧基 α₁,...,α_n 到新基 β₁,...,β_n 的过渡矩阵为 P（即每个 βⱼ 用 α 的线性组合写出作为 P 的第 j 列），则同一向量在新旧基下的坐标满足 x_旧 = P·y_新。反之 y = P⁻¹x。过渡矩阵 P 必可逆（基的等价性）。应用：若线性变换在旧基下矩阵为 A，在新基下为 B，则 B = P⁻¹AP（相似关系）。记忆口诀："旧坐标 = 过渡矩阵 × 新坐标"。',
+        level: 'important',
+      },
+      {
+        name: '线性变换的矩阵表示',
+        latex: '\\mathcal{A}(\\alpha_1,\\dots,\\alpha_n) = (\\alpha_1,\\dots,\\alpha_n)A \\quad\\Rightarrow\\quad \\mathcal{A}(\\xi) \\text{ 的坐标 } = A\\,x',
+        note: 'A 的第 j 列 = 第 j 个基向量经变换后的坐标。同一变换在不同基下的矩阵相似：B=P⁻¹AP。',
+        detail: '线性变换与矩阵的一一对应建立在选定基的基础上。若基为 α₁,...,α_n，变换 A 将每个基向量映射为它们的线性组合：A(αⱼ)=a_{1j}α₁+...+a_{nj}α_n，则 A 的矩阵 A=(a_{ij})。重要关系：若向量 ξ 的坐标为 x，则 A(ξ) 的坐标为 A·x。同一个线性变换在不同基下的矩阵相似：B=P⁻¹AP。换言之，"变换找相似，矩阵找合同"（二次型用合同，线性变换用相似）。',
+        level: 'important',
+      },
+      {
+        name: '核与值域（维数公式）',
+        latex: '\\dim \\ker \\mathcal{A} + \\dim \\operatorname{Im} \\mathcal{A} = \\dim V = n',
+        note: '核（零空间）的维数 + 值域（列空间）的维数 = 定义域维数。dim Ker = n - rank(A)。',
+        detail: '维数公式是线性变换最重要的结论之一。核 Ker A = {x | Ax=0}（齐次方程解空间），值域 Im A = {Ax | x∈V} = 列空间 = 列向量的所有线性组合。dim Ker = n - rank(A)（齐次方程的自由变量个数），dim Im = rank(A)。推论：①A 是单射 ⟺ Ker A = {0} ⟺ rank(A)=n；②A 是满射 ⟺ Im A = 全空间 ⟺ rank(A)=dim(目标空间)；③方阵满秩 ⟺ 既是单射又是满射。',
+        level: 'important',
+      },
+      {
+        name: '线性变换的特征值与特征向量',
+        latex: '\\mathcal{A}(\\xi) = \\lambda \\xi \\quad\\Rightarrow\\quad |A - \\lambda I| = 0 \\ \\text{（特征方程）}',
+        note: '线性变换的特征值/向量与矩阵的特征值/向量一一对应，不依赖基的选取（相似不变量）。',
+        detail: '线性变换的特征值与特征向量定义：存在非零向量 ξ 使得 A(ξ)=λξ。在基下转化为矩阵特征方程 |A-λI|=0。关键性质：①特征值是相似不变量（不同基下矩阵的特征值相同）；②属于不同特征值的特征向量线性无关；③特征子空间 V_λ = {ξ | A(ξ)=λξ} = Ker(A-λI)；④几何重数（dim V_λ）≤ 代数重数（特征根的重数）。线性变换可对角化 ⟺ 有 n 个线性无关的特征向量 ⟺ 每个特征值的几何重数=代数重数。',
+        level: 'advanced',
+      },
+    ],
+  },
+
   // ===== 离散数学 =====
   'disc-logic': {
     id: 'disc-logic',
@@ -636,7 +865,7 @@ const formulaData: FormulaMap = {
       },
       {
         name: '推理规则（常用蕴涵式）',
-        latex: '\\begin{aligned} &\\text{假言推理：} p,\\ p \\to q \\Rightarrow q \\\\[6pt] &\\text{拒取式：} \\lnot q,\\ p \\to q \\Rightarrow \\lnot p \\\\[6pt] &\\text{假言三段论：} p \\to q,\\ q \\to r \\Rightarrow p \\to r \\end{aligned}',
+        latex: '\\begin{aligned} &\\text{假言推理：} p,\\ p \\to q \\Rightarrow q \\ &\\text{拒取式：} \\lnot q,\\ p \\to q \\Rightarrow \\lnot p \\ &\\text{假言三段论：} p \\to q,\\ q \\to r \\Rightarrow p \\to r \\end{aligned}',
         note: '证明题中逐步推理的规则，类似"已知→结论"的链条。',
         detail: '假言推理（Modus Ponens）是最基本推理：知道 p 成立，又知道 p→q，则推出 q。拒取式（Modus Tollens）：知道 q 不成立，又知道 p→q，则推出 p 也不成立。假言三段论：蕴含关系的传递性。此外还有：附加律 p⇒p∨q、化简律 p∧q⇒p、构造性二难 (p→q)∧(r→s)∧(p∨r) ⇒ q∨s。证明题就是这些基本规则的组合运用。',
       },
@@ -650,7 +879,7 @@ const formulaData: FormulaMap = {
     formulas: [
       {
         name: '集合运算恒等式',
-        latex: '\\begin{aligned} A \\cup (B \\cap C) &= (A \\cup B) \\cap (A \\cup C) \\\\[6pt] A \\cap (B \\cup C) &= (A \\cap B) \\cup (A \\cap C) \\\\[6pt] \\overline{A \\cup B} &= \\overline{A} \\cap \\overline{B} \\end{aligned}',
+        latex: '\\begin{aligned} A \\cup (B \\cap C) &= (A \\cup B) \\cap (A \\cup C) \\ A \\cap (B \\cup C) &= (A \\cap B) \\cup (A \\cap C) \\ \\overline{A \\cup B} &= \\overline{A} \\cap \\overline{B} \\end{aligned}',
         note: '分配律和德摩根律在集合中的形式。用文氏图直观验证。',
         detail: '集合恒等式与命题逻辑恒等式一一对应：∪↔∨, ∩↔∧, 补集↔¬。因此集合的德摩根律：A∪B 的补 = A补 ∩ B补。集合分配律注意：①∪ 对 ∩ 分配；②∩ 对 ∪ 分配（命题逻辑中 ∧ 也对 ∨ 分配，这是集合恒等式比算术恒等式好的地方）。证明集合恒等式的标准方法：取任意元素 x，从左右两边互相推导。',
       },
@@ -849,6 +1078,27 @@ const formulaData: FormulaMap = {
         detail: '指数分布常用于：电子元件寿命、排队论中的服务时间、放射性衰变时间。无记忆性是核心特征：如果 X 表示灯泡寿命，已知已经亮了 s 小时，剩余寿命仍服从同样的指数分布（不因已使用时长而加速老化）。期望 = 1/λ，λ 越大→平均等待时间越短。指数分布与泊松分布的关系：泊松过程的事件到达时间间隔 ~ Exp(λ)。分布函数 F(x)=1-e^{-λx}（x≥0）。',
         level: 'important',
       },
+      {
+        name: 'χ² 分布（卡方分布）',
+        latex: '\\text{若 } X_i \\sim N(0,1) \\text{ 独立，则 } \\chi^2 = \\sum_{i=1}^{n} X_i^2 \\sim \\chi^2(n),\\quad E(\\chi^2)=n,\\ D(\\chi^2)=2n',
+        note: 'n 个独立标准正态的平方和。自由度 n 决定形状，n→∞ 趋近正态。用于方差检验和拟合优度。',
+        detail: 'χ² 分布是统计推断三大分布之一。关键性质：①n 个独立 N(0,1) 的平方和 ~ χ²(n)；②E(χ²)=n，D(χ²)=2n；③可加性：若 U~χ²(m), V~χ²(n) 独立，则 U+V~χ²(m+n)；④样本方差 (n-1)S²/σ² ~ χ²(n-1)（这是正态总体下方差推断的基础）；⑤n→∞ 时 χ²(n) 近似 N(n, 2n)。上侧分位点 χ²_α(n) 查表可得。注意：χ² 分布不对称、非负。',
+        level: 'important',
+      },
+      {
+        name: 't 分布（学生分布）',
+        latex: 'T = \\frac{X}{\\sqrt{Y/n}} \\sim t(n),\\quad X \\sim N(0,1),\\ Y \\sim \\chi^2(n),\\ X \\perp Y',
+        note: '标准正态除以独立卡方均值的平方根。n→∞ 时趋近 N(0,1)。用于均值检验（σ²未知）。',
+        detail: 't 分布是 W.S. Gosset（笔名 Student）推导的。构造：分子是标准正态，分母是独立 χ² 除以自由度的平方根。性质：①关于 0 对称钟形；②尾部比正态厚（自由度越小越厚）；③ET=0 (n>1)，DT=n/(n-2) (n>2)；④n→∞ 时 t(n)→N(0,1)，n≥30 即可用正态近似；⑤应用：σ² 未知时的单样本/双样本均值检验、回归系数检验。与正态的关系：t 检验更保守（临界值更大），小样本时必须用 t 而非 Z。',
+        level: 'important',
+      },
+      {
+        name: 'F 分布',
+        latex: 'F = \\frac{U/m}{V/n} \\sim F(m,n),\\quad U \\sim \\chi^2(m),\\ V \\sim \\chi^2(n),\\ U \\perp V',
+        note: '两个独立卡方除以各自自由度的比值。用于方差比检验、ANOVA 和回归显著性检验。',
+        detail: 'F 分布由两个独立的 χ² 变量构造：分子自由度 m（第一自由度），分母自由度 n（第二自由度）。性质：①非负、右偏长尾；②若 F~F(m,n)，则 1/F~F(n,m)；③F(1,n) = t²(n)（t 分布平方即 F 分布特例）；④E(F)=n/(n-2) (n>2)。应用：①两正态总体方差比检验（F 检验）；②方差分析 ANOVA（组间/组内均方比）；③回归方程整体显著性检验（F 检验）。查表需要两个自由度参数。',
+        level: 'important',
+      },
     ],
   },
 
@@ -866,7 +1116,7 @@ const formulaData: FormulaMap = {
       },
       {
         name: '协方差与相关系数',
-        latex: '\\begin{aligned} \\operatorname{Cov}(X,Y) &= E[(X-EX)(Y-EY)] = E(XY) - EX \\cdot EY \\\\ \\rho_{XY} &= \\frac{\\operatorname{Cov}(X,Y)}{\\sqrt{DX}\\sqrt{DY}},\\quad |\\rho| \\leq 1 \\end{aligned}',
+        latex: '\\begin{aligned} \\mathrm{Cov}(X,Y) &= E[(X-EX)(Y-EY)] = E(XY) - EX \\cdot EY \\\\ \\rho_{XY} &= \\frac{\\mathrm{Cov}(X,Y)}{\\sqrt{DX}\\sqrt{DY}},\\quad |\\rho| \\leq 1 \\end{aligned}',
         note: '协方差衡量线性相关性。ρ=0（不相关）≠ 独立，但对二元正态等价。',
         detail: '协方差的性质：①Cov(X,X)=D(X)；②Cov(X,Y)=Cov(Y,X)；③Cov(aX+b, cY+d)=ac·Cov(X,Y)；④Cov(X+Y,Z)=Cov(X,Z)+Cov(Y,Z)。相关系数 ρ 是标准化后的协方差，衡量线性相关程度：ρ=±1 ⟺ Y 与 X 几乎处处呈完美线性关系（Y=aX+b, a≠0）；ρ>0 正相关，ρ<0 负相关，ρ=0 不相关。重要区别：独立 ⇒ 不相关（ρ=0），但不相关 ⇏ 独立！例如 X~N(0,1), Y=X²，则 Cov(X,Y)=0 但显然不独立。',
         level: 'important',
@@ -933,6 +1183,238 @@ const formulaData: FormulaMap = {
         latex: '\\begin{aligned} &\\sigma^2 \\text{ 已知：} Z = \\frac{\\bar{X} - \\mu_0}{\\sigma/\\sqrt{n}} \\sim N(0,1) \\\\ &\\sigma^2 \\text{ 未知：} T = \\frac{\\bar{X} - \\mu_0}{S/\\sqrt{n}} \\sim t(n-1) \\end{aligned}',
         note: 'Z 检验用正态表，t 检验用 t 分布表。n≥30 时 t 近似于 Z。',
         detail: '检验均值的三类拒绝域（以 H₀: μ=μ₀ 为例）：①H₁: μ≠μ₀ → 双侧检验，|Z|>z_{α/2} 拒绝；②H₁: μ>μ₀ → 右侧检验，Z>z_α 拒绝；③H₁: μ<μ₀ → 左侧检验，Z<-z_α 拒绝。t 检验临界值查 t(n-1) 表，自由度 n-1。t 分布比正态分布尾部更厚（自由度越小越厚），n→∞ 时趋于正态。实际中 σ 通常未知，所以 t 检验比 Z 检验更常用。注意：t 检验要求总体服从正态分布（或 n 足够大由 CLT 保证近似）。',
+        level: 'important',
+      },
+    ],
+  },
+
+  'prob-multivariate': {
+    id: 'prob-multivariate',
+    title: '多维随机变量',
+    subject: '概率统计',
+    formulas: [
+      {
+        name: '联合分布与边缘分布',
+        latex: '\\begin{aligned} &F(x,y) = P(X \\leq x, Y \\leq y) \\\\ &F_X(x) = F(x,+\\infty),\\quad F_Y(y) = F(+\\infty,y) \\\\ &\\text{离散：} p_{i\\cdot} = \\sum_j p_{ij},\\quad p_{\\cdot j} = \\sum_i p_{ij} \\end{aligned}',
+        note: '边缘分布 = 联合分布对另一个变量"求和/积分"消去。联合分布唯一确定边缘，反之不成立！',
+        detail: '联合分布完整描述了 (X,Y) 的概率行为。从联合分布得到边缘分布的方法：离散型 → 对行/列求和（p_i· = Σ_j p_ij，p_·j = Σ_i p_ij）；连续型 → 对另一个变量积分（f_X(x)=∫f(x,y)dy）。重要警告：边缘分布不能唯一确定联合分布！例如两个不同的联合分布可能有完全相同的边缘分布——因为它们有不同的"关联结构"（用 copula 描述）。',
+        level: 'important',
+      },
+      {
+        name: '条件分布与独立性判定',
+        latex: '\\begin{aligned} &P(Y=y \\mid X=x) = \\frac{P(X=x,Y=y)}{P(X=x)} = \\frac{p_{ij}}{p_{i\\cdot}} \\\\ &X \\perp\\!\\!\\!\\perp Y \\iff F(x,y) = F_X(x)F_Y(y) \\iff f(x,y)=f_X(x)f_Y(y) \\iff p_{ij}=p_{i\\cdot}p_{\\cdot j} \\end{aligned}',
+        note: '条件分布 = 联合/边缘。独立 ⟺ 联合 = 边缘乘积（对所有 x,y 成立）。',
+        detail: '条件分布描述了在已知 X=x 的条件下 Y 的分布。关键公式：条件概率密度 f_{Y|X}(y|x) = f(x,y)/f_X(x)（连续型）。独立性的等价判定：①联合 = 边缘乘积（对任意 x,y）；②条件分布 = 无条件分布（给定 X 不影响 Y）；③对任意函数 g,h，E[g(X)h(Y)] = E[g(X)]E[h(Y)]。注意：两两独立 ≠ 相互独立（三个变量两两独立不保证三者独立）。独立 ⟺ 协方差为 0 在一般情况只是必要不充分条件。',
+        level: 'important',
+      },
+      {
+        name: '二维均匀分布与二维正态分布',
+        latex: '\\begin{aligned} &\\text{二维均匀 } U(D): f(x,y) = \\begin{cases} \\frac{1}{|D|} & (x,y) \\in D \\\\ 0 & \\text{其他} \\end{cases} \\\\ &\\text{二维正态 } N(\\mu_1,\\mu_2,\\sigma_1^2,\\sigma_2^2,\\rho): f(x,y) = \\frac{1}{2\\pi\\sigma_1\\sigma_2\\sqrt{1-\\rho^2}} \\exp\\!\\left(-\\frac{1}{2(1-\\rho^2)}\\left[\\frac{(x-\\mu_1)^2}{\\sigma_1^2} - 2\\rho\\frac{(x-\\mu_1)(y-\\mu_2)}{\\sigma_1\\sigma_2} + \\frac{(y-\\mu_2)^2}{\\sigma_2^2}\\right]\\right) \\end{aligned}',
+        note: '二维均匀：有界区域上等可能；二维正态由 5 个参数唯一确定。ρ=0 ⟺ 独立（仅二维正态成立）。',
+        detail: '二维均匀分布是有界区域 D 上的连续均匀分布，概率与面积成正比。二维正态分布由 5 个参数完全确定：(μ₁,μ₂,σ₁²,σ₂²,ρ)。关键性质：①边缘分布：X~N(μ₁,σ₁²)，Y~N(μ₂,σ₂²)（均为正态）；②条件分布也是正态：Y|X=x ~ N(μ₂+ρ(σ₂/σ₁)(x-μ₁), σ₂²(1-ρ²))；③ρ=0 ⟺ X 与 Y 独立（二维正态独有的性质，一般不成立！）；④线性组合仍正态：aX+bY ~ N(aμ₁+bμ₂, a²σ₁²+b²σ₂²+2abρσ₁σ₂)。',
+        level: 'advanced',
+      },
+      {
+        name: '协方差矩阵',
+        latex: '\\Sigma = \\begin{pmatrix} D(X) & \\operatorname{Cov}(X,Y) \\\\ \\operatorname{Cov}(Y,X) & D(Y) \\end{pmatrix} = \\begin{pmatrix} \\sigma_X^2 & \\rho\\sigma_X\\sigma_Y \\\\ \\rho\\sigma_X\\sigma_Y & \\sigma_Y^2 \\end{pmatrix}',
+        note: '对称半正定矩阵，对角元依次为各变量方差，非对角元为协方差。多维正态由此完全刻画。',
+        detail: '协方差矩阵 Σ 是多维随机变量最核心的数字特征：①对称：Σ^T = Σ；②半正定：x^T Σx ≥ 0（这保证了相关系数 |ρ|≤1 对任意维数都成立）；③对角元 = 各方差 σ_i²，非对角元 = Cov(X_i, X_j)。对多维正态 N(μ, Σ)，均值向量 μ 和协方差矩阵 Σ 完全决定了分布。线性变换的性质：若 Y = A X + b，则 Cov(Y) = A Σ A^T。这是传播误差/不确定性的重要公式。',
+        level: 'important',
+      },
+      {
+        name: '两个随机变量和的分布（卷积）',
+        latex: 'Z = X + Y,\\quad f_Z(z) = \\int_{-\\infty}^{\\infty} f(x, z-x)\\,dx \\ \\xrightarrow{X \\perp Y}\\ \\int_{-\\infty}^{\\infty} f_X(x)f_Y(z-x)\\,dx',
+        note: '独立时化为卷积 f_Z = f_X * f_Y。离散类似：P(Z=z) = Σ P(X=k)P(Y=z-k)。',
+        detail: '卷积公式是求独立随机变量之和分布的核心工具。步骤：①书写联合密度（独立时 = f_X(x)f_Y(y)）；②做变换（z=x+y, w=x 或 w=y）；③计算雅可比行列式；④对多余变量积分得到 Z 的边际密度。特殊情形：①独立正态之和仍正态：N(μ₁,σ₁²)+N(μ₂,σ₂²)=N(μ₁+μ₂,σ₁²+σ₂²)；②独立泊松之和仍泊松：P(λ₁)+P(λ₂)=P(λ₁+λ₂)；③独立二项之和（同 p）仍二项：B(m,p)+B(n,p)=B(m+n,p)。离散情形直接用全概率公式：P(Z=k)=Σ_i P(X=i)P(Y=k-i)。',
+        level: 'advanced',
+      },
+    ],
+  },
+
+  'prob-regression': {
+    id: 'prob-regression',
+    title: '方差分析与回归',
+    subject: '概率统计',
+    formulas: [
+      {
+        name: '一元线性回归（最小二乘估计）',
+        latex: '\\begin{aligned} &y = a + bx + \\varepsilon,\\quad \\varepsilon \\sim N(0,\\sigma^2) \\\\ &\\hat{b} = \\frac{\\sum (x_i-\\bar{x})(y_i-\\bar{y})}{\\sum (x_i-\\bar{x})^2} = \\frac{S_{xy}}{S_{xx}},\\quad \\hat{a} = \\bar{y} - \\hat{b}\\bar{x} \\\\ &S_{xx} = \\sum x_i^2 - n\\bar{x}^2,\\ S_{yy} = \\sum y_i^2 - n\\bar{y}^2,\\ S_{xy} = \\sum x_i y_i - n\\bar{x}\\bar{y} \\end{aligned}',
+        note: 'b̂ = S_xy/S_xx 是最小化残差平方和的结果。â 保证回归线过 (x̄, ȳ)。手算用 S 公式更简便。',
+        detail: '最小二乘法的核心：选择 a,b 使 Σ(y_i - a - bx_i)² 最小。b̂ = S_xy/S_xx 是核心公式。回归直线性质：①过点 (x̄, ȳ)；②Σ(y_i-ŷ_i)=0（残差和为零）；③Σ x_i(y_i-ŷ_i)=0。计算技巧：先求 x̄, ȳ, Σx_i², Σy_i², Σx_iy_i，再用 S 公式求 b̂。典型题型：给 5 组数据 (x,y)，求回归方程并预测 x=某值时 y 的值。',
+        level: 'important',
+      },
+      {
+        name: '判定系数 R²（拟合优度）',
+        latex: 'R^2 = \\frac{SSR}{SST} = \\frac{\\sum (\\hat{y}_i - \\bar{y})^2}{\\sum (y_i - \\bar{y})^2} = 1 - \\frac{SSE}{SST},\\quad 0 \\leq R^2 \\leq 1',
+        note: 'R² = 回归解释的变异比例。R² 越接近 1 拟合越好。一元回归 R² = r²（相关系数平方）。',
+        detail: '平方和分解：SST = SSR + SSE。总变异 SST = Σ(y_i-ȳ)²，回归解释 SSR = Σ(ŷ_i-ȳ)²，残差 SSE = Σ(y_i-ŷ_i)²。R² = SSR/SST 衡量回归线解释了多少比例的 y 的变异。重要关系：一元线性回归中 R² = r²（皮尔逊相关系数的平方）。注意：R² 永远不会因为增加自变量而减小（即使加的是噪声变量），调整 R² (Adjusted R²) 考虑了变量个数的惩罚。',
+        level: 'important',
+      },
+      {
+        name: '回归系数的显著性检验（t 检验）',
+        latex: 'T = \\frac{\\hat{b}}{S_b} \\sim t(n-2),\\quad S_b = \\frac{S}{\\sqrt{S_{xx}}},\\ S^2 = \\frac{SSE}{n-2}',
+        note: '检验 H₀: b=0 vs H₁: b≠0。若 |T| > t_{α/2}(n-2)，拒绝 H₀ → 回归效果显著。',
+        detail: 'b̂ 的方差估计：Var(b̂) = σ²/S_xx，σ² 的无偏估计 S² = SSE/(n-2)（n-2 是自由度）。b̂ 的标准化 T 统计量 ~ t(n-2)。显著性检验：①H₀: b=0（x 对 y 无线性影响）；②计算 T = b̂/S_b；③比较临界值 t_{α/2}(n-2)。若拒绝 H₀，说明 x 对 y 有显著的线性影响。同时可构造 b 的置信区间：b̂ ± t_{α/2}(n-2)·S_b。',
+        level: 'important',
+      },
+      {
+        name: '单因素方差分析（ANOVA）',
+        latex: '\\begin{aligned} &F = \\frac{MSA}{MSE} = \\frac{SSA/(k-1)}{SSE/(n-k)} \\sim F(k-1, n-k) \\\\ &SST = SSA + SSE \\end{aligned}',
+        note: '检验 k 个组的均值是否有显著差异。组间变异 vs 组内变异。F 值越大越显著。',
+        detail: '单因素 ANOVA 检验 H₀: μ₁=μ₂=...=μ_k vs H₁: 至少两个均值不等。总变异 SST 分解为：组间变异 SSA（factor 解释）+ 组内变异 SSE（随机误差）。F = MSA/MSE = (SSA/(k-1))/(SSE/(n-k))，若 F > F_α(k-1, n-k)，拒绝 H₀。关键假设：①各组独立；②正态性；③方差齐性（各组方差相等）。典型应用：比较三种教学方法的效果差异是否显著。',
+        level: 'important',
+      },
+      {
+        name: 'F 检验与回归方程整体显著性',
+        latex: 'F = \\frac{SSR}{SSE/(n-2)} = \\frac{MSR}{MSE} \\sim F(1, n-2)',
+        note: '检验整个回归方程是否显著（H₀: b=0）。一元回归中 F = T²，检验结论一致。',
+        detail: '对一元线性回归，F 检验和 t 检验等价（F = T²），但 F 检验可推广到多元。方差分析表：来源(回归/残差/总计) → 平方和(SSR/SSE/SST) → 自由度(1/n-2/n-1) → 均方(MSR/MSE) → F 值。若 p 值 < α（通常 0.05），说明回归方程整体显著。注意区分：回归显著 ≠ 拟合好（R² 可能很低），显著性只说明 x 与 y 确实存在线性关系。',
+        level: 'important',
+      },
+    ],
+  },
+
+  'prob-transform': {
+    id: 'prob-transform',
+    title: '随机变量函数的分布',
+    subject: '概率统计',
+    formulas: [
+      {
+        name: '离散型随机变量函数的分布',
+        latex: 'P(g(X)=y) = \\sum_{x: g(x)=y} P(X=x)',
+        note: '合并相同函数值的概率。列表法：枚举 X 的取值 → 计算 g(X) → 合并同类值。',
+        detail: '求 Y=g(X) 的分布：①写出 X 的分布列；②计算每个 x 对应的 y=g(x)；③对于相同的 y 值合并概率（概率相加）；④按 y 从小到大列出 Y 的分布列。若 g 是一一映射，则 Y 的概率 = X 对应取值的概率。典型题：已知 X~B(n,p)，求 Y=X² 的分布——注意 X 和 -X 可能映射到同一个 Y 值。二元情形类似：Z=g(X,Y)，对每对 (x,y) 算 g 值并合并。',
+        level: 'important',
+      },
+      {
+        name: '连续型：分布函数法',
+        latex: 'F_Y(y) = P(Y \\leq y) = P(g(X) \\leq y) = \\int_{\\{x: g(x) \\leq y\\}} f_X(x)\\,dx \\quad\\Rightarrow\\quad f_Y(y) = F\'_Y(y)',
+        note: '先求分布函数再求导得到密度。适用于任意 g（不要求单调）。',
+        detail: '分布函数法是求连续型 r.v. 函数分布的最通用方法。步骤：①F_Y(y)=P(Y≤y)=P(g(X)≤y)；②解不等式 g(x)≤y 得到 x 的范围；③用 X 的密度在范围内积分得到 F_Y(y)；④对 y 求导得到 f_Y(y)=F\'_Y(y)。关键难点在步骤②：如 Y=X²，则 P(X²≤y)=P(-√y≤X≤√y)=F_X(√y)-F_X(-√y)，求导得 f_Y(y)=[f_X(√y)+f_X(-√y)]/(2√y) (y>0)。',
+        level: 'important',
+      },
+      {
+        name: '连续型：公式法（单调函数）',
+        latex: 'Y = g(X),\\ g \\text{ 严格单调} \\Rightarrow f_Y(y) = f_X(h(y))\\cdot|h\'(y)|,\\quad h = g^{-1}',
+        note: 'g 单调 + g⁻¹ 可导时直接用公式！|h\'(y)| 是雅可比（一维）。注意绝对值。',
+        detail: '公式法比分布函数法更快，但仅适用于 g 严格单调的情形。若 g 递增：f_Y(y)=f_X(h(y))·h\'(y)；若 g 递减：h\'(y)<0，取绝对值后仍为正。经典例子：Y=aX+b (a≠0) → f_Y(y)=f_X((y-b)/a)·1/|a|。若 g 非单调（如 Y=X²），需分段：将定义域按单调性分成多段，每段用公式法再相加：f_Y(y)=Σ f_X(h_i(y))·|h\'_i(y)|，其中 h_i 是各单调分支的反函数。',
+        level: 'important',
+      },
+      {
+        name: '次序统计量的分布',
+        latex: '\\begin{aligned} &X_{(k)} \\text{（第 } k \\text{ 小的次序统计量）密度：} \\\\ &f_{X_{(k)}}(x) = \\frac{n!}{(k-1)!(n-k)!} [F(x)]^{k-1}[1-F(x)]^{n-k}f(x) \\end{aligned}',
+        note: '极大值 X_{(n)}: F_max(x)=[F(x)]ⁿ；极小值 X_{(1)}: F_min(x)=1-[1-F(x)]ⁿ。',
+        detail: '次序统计量在可靠性、风险管理中很关键。n 个独立同分布样本排序后得 X_{(1)}≤X_{(2)}≤...≤X_{(n)}。极值分布公式最简单：最大值 ≤ x ⟺ 所有都 ≤ x ⟺ F_max(x)=F(x)^n；最小值 > x ⟺ 所有都 > x ⟺ F_min(x)=1-(1-F(x))^n。中位数、四分位数属于次序统计量。次序统计量的联合分布也经常考察：f(x_{(i)},x_{(j)}) 涉及两个值的联合密度。',
+        level: 'advanced',
+      },
+    ],
+  },
+
+  'disc-boolean': {
+    id: 'disc-boolean',
+    title: '布尔代数',
+    subject: '离散数学',
+    formulas: [
+      {
+        name: '布尔代数基本定律',
+        latex: '\\begin{aligned} &\\text{幂等律：} a+a=a,\\ a\\cdot a=a \\\\ &\\text{吸收律：} a+ab=a,\\ a(a+b)=a \\\\ &\\text{德摩根律：} \\overline{a+b}=\\bar{a}\\cdot\\bar{b},\\ \\overline{a\\cdot b}=\\bar{a}+\\bar{b} \\\\ &\\text{双重否定：} \\overline{\\bar{a}} = a \\end{aligned}',
+        note: '布尔代数 = 集合代数 + 命题逻辑的统一抽象。+ 对应 ∪/∨，· 对应 ∩/∧。',
+        detail: '布尔代数是满足交换律、分配律、有界律、互补律的代数结构。不仅是命题逻辑和集合论的统一框架，也是数字电路设计的基础。吸收律 a+ab=a 的直观理解：若 a 为真，则 (a 或 (a 且 b)) 必为真——a 完全支配了结果。对偶原理：将 +↔·、0↔1 互换后定律仍成立（如 0-1 律 ↔ 有界律）。布尔代数与布尔环等价（通过 a⊕b = ab̄+āb 和 a∧b = ab）。',
+        level: 'basic',
+      },
+      {
+        name: '卡诺图化简（2-4 变量）',
+        latex: '\\begin{aligned} &\\text{卡诺图化简口诀：} \\\\ &\\text{圈大圈 → 消去变化量 → 保留不变量 → 写出最简与或式} \\end{aligned}',
+        note: '相邻格只有一个变量变化！圈 2ⁿ 个 1 消去 n 个变量。圈越大项越简。',
+        detail: '卡诺图化简步骤：①将真值表填入卡诺图（注意格雷码顺序，相邻格仅一位变）；②圈出所有 1（可重叠，圈尽可能大，2/4/8 个）；③每个圈对应一个质蕴含项（消去变化的变量）；④选取最小覆盖得到最简与或式。2 变量：4 格正方形；3 变量：8 格 2×4；4 变量：16 格 4×4。注意卷绕（左右相邻、上下相邻、四角相邻）。无关项 d（don\'t care）可当 0 或 1 用。',
+        level: 'basic',
+      },
+      {
+        name: '逻辑门与布尔表达式',
+        latex: '\\begin{aligned} &\\text{AND: } F = A \\cdot B \\quad \\text{OR: } F = A + B \\quad \\text{NOT: } F = \\overline{A} \\\\ &\\text{NAND: } F = \\overline{A \\cdot B} \\quad \\text{NOR: } F = \\overline{A + B} \\\\ &\\text{XOR: } F = A \\oplus B = A\\overline{B} + \\overline{A}B \\end{aligned}',
+        note: 'NAND/NOR 是功能完备集（可表示任意布尔函数）。实际电路多用 NAND 门。',
+        detail: '基本逻辑门：AND（与，·）、OR（或，+）、NOT（非，ˉ）、NAND（与非）、NOR（或非）、XOR（异或，⊕）、XNOR（同或，⊙）。功能完备性：{NAND} 或 {NOR} 单独就能实现所有布尔函数。任何布尔表达式可化为 SOP（与或式）或 POS（或与式）标准形式。逻辑门延时和扇入/扇出是实际电路设计的重要参数。',
+        level: 'basic',
+      },
+      {
+        name: '布尔函数的标准形式',
+        latex: '\\begin{aligned} &\\text{SOP（最小项之和）：} F = \\sum m(\\text{输出为 1 的行号}) \\\\ &\\text{POS（最大项之积）：} F = \\prod M(\\text{输出为 0 的行号}) \\end{aligned}',
+        note: '最小项 m_i：每个变量恰好出现一次（原变量或反变量）的乘积项。最大项是和的因子。',
+        detail: '最小项（minterm）m_i：对每个变量组合（取值为 1 用原变量，0 用反变量），全部变量的积。例如三变量中 m₃ (011) = x̄yz。最大项（maxterm）M_i：全部变量的和，例如 M₃ = x+ȳ+z̄。任意布尔函数可以表示为：①最小项之和（SOP，Σ 表示）；②最大项之积（POS，Π 表示）。SOP ↔ POS 可通过取反转化。SOP 更自然（直接从真值表 1 的行写出），也是卡诺图化简的目标形式。',
+        level: 'basic',
+      },
+    ],
+  },
+
+  // ===== 数值分析 =====
+  'num-interpolation': {
+    id: 'num-interpolation',
+    title: '插值与逼近',
+    subject: '数值分析',
+    formulas: [
+      {
+        name: '拉格朗日插值',
+        latex: 'L_n(x) = \\sum_{k=0}^{n} y_k \\cdot \\ell_k(x),\\quad \\ell_k(x) = \\prod_{\\substack{j=0 \\\\ j \\neq k}}^{n} \\frac{x - x_j}{x_k - x_j}',
+        note: '给定 n+1 个点，构造唯一的 n 次插值多项式。ℓ_k(x_k)=1, ℓ_k(x_j)=0 (j≠k)。',
+        detail: '拉格朗日插值的核心：构造一组基函数 ℓ_k(x)，每个基函数在对应节点处为 1、在其他节点处为 0。最终插值多项式 = Σ y_k·ℓ_k(x)。计算量：O(n²)。优点：公式简洁、理论清晰；缺点：增加节点后需全量重算、高次插值易产生龙格现象。龙格现象：等距节点下高次插值在区间两端剧烈振荡。改进：分段低次插值或切比雪夫节点。',
+        level: 'important',
+      },
+      {
+        name: '牛顿插值（差商形式）',
+        latex: 'N_n(x) = f[x_0] + f[x_0,x_1](x-x_0) + f[x_0,x_1,x_2](x-x_0)(x-x_1) + \\cdots',
+        note: '增加节点只需加一项！差商表：f[x_i,x_j] = (f[x_j]-f[x_i])/(x_j-x_i)，高阶类推。',
+        detail: '牛顿插值是拉格朗日插值的另一种等价形式。核心优势：①增加新节点只需在多项式末尾追加一项（拉格朗日需全部重算）；②系数 f[x_0,...,x_k] 通过差商表递推计算；③与泰勒展开形式类似（用差商代替导数）。计算差商表时注意对角线元素就是插值系数。等距节点时使用向前/向后差分公式，计算更简单。',
+        level: 'important',
+      },
+    ],
+  },
+
+  'num-integration': {
+    id: 'num-integration',
+    title: '数值积分',
+    subject: '数值分析',
+    formulas: [
+      {
+        name: '梯形公式与复合梯形公式',
+        latex: '\\begin{aligned} &\\text{梯形：} \\int_a^b f(x)dx \\approx \\frac{h}{2}[f(a)+f(b)],\\ h=b-a \\\\ &\\text{复合梯形：} \\int_a^b f(x)dx \\approx \\frac{h}{2}\\left[f(a)+f(b)+2\\sum_{i=1}^{n-1} f(x_i)\\right],\\ h=\\frac{b-a}{n} \\end{aligned}',
+        note: '线性插值积分。复合公式把区间等分 n 段，每段用梯形近似。误差 O(h²)。',
+        detail: '梯形公式 = 用直线段近似曲线，积分 = 梯形面积。复合梯形公式：将 [a,b] 等分为 n 个子区间，每段用梯形公式。收敛阶 O(h²)，即 h 减半→误差减至 1/4。适用：被积函数不太光滑时也能用（低阶方法对光滑性要求低）。与辛普森对比：梯形更稳健但收敛慢。',
+        level: 'basic',
+      },
+      {
+        name: '辛普森公式（抛物线公式）',
+        latex: '\\int_a^b f(x)dx \\approx \\frac{h}{3}[f(a) + 4f(a+h) + f(b)],\\ h = \\frac{b-a}{2}',
+        note: '用二次抛物线近似曲线。三点确定一条抛物线。复合辛普森：n 必须为偶数。误差 O(h⁴)。',
+        detail: '辛普森公式（Simpson\'s 1/3 规则）用三点 (a, f(a)), (a+h, f(a+h)), (b, f(b)) 确定二次曲线，积分 = (h/3)(f₀+4f₁+f₂)。复合辛普森：n 为偶数等分，公式 = (h/3)[f₀+f_n + 4Σf_odd + 2Σf_even]。收敛阶 O(h⁴)，比梯形快得多。要求被积函数足够光滑（四阶导连续）。辛普森 3/8 规则用于 n 为奇数的情况。',
+        level: 'important',
+      },
+      {
+        name: '高斯求积公式',
+        latex: '\\int_{-1}^{1} f(x)dx \\approx \\sum_{i=1}^{n} w_i f(x_i)',
+        note: '节点和权重都优化选取，n 点可达 2n-1 次代数精度！常用区间 [-1,1]（高斯-勒让德）。',
+        detail: '高斯求积的核心思想：节点不是等距选取，而是选为对应正交多项式的零点，使代数精度最大化。n 点高斯公式 = 精确积分 ≤2n-1 次多项式（等距节点只有 n-1 或 n 次精度）。常用：①高斯-勒让德（区间 [-1,1]，权重函数 w=1）；②高斯-拉盖尔（区间 [0,∞)，w=e^{-x}）；③高斯-埃尔米特（区间 (-∞,∞)，w=e^{-x²}）。一般区间 [a,b] 需先做变量变换到 [-1,1]。',
+        level: 'advanced',
+      },
+    ],
+  },
+
+  'num-equation': {
+    id: 'num-equation',
+    title: '非线性方程求根',
+    subject: '数值分析',
+    formulas: [
+      {
+        name: '二分法',
+        latex: '\\begin{aligned} &f \\in C[a,b],\\ f(a)\\cdot f(b) < 0 \\\\ &\\text{迭代：取 } c = \\frac{a+b}{2} \\\\ &\\text{若 } f(c)=0 \\text{ 则停止；否则取含根半区间继续} \\end{aligned}',
+        note: '最简单可靠的方法！线性收敛，每步误差减半。精度要求 ε 需 log₂((b-a)/ε) 步。',
+        detail: '二分法基于零点定理：连续函数在端点异号的区间内必有根。每步将区间对半，保留异号的一半。优点：①绝对可靠（只要初始区间异号则必收敛）；②实现简单。缺点：①收敛速度慢（线性收敛，每步误差减半→约 3-4 步多 1 位精度）；②只能求单根，不能求复根。常与其他方法（牛顿法）配合：先用二分法逼近到附近，再用牛顿法加速。',
+        level: 'basic',
+      },
+      {
+        name: '牛顿迭代法（切线法）',
+        latex: 'x_{n+1} = x_n - \\frac{f(x_n)}{f\'(x_n)}',
+        note: '平方收敛！每步有效位数翻倍。初值必须足够接近真根（局部收敛）。f\'(根)≠0 时效果好。',
+        detail: '牛顿法几何意义：过 (x_n, f(x_n)) 作曲线的切线，切线与 x 轴交点即为 x_{n+1}。收敛速度：平方收敛（每步有效位数翻倍）——若初值足够接近。条件：①f\' 在根附近 ≠ 0；②f\'\' 连续；③初值充分接近。缺点：①需要计算导数 f\'；②对初值敏感（选错可能发散）；③f\'≈0 附近效果差。改进：割线法（用差分替代导数，收敛阶 ≈1.618）。',
         level: 'important',
       },
     ],

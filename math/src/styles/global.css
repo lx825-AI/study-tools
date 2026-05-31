@@ -19,6 +19,20 @@ body {
   min-height: 100vh;
 }
 
+/* 暗色模式下 KaTeX 全局颜色覆盖 */
+:root.dark .katex {
+  color: var(--katex-color, #e2e8f0);
+}
+
+:root.dark .formula-latex .katex .mathnormal,
+:root.dark .formula-latex .katex .mathit,
+:root.dark .formula-latex .katex .mathrm,
+:root.dark .formula-latex .katex .mathbf,
+:root.dark .formula-latex .katex .mathsf,
+:root.dark .formula-latex .katex .mathtt {
+  color: var(--katex-color, #e2e8f0);
+}
+
 /* 搜索高亮 */
 mark {
   background: #fef08a;
@@ -26,3 +40,45 @@ mark {
   border-radius: 2px;
   padding: 0 1px;
 }
+
+/* ===== 无障碍：减少动画 ===== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ===== 卡片入场动画 ===== */
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.formula-grid .formula-card {
+  animation: cardFadeIn 0.35s ease backwards;
+}
+
+/* 为每个卡片添加递进延迟 */
+.formula-grid .formula-card:nth-child(1) { animation-delay: 0s; }
+.formula-grid .formula-card:nth-child(2) { animation-delay: 0.03s; }
+.formula-grid .formula-card:nth-child(3) { animation-delay: 0.06s; }
+.formula-grid .formula-card:nth-child(4) { animation-delay: 0.09s; }
+.formula-grid .formula-card:nth-child(5) { animation-delay: 0.12s; }
+.formula-grid .formula-card:nth-child(6) { animation-delay: 0.15s; }
+.formula-grid .formula-card:nth-child(7) { animation-delay: 0.18s; }
+.formula-grid .formula-card:nth-child(8) { animation-delay: 0.21s; }
+.formula-grid .formula-card:nth-child(9) { animation-delay: 0.24s; }
+.formula-grid .formula-card:nth-child(10) { animation-delay: 0.27s; }

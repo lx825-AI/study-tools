@@ -44,9 +44,7 @@ export default function useSearch(): UseSearchReturn {
     Object.entries(formulaData).forEach(([sectionId, section]) => {
       if (subjectFilter && !sectionId.startsWith(subjectFilter)) return;
       section.formulas.forEach((f, i) => {
-        if (levelFilter) {
-          if ((f.level || '') !== levelFilter) return;
-        }
+        if (levelFilter && f.level && f.level !== levelFilter) return;
         const text = `${f.name} ${f.latex} ${f.note} ${f.detail || ''}`.toLowerCase();
         if (text.includes(q)) {
           list.push({

@@ -114,3 +114,92 @@
   color: var(--text-heading);
   letter-spacing: -0.5px;
 }
+
+/* ===== 侧边栏折叠按钮 ===== */
+.sidebar-collapse-btn {
+  position: absolute;
+  top: 16px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 2;
+}
+
+.sidebar-collapse-btn:hover {
+  background: var(--surface-hover);
+  border-color: var(--primary-border);
+  color: var(--primary);
+}
+
+/* ===== 折叠状态（桌面端） ===== */
+.sidebar.collapsed {
+  width: 56px;
+  padding: 32px 8px;
+  overflow-y: hidden;
+}
+
+.sidebar.collapsed .sidebar-title {
+  font-size: 14px;
+  padding: 0 0 16px;
+  text-align: center;
+}
+
+.sidebar.collapsed .sidebar-tools {
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.sidebar.collapsed .sidebar-tools button {
+  font-size: 10px;
+  padding: 4px;
+  text-align: center;
+}
+
+.sidebar.collapsed .category {
+  text-align: center;
+  font-size: 10px;
+  padding: 12px 0 4px;
+}
+
+.sidebar.collapsed .sub {
+  font-size: 11px;
+  padding: 6px 4px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar.collapsed .progress-badge {
+  display: none;
+}
+
+.sidebar.collapsed .sidebar-collapse-btn {
+  right: 4px;
+  top: 12px;
+}
+
+/* 折叠时主内容区偏移 */
+.main.sidebar-collapsed {
+  margin-left: 56px;
+}
+
+@media (min-width: 769px) {
+  .sidebar.collapsed .sidebar-tools button {
+    flex: none;
+    width: 36px;
+    height: 32px;
+    font-size: 10px;
+    overflow: hidden;
+  }
+}
