@@ -569,6 +569,7 @@ var FlashcardApp = window.FlashcardApp || {};
 
     var el = document.getElementById('flashcard');
     el.classList.remove('flipped');
+    el.style.removeProperty('transform');
     App.isFlipped = false;
   };
 

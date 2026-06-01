@@ -220,7 +220,8 @@ var FlashcardApp = window.FlashcardApp || {};
       var SWIPE_THRESHOLD = 80;
 
       function resetCardTransform() {
-        card.style.transform = App.isFlipped ? 'rotateY(180deg)' : '';
+        /* 清除内联 transform，让 CSS .flipped 类控制卡片翻转 */
+        card.style.removeProperty('transform');
         card.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease';
         card.style.opacity = '1';
       }
@@ -276,7 +277,7 @@ var FlashcardApp = window.FlashcardApp || {};
           }
         } else {
           /* 非有效滑动：清除内联 transform，让 CSS .flipped 类控制翻转 */
-          card.style.transform = '';
+          card.style.removeProperty('transform');
         }
 
         isDragging = false;
@@ -286,7 +287,7 @@ var FlashcardApp = window.FlashcardApp || {};
       card.addEventListener('touchcancel', function () {
         card.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease';
         card.style.opacity = '1';
-        card.style.transform = '';
+        card.style.removeProperty('transform');
         isDragging = false;
         isHorizontalSwipe = false;
       });
