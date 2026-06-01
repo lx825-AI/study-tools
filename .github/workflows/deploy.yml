@@ -30,24 +30,20 @@ jobs:
         with:
           node-version: '24'
 
-      # 构建 English
-      - name: Build English
+      # 测试 + 构建 English
+      - name: Test & Build English
         run: |
           cd English
-          npm install
-          node scripts/build.js
+          npm ci
+          npm test
+          npm run build
 
-      # 运行 Math 测试
-      - name: Test Math
+      # 测试 + 构建 Math
+      - name: Test & Build Math
         run: |
           cd math
           npm ci
           npm test
-
-      # 构建 Math
-      - name: Build Math
-        run: |
-          cd math
           npm run build
 
       # 合并产物 (用 _site 避免 .gitignore 中 dist/ 导致 upload-pages-artifact 跳过文件)
