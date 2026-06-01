@@ -275,7 +275,8 @@ var FlashcardApp = window.FlashcardApp || {};
             resetCardTransform();
           }
         } else {
-          resetCardTransform();
+          /* 非有效滑动：清除内联 transform，让 CSS .flipped 类控制翻转 */
+          card.style.transform = '';
         }
 
         isDragging = false;
@@ -285,7 +286,7 @@ var FlashcardApp = window.FlashcardApp || {};
       card.addEventListener('touchcancel', function () {
         card.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease';
         card.style.opacity = '1';
-        resetCardTransform();
+        card.style.transform = '';
         isDragging = false;
         isHorizontalSwipe = false;
       });
