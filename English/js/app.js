@@ -572,6 +572,21 @@ var FlashcardApp = window.FlashcardApp || {};
       e.stopPropagation();
     });
 
+    /* 朗读按钮 */
+    document.getElementById('btnSpeak').addEventListener('click', function (e) {
+      e.stopPropagation();
+      var card = App.studyQueue[App.studyIndex];
+      var text = card ? App.getCardFront(card) : '';
+      if (text) App.speak(text);
+    });
+    /* 阻止触摸事件冒泡到词卡，防止误触发翻转 */
+    document.getElementById('btnSpeak').addEventListener('touchstart', function (e) {
+      e.stopPropagation();
+    });
+    document.getElementById('btnSpeak').addEventListener('touchend', function (e) {
+      e.stopPropagation();
+    });
+
     /* 初始化 TTS 语音列表 */
     if (window.speechSynthesis) {
       window.speechSynthesis.onvoiceschanged = function () { /* 预加载 voices */ };
