@@ -68,7 +68,7 @@
 }
 .flashcard.flipped { transform: rotateY(180deg); }
 .flashcard:hover {
-  filter: brightness(0.98);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
 }
 .card-face {
   position: absolute;
