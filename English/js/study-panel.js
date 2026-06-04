@@ -502,12 +502,13 @@ var FlashcardApp = window.FlashcardApp || {};
 
     document.getElementById('cardFrontText').innerHTML = frontHtml + diffHtml;
 
-    /* 背面 */
+    /* 背面 — 优先使用源牌组中的完整卡片数据 */
     var parts = [];
-    var defs = card.definitions || [card.back || ''];
+    var renderCard = deckCard || card;
+    var defs = renderCard.definitions || [renderCard.back || ''];
     if (!Array.isArray(defs)) defs = [defs];
-    var phonetic = card.phonetic || '';
-    var pos = card.pos || '';
+    var phonetic = renderCard.phonetic || '';
+    var pos = renderCard.pos || '';
 
     if (phonetic || pos) {
       parts.push('<div class="card-phonetic-pos">' +
@@ -520,7 +521,7 @@ var FlashcardApp = window.FlashcardApp || {};
       return '<div class="card-def-item">' + (defs.length > 1 ? (i + 1) + '. ' : '') + App.escHtml(d) + '</div>';
     }).join('') + '</div>');
 
-    var phrases = card.phrases || [];
+    var phrases = renderCard.phrases || [];
     if (phrases.length > 0) {
       parts.push('<div class="card-section"><div class="card-section-title">词组搭配</div>' +
         phrases.map(function (p) {
@@ -528,7 +529,7 @@ var FlashcardApp = window.FlashcardApp || {};
         }).join('') + '</div>');
     }
 
-    var sentences = card.sentences || [];
+    var sentences = renderCard.sentences || [];
     if (sentences.length > 0) {
       parts.push('<div class="card-section"><div class="card-section-title">例句</div>' +
         sentences.map(function (s) {
@@ -537,8 +538,8 @@ var FlashcardApp = window.FlashcardApp || {};
         }).join('') + '</div>');
     }
 
-    var synonyms = card.synonyms || [];
-    var antonyms = card.antonyms || [];
+    var synonyms = renderCard.synonyms || [];
+    var antonyms = renderCard.antonyms || [];
     if (synonyms.length > 0 || antonyms.length > 0) {
       var synAnt = '';
       if (synonyms.length > 0) synAnt += '<div class="card-syn-ant"><span class="syn-ant-label">同:</span> ' + App.escHtml(synonyms.join(', ')) + '</div>';
@@ -546,21 +547,21 @@ var FlashcardApp = window.FlashcardApp || {};
       parts.push('<div class="card-section">' + synAnt + '</div>');
     }
 
-    var confused = card.confused || [];
+    var confused = renderCard.confused || [];
     if (confused.length > 0) {
       parts.push('<div class="card-section"><div class="card-confused"><span class="syn-ant-label">易混淆:</span> ' + App.escHtml(confused.join(', ')) + '</div></div>');
     }
 
     /* SM-2 + 艾宾浩斯信息 */
-    if (card.nextReview || card.ebbinghausNextReview) {
+    if (renderCard.nextReview || renderCard.ebbinghausNextReview) {
       var ebInfo = '';
-      var ebS = deckCard ? deckCard.ebbinghausStage : card.ebbinghausStage;
+      var ebS = deckCard ? deckCard.ebbinghausStage : renderCard.ebbinghausStage;
       if (typeof ebS === 'number') {
         ebInfo = ' | 艾宾浩斯: L' + ebS + ' ' + (App.EB_STAGES[ebS] ? App.EB_STAGES[ebS].label : '');
       }
       parts.push('<div class="card-sm2-info">' +
-        '下次复习: ' + (card.ebbinghausNextReview || card.nextReview) +
-        ' | 间隔: ' + (card.interval || 0) + '天 | EF: ' + (card.easeFactor || 2.5).toFixed(1) +
+        '下次复习: ' + (renderCard.ebbinghausNextReview || renderCard.nextReview) +
+        ' | 间隔: ' + (renderCard.interval || 0) + '天 | EF: ' + (renderCard.easeFactor || 2.5).toFixed(1) +
         ebInfo +
       '</div>');
     }

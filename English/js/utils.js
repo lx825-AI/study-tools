@@ -19,7 +19,7 @@ var FlashcardApp = window.FlashcardApp || {};
     if (c.back) return c.back;
     var defs = c.definitions;
     if (!defs) return '';
-    if (Array.isArray(defs)) return defs[0] || '';
+    if (Array.isArray(defs)) return defs.filter(Boolean).join('; ') || '';
     return defs;
   };
 

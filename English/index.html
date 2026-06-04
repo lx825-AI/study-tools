@@ -341,9 +341,16 @@ if ('serviceWorker' in navigator) {
 /* 朗读按钮点击 */
 document.getElementById('btnSpeak').addEventListener('click', function (e) {
   e.stopPropagation();
-  var wordNode = document.getElementById('cardFrontText').childNodes[0];
-  var text = wordNode ? wordNode.textContent.trim() : '';
+  var card = FlashcardApp.studyQueue[FlashcardApp.studyIndex];
+  var text = card ? FlashcardApp.getCardFront(card) : '';
   if (text) FlashcardApp.speak(text);
+});
+/* 阻止触摸事件冒泡到词卡，防止误触发翻转 */
+document.getElementById('btnSpeak').addEventListener('touchstart', function (e) {
+  e.stopPropagation();
+});
+document.getElementById('btnSpeak').addEventListener('touchend', function (e) {
+  e.stopPropagation();
 });
 /* 启动应用 */
 FlashcardApp.init();

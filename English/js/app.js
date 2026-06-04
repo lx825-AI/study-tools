@@ -298,12 +298,15 @@ var FlashcardApp = window.FlashcardApp || {};
       var card = document.getElementById('flashcard');
       var longPressTimer = null;
       var touchStartY = 0;
+      var touchStartX = 0;
       var touchEndY = 0;
+      var touchEndX = 0;
       var hasMoved = false;
 
       card.addEventListener('touchstart', function (e) {
         if (App.studyQueue.length === 0 || App.studyIndex >= App.studyQueue.length) return;
         var t = e.touches[0];
+        touchStartX = t.clientX;
         touchStartY = t.clientY;
         hasMoved = false;
 
@@ -320,7 +323,7 @@ var FlashcardApp = window.FlashcardApp || {};
 
       card.addEventListener('touchmove', function (e) {
         var t = e.touches[0];
-        if (t && Math.abs(t.clientY - touchStartY) > 8) {
+        if (t && (Math.abs(t.clientY - touchStartY) > 8 || Math.abs(t.clientX - touchStartX) > 8)) {
           hasMoved = true;
           clearTimeout(longPressTimer);
         }
@@ -329,12 +332,17 @@ var FlashcardApp = window.FlashcardApp || {};
       card.addEventListener('touchend', function (e) {
         clearTimeout(longPressTimer);
         var ct = e.changedTouches[0];
-        if (ct) touchEndY = ct.clientY;
+        if (ct) {
+          touchEndX = ct.clientX;
+          touchEndY = ct.clientY;
+        }
 
-        /* 竖滑向上 >60px 触发朗读 */
-        if (!hasMoved && (touchStartY - touchEndY) > 60) {
-          var wordNode = document.getElementById('cardFrontText').childNodes[0];
-          var text = wordNode ? wordNode.textContent.trim() : '';
+        /* 竖滑向上 >60px 且垂直位移大于水平位移时触发朗读 */
+        var dy = touchStartY - touchEndY;
+        var dx = Math.abs(touchStartX - touchEndX);
+        if (dy > 60 && dy > dx) {
+          var studyCard = App.studyQueue[App.studyIndex];
+          var text = studyCard ? App.getCardFront(studyCard) : '';
           if (text) App.speak(text);
         }
       });
@@ -555,6 +563,13 @@ var FlashcardApp = window.FlashcardApp || {};
     document.getElementById('btnAccentToggle').addEventListener('click', function (e) {
       e.stopPropagation();
       App.toggleAccent();
+    });
+    /* 阻止触摸事件冒泡到词卡，防止误触发翻转 */
+    document.getElementById('btnAccentToggle').addEventListener('touchstart', function (e) {
+      e.stopPropagation();
+    });
+    document.getElementById('btnAccentToggle').addEventListener('touchend', function (e) {
+      e.stopPropagation();
     });
 
     /* 初始化 TTS 语音列表 */
@@ -779,13 +794,19 @@ var FlashcardApp = window.FlashcardApp || {};
 
   /* 朗读功能 */
   App.speak = function (text) {
-    if (!window.speechSynthesis) return;
+    if (!window.speechSynthesis) {
+      App.showToast('当前浏览器不支持语音朗读', 'warn', 2000);
+      return;
+    }
     window.speechSynthesis.cancel();
     var utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = App.ttsAccent;
     utterance.rate = 0.85;
     var voice = App._getBestVoice();
     if (voice) utterance.voice = voice;
+    utterance.onerror = function () {
+      App.showToast('语音朗读失败，请稍后重试', 'warn', 2000);
+    };
     window.speechSynthesis.speak(utterance);
   };
 
