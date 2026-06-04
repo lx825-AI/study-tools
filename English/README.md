@@ -20,6 +20,10 @@
 
 纯原生 JavaScript，零运行时依赖。使用 esbuild 构建打包。
 
+## 在线访问
+
+**[lx825-ai.github.io/study-tools/english/](https://lx825-ai.github.io/study-tools/english/)**
+
 ## 开发
 
 ```bash
