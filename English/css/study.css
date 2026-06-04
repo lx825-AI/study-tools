@@ -67,9 +67,6 @@
   cursor: pointer;
 }
 .flashcard.flipped { transform: rotateY(180deg); }
-.flashcard:hover {
-  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-}
 .card-face {
   position: absolute;
   inset: 0;
@@ -84,6 +81,9 @@
   box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
   overflow-y: auto;
   transition: box-shadow 0.3s;
+}
+.card-face:hover {
+  box-shadow: 0 6px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
 }
 .card-front {
   background: linear-gradient(135deg, #fff, #f8fafc);
