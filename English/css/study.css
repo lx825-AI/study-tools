@@ -70,6 +70,7 @@
 .card-face {
   position: absolute;
   inset: 0;
+  -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   border-radius: var(--radius-lg);
   display: flex;
@@ -100,6 +101,22 @@
 [data-theme="dark"] .card-back {
   background: linear-gradient(135deg, #1e1b4b, #172042);
 }
+
+/* visibility 兜底：移动端 backface-visibility 不可靠时确保正反面正确显隐 */
+.card-front { visibility: visible; }
+.card-back  { visibility: hidden; }
+.flashcard.flipped .card-front { visibility: hidden; }
+.flashcard.flipped .card-back  { visibility: visible; }
+
+/* visibility 延迟切换，与翻转动画 (0.6s) 中点同步 */
+.card-face {
+  transition: visibility 0s 0.3s;
+}
+.flashcard.flipped .card-front,
+.flashcard.flipped .card-back {
+  transition: visibility 0s 0.3s;
+}
+
 .card-label {
   font-size: 12px;
   font-weight: 600;
@@ -376,6 +393,12 @@
 
 /* 移动端卡片高度和布局 */
 @media (max-width: 480px) {
+  .flashcard {
+    will-change: transform;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: pan-y;
+  }
   .card-scene {
     height: 380px;
     margin-bottom: 16px;
@@ -384,6 +407,8 @@
     padding: 20px 16px;
     justify-content: flex-start;
     padding-top: 28px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .card-text {
     font-size: 28px;

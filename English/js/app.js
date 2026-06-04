@@ -341,6 +341,7 @@ var FlashcardApp = window.FlashcardApp || {};
         var dy = touchStartY - touchEndY;
         var dx = Math.abs(touchStartX - touchEndX);
         if (dy > 60 && dy > dx) {
+          e.preventDefault();
           var studyCard = App.studyQueue[App.studyIndex];
           var text = studyCard ? App.getCardFront(studyCard) : '';
           if (text) App.speak(text);
@@ -588,9 +589,26 @@ var FlashcardApp = window.FlashcardApp || {};
     });
 
     /* 初始化 TTS 语音列表 */
+    /* 预加载 TTS 语音列表，支持 iOS Safari 预热 */
+    App._voicesCache = [];
+    App._voicesReady = false;
     if (window.speechSynthesis) {
-      window.speechSynthesis.onvoiceschanged = function () { /* 预加载 voices */ };
-      window.speechSynthesis.getVoices();
+      var _loadVoices = function () {
+        App._voicesCache = window.speechSynthesis.getVoices();
+        if (App._voicesCache.length > 0) App._voicesReady = true;
+      };
+      _loadVoices();
+      window.speechSynthesis.onvoiceschanged = function () {
+        App._voicesCache = window.speechSynthesis.getVoices();
+        App._voicesReady = true;
+      };
+      /* iOS Safari 预热：dummy utterance 激活音频会话，防止首次 speak() 无声 */
+      try {
+        var _dummy = new SpeechSynthesisUtterance('');
+        _dummy.volume = 0;
+        _dummy.rate = 1;
+        window.speechSynthesis.speak(_dummy);
+      } catch (_e) {}
     }
     App._updateAccentUI();
 
@@ -774,7 +792,9 @@ var FlashcardApp = window.FlashcardApp || {};
 
   /* 获取当前口音对应的最佳语音 */
   App._getBestVoice = function () {
-    var voices = window.speechSynthesis.getVoices();
+    var voices = (App._voicesCache && App._voicesCache.length > 0)
+      ? App._voicesCache
+      : window.speechSynthesis.getVoices();
     if (voices.length === 0) return null;
     var lang = App.ttsAccent;
     var exactDefault = null, exactAny = null, prefixDefault = null, prefixAny = null;
@@ -807,20 +827,24 @@ var FlashcardApp = window.FlashcardApp || {};
     if (el) el.textContent = flag;
   };
 
-  /* 朗读功能 */
+  /* 朗读功能（iOS Safari 兼容修复） */
   App.speak = function (text) {
     if (!window.speechSynthesis) {
       App.showToast('当前浏览器不支持语音朗读', 'warn', 2000);
       return;
     }
+    /* iOS Safari 修复：先 cancel 再 speak，避免 silent failure */
     window.speechSynthesis.cancel();
     var utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = App.ttsAccent;
     utterance.rate = 0.85;
+    utterance.volume = 1;
     var voice = App._getBestVoice();
     if (voice) utterance.voice = voice;
-    utterance.onerror = function () {
-      App.showToast('语音朗读失败，请稍后重试', 'warn', 2000);
+    utterance.onerror = function (e) {
+      /* 忽略由 cancel() 触发的 canceled/interrupted 错误 */
+      if (e.error === 'canceled' || e.error === 'interrupted') return;
+      console.warn('TTS error:', e.error);
     };
     window.speechSynthesis.speak(utterance);
   };
