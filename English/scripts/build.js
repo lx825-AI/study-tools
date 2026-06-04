@@ -82,9 +82,10 @@ html = html.replace(/<script src="[^"]+"><\/script>\s*/g, '');
 /* 移除内联 SW 注册 + 初始化 script */
 html = html.replace(/<script>\s*\/\* 注册 Service Worker \*\/[\s\S]*?<\/script>\s*/g, '');
 
-/* 在 body 末尾插入 bundle script + SW 注册 */
+var buildVersion = Date.now();
+/* 在 body 末尾插入 bundle script（带版本戳防缓存） + SW 注册 */
 html = html.replace('</body>',
-  '<script src="./app.bundle.js"></script>\n' +
+  '<script src="./app.bundle.js?v=' + buildVersion + '"></script>\n' +
   '<script>\n' +
   'if ("serviceWorker" in navigator) {\n' +
   '  try { navigator.serviceWorker.register("./sw.js").catch(function () {}); } catch (e) {}\n' +
