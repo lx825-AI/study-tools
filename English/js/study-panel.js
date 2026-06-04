@@ -505,7 +505,8 @@ var FlashcardApp = window.FlashcardApp || {};
     /* 背面 — 优先使用源牌组中的完整卡片数据 */
     var parts = [];
     var renderCard = deckCard || card;
-    var defs = renderCard.definitions || [renderCard.back || ''];
+    var defs = (renderCard.definitions && renderCard.definitions.length)
+      ? renderCard.definitions : [renderCard.back || ''];
     if (!Array.isArray(defs)) defs = [defs];
     var phonetic = renderCard.phonetic || '';
     var pos = renderCard.pos || '';
