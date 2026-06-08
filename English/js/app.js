@@ -816,6 +816,9 @@ var FlashcardApp = window.FlashcardApp || {};
     App.ttsAccent = (App.ttsAccent === 'en-US') ? 'en-GB' : 'en-US';
     try { localStorage.setItem('flashcard-tts-accent', App.ttsAccent); }
     catch (e) {}
+    /* 停止正在播放的 TTS 和 Audio */
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    if (App._audioEl) { App._audioEl.pause(); App._audioEl.currentTime = 0; }
     App._updateAccentUI();
     App.showToast('发音切换为: ' + (App.ttsAccent === 'en-US' ? '美式 🇺🇸' : '英式 🇬🇧'), 'info', 1500);
   };
@@ -827,26 +830,54 @@ var FlashcardApp = window.FlashcardApp || {};
     if (el) el.textContent = flag;
   };
 
-  /* 朗读功能（iOS Safari 兼容修复） */
-  App.speak = function (text) {
-    if (!window.speechSynthesis) {
-      App.showToast('当前浏览器不支持语音朗读', 'warn', 2000);
-      return;
+  /* ========== TTS 音频兜底（有道词典语音 API） ========== */
+
+  /* 单例 Audio 元素，用于 speechSynthesis 不可用时的 TTS 兜底 */
+  App._audioEl = null;
+
+  App._getAudioEl = function () {
+    if (!App._audioEl) {
+      App._audioEl = new Audio();
+      App._audioEl.preload = 'auto';
     }
-    /* iOS Safari 修复：先 cancel 再 speak，避免 silent failure */
-    window.speechSynthesis.cancel();
-    var utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = App.ttsAccent;
-    utterance.rate = 0.85;
-    utterance.volume = 1;
-    var voice = App._getBestVoice();
-    if (voice) utterance.voice = voice;
-    utterance.onerror = function (e) {
-      /* 忽略由 cancel() 触发的 canceled/interrupted 错误 */
-      if (e.error === 'canceled' || e.error === 'interrupted') return;
-      console.warn('TTS error:', e.error);
-    };
-    window.speechSynthesis.speak(utterance);
+    return App._audioEl;
+  };
+
+  /* 通过有道词典在线语音 API 播放单词发音 */
+  App._speakViaAudio = function (text) {
+    var word = encodeURIComponent(text.trim());
+    var type = App.ttsAccent === 'en-US' ? '0' : '1';
+    var url = 'https://dict.youdao.com/dictvoice?audio=' + word + '&type=' + type;
+    var audio = App._getAudioEl();
+    audio.src = url;
+    audio.play().catch(function (err) {
+      console.warn('Audio TTS fallback failed:', err.message);
+      App.showToast('朗读需要网络连接，请检查网络后重试', 'warn', 2000);
+    });
+  };
+
+  /* 朗读功能：优先 speechSynthesis，不可用时 Audio 兜底 */
+  App.speak = function (text) {
+    if (!text) return;
+    if (window.speechSynthesis) {
+      /* 优先使用浏览器原生 TTS */
+      window.speechSynthesis.cancel();
+      var utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = App.ttsAccent;
+      utterance.rate = 0.85;
+      utterance.volume = 1;
+      var voice = App._getBestVoice();
+      if (voice) utterance.voice = voice;
+      utterance.onerror = function (e) {
+        if (e.error === 'canceled' || e.error === 'interrupted') return;
+        /* speechSynthesis 失败，降级到 Audio 在线播放 */
+        App._speakViaAudio(text);
+      };
+      window.speechSynthesis.speak(utterance);
+    } else {
+      /* 浏览器不支持 speechSynthesis（如 UC/QQ/微信内置浏览器） */
+      App._speakViaAudio(text);
+    }
   };
 
   /* 分享学习成果 */
