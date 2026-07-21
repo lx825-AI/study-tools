@@ -4,11 +4,11 @@
   "private": true,
   "description": "学习工具 monorepo：英语词汇闪卡 PWA + 数学公式速查 PWA",
   "scripts": {
-    "build:english": "cd English && npm run build",
-    "build:math": "cd math && npm run build",
+    "build:english": "cd English-web && npm run build",
+    "build:math": "cd math-web && npm run build",
     "build:all": "npm run build:english && npm run build:math",
-    "test:english": "cd English && npm test",
-    "test:math": "cd math && npm test",
+    "test:english": "cd English-web && npm test",
+    "test:math": "cd math-web && npm test",
     "test:all": "npm run test:english && npm run test:math",
     "ci": "npm run test:all && npm run build:all"
   }

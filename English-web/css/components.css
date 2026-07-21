@@ -369,3 +369,54 @@ mark {
     bottom: calc(76px + var(--safe-bottom));
   }
 }
+
+/* 小程序引导条 */
+.mp-guide-bar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 999;
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  gap: 8px;
+  font-size: 14px;
+  box-shadow: 0 2px 12px rgba(79, 70, 229, 0.3);
+  transform: translateY(-100%);
+  transition: transform 0.3s ease;
+}
+.mp-guide-bar.visible {
+  transform: translateY(0);
+}
+.mp-guide-icon { font-size: 20px; flex-shrink: 0; }
+.mp-guide-text {
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.mp-guide-btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: #4f46e5;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.mp-guide-close {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.7);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+body.mp-guide-visible #app {
+  padding-top: 56px;
+}

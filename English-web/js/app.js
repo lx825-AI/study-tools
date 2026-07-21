@@ -1067,4 +1067,43 @@ var FlashcardApp = window.FlashcardApp || {};
       .catch(function (err) { App.showToast('获取失败: ' + (err.message || '网络错误'), 'error'); });
   };
 
+  /* ========== 小程序引导条 ========== */
+
+  App.showMpGuide = function () {
+    var guide = document.getElementById('mpGuideBar');
+    if (!guide) return;
+    // 已关闭过则不再显示
+    if (localStorage.getItem('mp-guide-dismissed')) return;
+    // 延迟 2 秒展示
+    setTimeout(function () {
+      guide.classList.add('visible');
+      document.body.classList.add('mp-guide-visible');
+    }, 2000);
+  };
+
+  App.dismissMpGuide = function () {
+    var guide = document.getElementById('mpGuideBar');
+    if (!guide) return;
+    guide.classList.remove('visible');
+    document.body.classList.remove('mp-guide-visible');
+    localStorage.setItem('mp-guide-dismissed', 'true');
+  };
+
+  App.openMiniProgram = function () {
+    if (/micromessenger/i.test(navigator.userAgent)) {
+      alert('请在微信中搜索小程序「英语背单词」即可打开。');
+    } else {
+      alert('请打开微信，搜索小程序「英语背单词」\n或扫描小程序码进入。\n\n小程序体验更流畅，学习进度云端同步！');
+    }
+  };
+
+  // 绑定事件
+  var btnMpGuide = document.getElementById('btnMpGuide');
+  var btnMpClose = document.getElementById('btnMpClose');
+  if (btnMpGuide) btnMpGuide.addEventListener('click', App.openMiniProgram);
+  if (btnMpClose) btnMpClose.addEventListener('click', App.dismissMpGuide);
+
+  // 启动引导条
+  App.showMpGuide();
+
 })(FlashcardApp);

@@ -5,7 +5,7 @@
 ## 项目结构
 
 ```
-English/    -- 英语词汇闪卡 PWA（纯 JS，零运行时依赖，esbuild 构建）
+English-web/    -- 英语词汇闪卡 PWA（纯 JS，零运行时依赖，esbuild 构建）
   js/       -- 14 个 JS 模块（app/state/models/utils/ebbinghaus/ui/panels/storage/schema）
   css/      -- 10 个 CSS 文件
   data/     -- 扩展词格式校验与迁移
@@ -25,14 +25,14 @@ english-app/-- 英语背单词 uni-app（Vue 3 + Vite → 微信小程序 MVP）
                     aiDiary/getStats/submitFeedback）
   static/        -- 图标/音频/图片资源
 
-math/       -- 数学公式速查 PWA（React + TypeScript + Vite）
+math-web/       -- 数学公式速查 PWA（React + TypeScript + Vite）
 ```
 
 ## 构建与测试
 
-- English: `cd English && npm run build && npm test && npm run dev`
+- English-web: `cd English-web && npm run build && npm test && npm run dev`
 - english-app: `cd english-app && npm run build:mp-weixin`（构建）/ `npm run dev:mp-weixin`（开发）
-- Math: `cd math && npm install && npm test && npm run build`
+- Math-web: `cd math-web && npm install && npm test && npm run build`
 - 全量测试: 根目录 `npm run test:all`
 
 ## english-app 技术栈
@@ -42,13 +42,13 @@ math/       -- 数学公式速查 PWA（React + TypeScript + Vite）
 | 跨端框架 | uni-app (Vue 3 Composition API + Vite) |
 | 后端 | 微信云开发（云数据库 + 云函数 + 云存储） |
 | AI | DeepSeek API（aiDiary 云函数，含三层降级） |
-| 算法 | SM-2 + 艾宾浩斯遗忘曲线（从 English/ 迁移） |
+| 算法 | SM-2 + 艾宾浩斯遗忘曲线（从 English-web/ 迁移） |
 | 状态管理 | Vue reactive() 单例 store（无 Pinia 依赖） |
 | 样式 | SCSS + 暗色主题 CSS 变量系统 |
 
 ## 部署
 
-- English: https://lx825-ai.github.io/study-tools/english/
-- Math: https://lx825-ai.github.io/study-tools/math/
+- English-web: https://lx825-ai.github.io/study-tools/english/
+- Math-web: https://lx825-ai.github.io/study-tools/math/
 - english-app: 微信小程序（mp.weixin.qq.com 审核上架，appid 待填入 manifest.json）
 - 使用 GitHub Pages + GitHub Actions 自动部署

@@ -2,8 +2,8 @@
 
 学习工具集合，包含两个 PWA 应用：
 
-- **[English](English/)** — 基于 SM-2 间隔重复算法的英语词汇闪卡 PWA，内置高考/CET-4/CET-6/考研 5 套词书（~22K 词），支持音标、词组、例句等富数据卡片
-- **[Math](math/)** — 大学数学公式速查表 PWA，覆盖高数、线代、离散、概率统计 ~123 条公式，支持 KaTeX 渲染、收藏、测验
+- **[English-web](English-web/)** — 基于 SM-2 间隔重复算法的英语词汇闪卡 PWA，内置高考/CET-4/CET-6/考研 5 套词书（~22K 词），支持音标、词组、例句等富数据卡片
+- **[Math-mini-app](math-web/)** — 大学数学公式速查表 PWA，覆盖高数、线代、离散、概率统计 ~123 条公式，支持 KaTeX 渲染、收藏、测验
 
 ## 快速开始
 
@@ -13,8 +13,8 @@ npm run test:all     # 运行全部测试
 npm run build:all    # 构建全部项目
 
 # 或单独操作
-cd English && npm install && npm run build
-cd math   && npm install && npm run build
+cd English-web && npm install && npm run build
+cd math-web   && npm install && npm run build
 ```
 
 ## 线上访问
@@ -26,7 +26,7 @@ cd math   && npm install && npm run build
 
 ## 功能特性
 
-### English 英语闪卡
+### English-web 英语闪卡
 
 | 功能 | 说明 |
 |------|------|
@@ -38,7 +38,7 @@ cd math   && npm install && npm run build
 | 数据管理 | 牌组 CRUD、批量导入、JSON/CSV 导出、全部数据备份与恢复 |
 | PWA | Service Worker 离线缓存、独立窗口运行 |
 
-### Math 数学公式
+### Math-mini-app 数学公式
 
 | 功能 | 说明 |
 |------|------|
@@ -52,7 +52,7 @@ cd math   && npm install && npm run build
 
 ## 技术栈
 
-| | English | Math |
+| | English-web | Math-mini-app |
 |------|---------|------|
 | 框架 | 纯 JavaScript (ES2017+) | React 18 + TypeScript |
 | 构建 | esbuild | Vite 6 |
