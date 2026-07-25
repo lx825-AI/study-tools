@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数学公式速查微信小程序 - 完整开发方案</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;line-height:1.7;color:#333;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+.container{max-width:1300px;margin:0 auto}
+header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:45px 40px;border-radius:16px 16px 0 0;text-align:center}
+header h1{font-size:2.5em;margin-bottom:10px;text-shadow:2px 2px 4px rgba(0,0,0,0.2)}
+header p{font-size:1.2em;opacity:0.9}
+nav{background:#2d3436;padding:12px 40px;position:sticky;top:0;z-index:100;display:flex;flex-wrap:wrap;gap:8px}
+nav a{color:#b2bec3;text-decoration:none;padding:6px 14px;border-radius:6px;font-size:0.92em;transition:all 0.2s}
+nav a:hover{background:#636e72;color:#fff}
+.content{background:white;padding:40px;border-radius:0 0 16px 16px}
+.section{margin-bottom:45px;padding-bottom:45px;border-bottom:2px solid #f0f0f0}
+.section:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+h2{color:#667eea;font-size:1.8em;margin-bottom:20px;padding-bottom:10px;border-bottom:3px solid #667eea;display:inline-block}
+h3{color:#764ba2;font-size:1.4em;margin:28px 0 15px}
+h4{color:#555;font-size:1.1em;margin:20px 0 10px}
+p{margin-bottom:15px;color:#555}
+.highlight-box{background:linear-gradient(135deg,#f5f7fa 0%,#c3cfe2 100%);border-left:5px solid #667eea;padding:20px;margin:20px 0;border-radius:0 8px 8px 0}
+.tech-stack{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin:20px 0}
+.tech-card{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:20px;border-radius:12px;box-shadow:0 4px 15px rgba(102,126,234,0.3)}
+.tech-card h4{color:white;margin-top:0;font-size:1.15em}
+.tech-card p{color:rgba(255,255,255,0.9);margin:0;font-size:0.95em}
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:20px;margin:20px 0}
+.feature-card{background:#f8f9fa;padding:20px;border-radius:12px;border:2px solid #e9ecef;transition:all 0.3s ease}
+.feature-card:hover{border-color:#667eea;transform:translateY(-5px);box-shadow:0 10px 30px rgba(0,0,0,0.1)}
+.feature-card h4{color:#667eea;margin-top:0}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin:20px 0}
+.card{background:#f8f9fa;padding:20px;border-radius:10px;border-left:4px solid #0984e3}
+.card h4{color:#0984e3;margin-top:0}
+.card.purple{border-left-color:#6c5ce7}
+.card.purple h4{color:#6c5ce7}
+.card.green{border-left-color:#00b894}
+.card.green h4{color:#00b894}
+.card.orange{border-left-color:#e17055}
+.card.orange h4{color:#e17055}
+.note{background:#fff3cd;border-left:4px solid #fdcb6e;padding:15px;margin:15px 0;border-radius:0 8px 8px 0}
+.note strong{color:#856404}
+.warn{background:#ffeaa7;border-left:4px solid #fdcb6e;padding:15px;margin:15px 0;border-radius:0 8px 8px 0}
+.db-table{width:100%;border-collapse:collapse;margin:20px 0;background:white;border-radius:8px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
+.db-table th{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:14px 15px;text-align:left;font-weight:600}
+.db-table td{padding:11px 15px;border-bottom:1px solid #eee}
+.db-table tr:nth-child(even){background:#f9f9f9}
+.db-table tr:hover{background:#f0f4ff}
+.timeline{position:relative;padding-left:30px;margin:20px 0}
+.timeline::before{content:'';position:absolute;left:15px;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#667eea 0%,#764ba2 100%)}
+.timeline-item{position:relative;margin-bottom:28px;padding:20px;background:#f8f9fa;border-radius:12px;border-left:4px solid #667eea}
+.timeline-item::before{content:'';position:absolute;left:-38px;top:25px;width:16px;height:16px;background:white;border:4px solid #667eea;border-radius:50%}
+.timeline-item h4{color:#667eea;margin-top:0}
+.timeline-item .duration{display:inline-block;background:#667eea;color:white;padding:3px 10px;border-radius:15px;font-size:0.85em;margin-bottom:10px}
+.week-timeline{display:flex;gap:15px;margin:20px 0;flex-wrap:wrap}
+.week-timeline .wt-item{flex:1;min-width:160px;background:linear-gradient(135deg,#0984e3,#6c5ce7);color:white;padding:18px;border-radius:10px;text-align:center}
+.week-timeline .wt-item .week{font-size:2em;font-weight:bold}
+.week-timeline .wt-item .label{opacity:0.9;margin-top:5px}
+.risk-card{background:#fff3cd;border-left:5px solid #ffc107;padding:20px;margin:15px 0;border-radius:0 8px 8px 0}
+.risk-card strong{color:#856404}
+.risk-card .solution{background:#d4edda;border-left:5px solid #28a745;padding:15px;margin-top:15px;border-radius:0 8px 8px 0;color:#155724}
+code{background:#f4f4f4;padding:2px 8px;border-radius:4px;font-family:'Fira Code',Consolas,monospace;font-size:0.88em;color:#e83e8c}
+.code-block,pre{background:#2d2d2d;color:#f8f8f2;padding:20px;border-radius:8px;overflow-x:auto;margin:15px 0;font-family:'Fira Code',Consolas,monospace;font-size:0.88em;line-height:1.6}
+.code-block .comment,pre .c{color:#75715e}
+.code-block .keyword,pre .k{color:#f92672}
+.code-block .string,pre .s{color:#e6db74}
+pre .t{color:#a29bfe}
+.diagram{background:#f8f9fa;border:2px dashed #b2bec3;border-radius:8px;padding:25px;margin:20px 0;text-align:center;font-family:'Courier New',monospace;line-height:1.8;white-space:pre;overflow-x:auto;font-size:0.85em}
+ul,ol{margin:15px 0;padding-left:25px}
+li{margin-bottom:8px;color:#555}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin:20px 0}
+.stat-card{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:25px;border-radius:12px;text-align:center;box-shadow:0 4px 15px rgba(102,126,234,0.3)}
+.stat-card .number{font-size:2.5em;font-weight:bold;display:block;margin-bottom:5px}
+.stat-card .label{font-size:0.95em;opacity:0.9}
+.checklist{background:#f8f9fa;padding:20px;border-radius:12px;margin:20px 0}
+.checklist-item{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #eee}
+.checklist-item:last-child{border-bottom:none}
+.checklist-item::before{content:'✓';display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:#28a745;color:white;border-radius:50%;margin-right:15px;font-size:0.8em;font-weight:bold;flex-shrink:0}
+.checklist-item strong{color:#333}
+footer{background:#2d2d2d;color:#aaa;text-align:center;padding:25px;font-size:0.9em}
+footer a{color:#667eea;text-decoration:none}
+@media(max-width:768px){body{padding:10px}header{padding:25px}header h1{font-size:1.8em}.content{padding:25px}.tech-stack,.feature-grid,.stats-grid,.card-grid{grid-template-columns:1fr}nav{padding:8px 15px}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>📐 数学公式速查微信小程序</h1>
+  <p>基于 uni-app + Vue 3 + 微信云开发 | 完整技术方案</p>
+</header>
+
+<nav>
+  <a href="#overview">项目概述</a>
+  <a href="#tech">技术架构</a>
+  <a href="#features">功能模块</a>
+  <a href="#database">数据库设计</a>
+  <a href="#render">公式渲染引擎</a>
+  <a href="#sync">后端架构与同步</a>
+  <a href="#pages">页面与界面</a>
+  <a href="#impl">核心功能实现</a>
+  <a href="#plan">开发计划</a>
+  <a href="#risks">风险评估</a>
+  <a href="#roadmap">后续演进</a>
+  <a href="#structure">项目结构</a>
+  <a href="#perf">性能优化</a>
+  <a href="#summary">总结</a>
+</nav>
+
+<div class="content">
+
+<!-- ==================== 1. 项目概述 ==================== -->
+<div class="section" id="overview">
+  <h2>📋 项目概述</h2>
+  <div class="highlight-box">
+    <p><strong>项目目标：</strong>将现有 math-web PWA 项目完整迁移至微信小程序，保留所有功能，提供原生体验，支持云端数据同步。</p>
+    <p><strong>核心价值：</strong>为大学生提供随时随地查阅数学公式的便捷工具，支持搜索、收藏、测验、进度追踪等功能，帮助高效备考。</p>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><span class="number">5</span><span class="label">大学科覆盖</span></div>
+    <div class="stat-card"><span class="number">34</span><span class="label">细分章节</span></div>
+    <div class="stat-card"><span class="number">177</span><span class="label">公式条目</span></div>
+    <div class="stat-card"><span class="number">8 周</span><span class="label">开发周期</span></div>
+  </div>
+  <h3>学科覆盖</h3>
+  <ul>
+    <li><strong>高等数学：</strong>函数极限、导数微分、中值定理、不定/定积分、微分方程、多元函数微分、二重/三重积分、无穷级数、曲线/曲面积分、场论</li>
+    <li><strong>线性代数：</strong>行列式、矩阵、向量、特征值等</li>
+    <li><strong>离散数学：</strong>逻辑、集合、图论、组合等</li>
+    <li><strong>概率统计：</strong>概率分布、假设检验、回归分析等</li>
+    <li><strong>数值分析：</strong>插值、数值积分、微分方程数值解等</li>
+  </ul>
+</div>
+
+<!-- ==================== 2. 技术架构 ==================== -->
+<div class="section" id="tech">
+  <h2>🏗️ 技术架构</h2>
+  <div class="tech-stack">
+    <div class="tech-card"><h4>📱 跨端框架</h4><p><strong>uni-app + Vue 3</strong><br>Composition API + TypeScript，条件编译适配小程序</p></div>
+    <div class="tech-card"><h4>⚡ 构建工具</h4><p><strong>Vite 5</strong><br>极速 HMR，优秀的 TS 支持，现代化构建体验</p></div>
+    <div class="tech-card"><h4>🎨 UI</h4><p><strong>uni-ui + 自定义组件</strong><br>官方组件库保证兼容，自定义组件满足特殊需求</p></div>
+    <div class="tech-card"><h4>☁️ 后端</h4><p><strong>微信云开发</strong><br>云数据库 + 云函数 + 云存储，免运维，免费额度充足</p></div>
+    <div class="tech-card"><h4>📊 公式渲染</h4><p><strong>Canvas 2D 自研引擎</strong><br>Tokenizer → Parser → Renderer 三阶段管线</p></div>
+    <div class="tech-card"><h4>🔐 用户认证</h4><p><strong>微信登录</strong><br>免注册，openid 标识，数据安全隔离</p></div>
+  </div>
+  <h3>与现有 math-web 项目的代码复用关系</h3>
+  <table class="db-table">
+    <tr><th>源文件 (math-web/)</th><th>目标文件 (math-miniapp/)</th><th>复用方式</th></tr>
+    <tr><td><code>src/data/types.ts</code></td><td><code>src/data/types.ts</code></td><td>直接复制，零改动</td></tr>
+    <tr><td><code>src/data/formulas.ts</code></td><td><code>src/data/formulas-university.ts</code></td><td>直接复制，改名以预留多学段扩展</td></tr>
+    <tr><td><code>src/hooks/useSearch.ts</code></td><td><code>src/composables/useSearch.ts</code></td><td>React hook → Vue composable 转换</td></tr>
+    <tr><td><code>src/hooks/useFavorites.ts</code></td><td><code>src/composables/useFavorites.ts</code></td><td>逻辑迁移 + 云端同步扩展</td></tr>
+    <tr><td><code>src/hooks/usePractice.ts</code></td><td><code>src/composables/usePractice.ts</code></td><td>状态机逻辑完整迁移</td></tr>
+    <tr><td><code>src/hooks/useProgress.ts</code></td><td><code>src/composables/useProgress.ts</code></td><td>逻辑迁移 + 云端同步扩展</td></tr>
+    <tr><td><code>src/hooks/useDailyChallenge.ts</code></td><td><code>src/composables/useDailyChallenge.ts</code></td><td>逻辑迁移 + 云端同步扩展</td></tr>
+    <tr><td><code>src/hooks/useTheme.ts</code></td><td><code>src/composables/useTheme.ts</code></td><td>CSS 变量方案替代 DOM 类切换</td></tr>
+    <tr><td><code>src/components/FormulaCard.tsx</code></td><td><code>src/components/FormulaCard.vue</code></td><td>JSX → Vue SFC 重写</td></tr>
+    <tr><td><code>src/components/FormulaGrid.tsx</code></td><td><code>src/components/FormulaList.vue</code></td><td>组件逻辑映射</td></tr>
+    <tr><td><code>src/components/SearchBar.tsx</code></td><td><code>src/components/SearchBar.vue</code></td><td>组件逻辑映射</td></tr>
+    <tr><td><code>src/components/KatexDisplay.tsx</code></td><td><code>src/components/FormulaCanvas.vue</code></td><td>KaTeX → Canvas 自研引擎（全新）</td></tr>
+    <tr><td><code>src/utils/storage.ts</code></td><td><code>src/utils/storage.ts</code></td><td>localStorage API → uni.storage API 适配</td></tr>
+    <tr><td><code>src/utils/highlight.ts</code></td><td><code>src/utils/highlight.ts</code></td><td>DOM 高亮 → rich-text 节点高亮适配</td></tr>
+    <tr><td><code>src/utils/formulaImage.ts</code></td><td><code>src/utils/formulaImage.ts</code></td><td>DOM API → Canvas API 适配</td></tr>
+  </table>
+</div>
+
+<!-- ==================== 3. 功能模块 ==================== -->
+<div class="section" id="features">
+  <h2>✨ 功能模块设计</h2>
+  <h3>核心功能（MVP）</h3>
+  <div class="feature-grid">
+    <div class="feature-card"><h4>🔍 全文搜索</h4><p>300ms 防抖，预建扁平索引，学科/难度筛选，搜索建议自动补全，历史记录</p></div>
+    <div class="feature-card"><h4>📚 公式速查</h4><p>按学科/章节分类浏览，Canvas 渲染公式，网格/列表双视图，卡片展开查看详情与笔记</p></div>
+    <div class="feature-card"><h4>⭐ 收藏系统</h4><p>一键收藏/取消，收藏列表管理，云端同步，批量复制导出</p></div>
+    <div class="feature-card"><h4>🕐 最近浏览</h4><p>自动记录浏览历史（上限 20 条），快速访问，支持清除</p></div>
+  </div>
+  <h3>学习功能</h3>
+  <div class="feature-grid">
+    <div class="feature-card"><h4>📝 个人笔记</h4><p>每条公式可添加 Markdown 笔记，云端同步，支持 Escape 快捷保存</p></div>
+    <div class="feature-card"><h4>📊 进度追踪</h4><p>按章节统计已浏览公式，百分比可视化，支持重置</p></div>
+    <div class="feature-card"><h4>🎯 公式测验</h4><p>选择题（4 选 1）+ 闪卡记忆两种模式，题库来源可选全部/收藏/错题</p></div>
+    <div class="feature-card"><h4>🏆 每日挑战</h4><p>每日 5 道随机选择题，连续打卡天数，成就 emoji 阶梯（3/7/14/30 天）</p></div>
+  </div>
+  <h3>实用功能</h3>
+  <div class="feature-grid">
+    <div class="feature-card"><h4>📋 复制导出</h4><p>LaTeX / Markdown 一键复制，长按公式 Canvas → ActionSheet 选择操作</p></div>
+    <div class="feature-card"><h4>🎨 主题切换</h4><p>自动 / 暗色 / 亮色，CSS 变量实现，跟随系统设置</p></div>
+    <div class="feature-card"><h4>📱 离线支持</h4><p>公式数据本地缓存，离线队列暂存操作，联网后自动同步</p></div>
+    <div class="feature-card"><h4>♿ 无障碍</h4><p>大字体模式，高对比度，VoiceOver/TalkBack 支持</p></div>
+  </div>
+</div>
+
+<!-- ==================== 4. 数据库设计 ==================== -->
+<div class="section" id="database">
+  <h2>🗄️ 数据库设计（微信云开发）</h2>
+  <h3>6 个数据集合</h3>
+  <h4>1. users — 用户信息</h4>
+  <table class="db-table"><tr><th>字段</th><th>类型</th><th>说明</th></tr>
+  <tr><td><code>_id</code></td><td>String</td><td>openid</td></tr>
+  <tr><td><code>settings</code></td><td>Object</td><td>{ theme, fontSize }</td></tr>
+  <tr><td><code>createdAt / updatedAt</code></td><td>Date</td><td>时间戳</td></tr></table>
+
+  <h4>2. favorites — 收藏</h4>
+  <table class="db-table"><tr><th>字段</th><th>类型</th><th>说明</th></tr>
+  <tr><td><code>_id</code></td><td>String</td><td>{userId}_{sectionId}_{formulaIndex}</td></tr>
+  <tr><td><code>userId</code></td><td>String</td><td>openid</td></tr>
+  <tr><td><code>sectionId</code></td><td>String</td><td>章节 ID</td></tr>
+  <tr><td><code>formulaIndex</code></td><td>Number</td><td>公式在章节中的索引</td></tr>
+  <tr><td><code>createdAt</code></td><td>Date</td><td>收藏时间</td></tr></table>
+
+  <h4>3. notes — 个人笔记</h4>
+  <table class="db-table"><tr><th>字段</th><th>类型</th><th>说明</th></tr>
+  <tr><td><code>_id</code></td><td>String</td><td>{userId}_{sectionId}_{formulaIndex}</td></tr>
+  <tr><td><code>userId</code></td><td>String</td><td>openid</td></tr>
+  <tr><td><code>sectionId / formulaIndex</code></td><td>String / Number</td><td>定位公式</td></tr>
+  <tr><td><code>content</code></td><td>String</td><td>Markdown 内容</td></tr>
+  <tr><td><code>updatedAt</code></td><td>Date</td><td>最后修改时间</td></tr></table>
+
+  <h4>4. progress — 学习进度</h4>
+  <table class="db-table"><tr><th>字段</th><th>类型</th><th>说明</th></tr>
+  <tr><td><code>_id</code></td><td>String</td><td>{userId}_{sectionId}</td></tr>
+  <tr><td><code>userId</code></td><td>String</td><td>openid</td></tr>
+  <tr><td><code>sectionId</code></td><td>String</td><td>章节 ID</td></tr>
+  <tr><td><code>viewedFormulas</code></td><td>Array&lt;Number&gt;</td><td>已浏览的公式索引列表</td></tr>
+  <tr><td><code>updatedAt</code></td><td>Date</td><td>最后更新时间</td></tr></table>
+
+  <h4>5. quiz_records — 测验记录</h4>
+  <table class="db-table"><tr><th>字段</th><th>类型</th><th>说明</th></tr>
+  <tr><td><code>_id</code></td><td>String</td><td>自动生成</td></tr>
+  <tr><td><code>userId</code></td><td>String</td><td>openid</td></tr>
+  <tr><td><code>mode</code></td><td>String</td><td>mcq / flashcard</td></tr>
+  <tr><td><code>totalQuestions / correctAnswers</code></td><td>Number</td><td>总题数 / 正确数</td></tr>
+  <tr><td><code>wrongQuestions</code></td><td>Array</td><td>错题列表</td></tr>
+  <tr><td><code>duration</code></td><td>Number</td><td>耗时（秒）</td></tr>
+  <tr><td><code>createdAt</code></td><td>Date</td><td>测验时间</td></tr></table>
+
+  <h4>6. daily_challenges — 每日挑战</h4>
+  <table class="db-table"><tr><th>字段</th><th>类型</th><th>说明</th></tr>
+  <tr><td><code>_id</code></td><td>String</td><td>{userId}_{date}</td></tr>
+  <tr><td><code>userId</code></td><td>String</td><td>openid</td></tr>
+  <tr><td><code>date</code></td><td>String</td><td>YYYY-MM-DD</td></tr>
+  <tr><td><code>questions / answers</code></td><td>Array</td><td>题目与作答</td></tr>
+  <tr><td><code>score</code></td><td>Number</td><td>得分</td></tr>
+  <tr><td><code>streak</code></td><td>Number</td><td>连续打卡天数</td></tr></table>
+
+  <h3>索引设计</h3>
+  <pre><span class="c">// 收藏：按用户 + 公式唯一约束 + 按时间排序</span>
+db.favorites.createIndex({ <span class="s">"userId"</span>: 1, <span class="s">"sectionId"</span>: 1, <span class="s">"formulaIndex"</span>: 1 }, { unique: <span class="k">true</span> })
+db.favorites.createIndex({ <span class="s">"userId"</span>: 1, <span class="s">"createdAt"</span>: -1 })
+
+<span class="c">// 笔记：按用户 + 公式唯一约束</span>
+db.notes.createIndex({ <span class="s">"userId"</span>: 1, <span class="s">"sectionId"</span>: 1, <span class="s">"formulaIndex"</span>: 1 }, { unique: <span class="k">true</span> })
+
+<span class="c">// 进度：按用户 + 章节唯一约束</span>
+db.progress.createIndex({ <span class="s">"userId"</span>: 1, <span class="s">"sectionId"</span>: 1 }, { unique: <span class="k">true</span> })
+
+<span class="c">// 测验记录：按用户 + 时间排序</span>
+db.quiz_records.createIndex({ <span class="s">"userId"</span>: 1, <span class="s">"createdAt"</span>: -1 })
+
+<span class="c">// 每日挑战：按用户 + 日期唯一约束</span>
+db.daily_challenges.createIndex({ <span class="s">"userId"</span>: 1, <span class="s">"date"</span>: 1 }, { unique: <span class="k">true</span> })</pre>
+
+  <h3>安全规则</h3>
+  <pre>{
+  <span class="s">"read"</span>:  <span class="s">"doc.userId == auth.openid"</span>,
+  <span class="s">"write"</span>: <span class="s">"doc.userId == auth.openid"</span>
+}</pre>
+</div>
+
+<!-- ==================== 5. 公式渲染引擎 ==================== -->
+<div class="section" id="render">
+  <h2>🎨 LaTeX → Canvas 公式渲染引擎</h2>
+  <p>因为小程序不支持 DOM API，无法直接使用 KaTeX。需要自研一套<strong>轻量级 LaTeX 解析 + Canvas 2D 渲染</strong>方案。</p>
+
+  <h3>5.1 整体架构</h3>
+  <div class="diagram">
+┌─────────────────────────────────────────────────┐
+│                  FormulaRenderer                  │
+│  ┌──────────┐   ┌──────────┐   ┌────────────┐  │
+│  │ Tokenizer │ → │  Parser  │ → │  Renderer  │  │
+│  │ 词法分析  │   │ 语法分析  │   │ Canvas 渲染 │  │
+│  └──────────┘   └──────────┘   └────────────┘  │
+│       ↓              ↓               ↓          │
+│  Token[]          AST           Canvas 2D      │
+│                                    ↓            │
+│                            ┌────────────┐       │
+│                            │ LRU Cache  │       │
+│                            │ (200条)    │       │
+│                            └────────────┘       │
+└─────────────────────────────────────────────────┘
+  </div>
+
+  <h3>5.2 词法分析器（Tokenizer）</h3>
+  <p>将 LaTeX 字符串拆解为 Token 序列，覆盖 <strong>约 40 种 Token 类型</strong>。</p>
+  <pre><span class="c">// src/utils/formula/tokenizer.ts</span>
+<span class="k">export enum</span> TokenType {
+  <span class="c">// 结构符号</span>
+  LBrace, RBrace, Subscript, Superscript,  <span class="c">// { } _ ^</span>
+  Frac, Sqrt, Sum, Prod, Int, Lim,         <span class="c">// \frac \sqrt \sum \prod \int \lim</span>
+  Left, Right,                              <span class="c">// \left \right</span>
+  <span class="c">// 希腊字母（~25 个，大小写）</span>
+  Alpha, Beta, Gamma, Delta, Theta, Lambda, Pi, Sigma, Phi, Omega, ...
+  <span class="c">// 运算符 & 关系符</span>
+  Plus, Minus, Times, Div, Cdot, Pm, Le, Ge, Ne, Approx,
+  Infty, Partial, Nabla, Forall, Exists,
+  <span class="c">// 函数名</span>
+  Sin, Cos, Tan, Ln, Log, Exp, Max, Min, Lim,
+  <span class="c">// 矩阵 & 装饰</span>
+  Aligned, Pmatrix, Cases, Choose,
+  Bar, Hat, Vec, Tilde, Ddot, Underbrace, Overbrace,
+  <span class="c">// 文字 & 数字</span>
+  Text, Number, Letter, Space, To,
+}</pre>
+
+  <p><strong>Token 覆盖率与实现优先级：</strong></p>
+  <table class="db-table">
+    <tr><th>类别</th><th>Token 命令</th><th>频率</th><th>优先级</th></tr>
+    <tr><td>结构</td><td><code>\frac</code>, <code>\sqrt</code>, <code>^</code>, <code>_</code></td><td>极高（几乎所有公式）</td><td>P0</td></tr>
+    <tr><td>希腊字母</td><td><code>\alpha</code> ~ <code>\Omega</code>（~25 个）</td><td>高</td><td>P0</td></tr>
+    <tr><td>运算符</td><td><code>\sum</code>, <code>\int</code>, <code>\lim</code>, <code>\partial</code>, <code>\infty</code></td><td>高</td><td>P0</td></tr>
+    <tr><td>函数</td><td><code>\sin</code>, <code>\cos</code>, <code>\ln</code>, <code>\log</code>, <code>\exp</code></td><td>高</td><td>P0</td></tr>
+    <tr><td>括号</td><td><code>\left(</code>, <code>\right)</code></td><td>中</td><td>P1</td></tr>
+    <tr><td>矩阵/排列</td><td><code>\begin{aligned}</code>, <code>\begin{pmatrix}</code>, <code>\begin{cases}</code></td><td>低（~10 条）</td><td>P1</td></tr>
+    <tr><td>装饰</td><td><code>\vec</code>, <code>\bar</code>, <code>\hat</code>, <code>\dot</code></td><td>低</td><td>P2</td></tr>
+    <tr><td>特殊</td><td><code>\underbrace</code>, <code>\choose</code></td><td>极低（2-3 条）</td><td>P2</td></tr>
+  </table>
+  <div class="note"><strong>策略：</strong>P0 覆盖 95% 公式；P1 第二周补全；P2 降级为预渲染图片兜底。</div>
+
+  <h3>5.3 语法分析器（Parser）</h3>
+  <p>采用<strong>递归下降解析</strong>，每个 LaTeX 结构对应一个 AST 节点。</p>
+  <pre><span class="c">// src/utils/formula/parser.ts</span>
+<span class="k">export type</span> ASTNode =
+  | { type: <span class="s">'text'</span>; value: <span class="t">string</span> }
+  | { type: <span class="s">'frac'</span>; num: ASTNode[]; den: ASTNode[] }
+  | { type: <span class="s">'sqrt'</span>; content: ASTNode[]; index?: ASTNode[] }
+  | { type: <span class="s">'subsup'</span>; base: ASTNode[]; sub?: ASTNode[]; sup?: ASTNode[] }
+  | { type: <span class="s">'paren'</span>; left: <span class="t">string</span>; right: <span class="t">string</span>; content: ASTNode[] }
+  | { type: <span class="s">'op'</span>; op: <span class="t">string</span>; limits?: ASTNode[] }
+  | { type: <span class="s">'matrix'</span>; env: <span class="t">string</span>; rows: ASTNode[][][] }
+  | { type: <span class="s">'accent'</span>; accent: <span class="t">string</span>; base: ASTNode[] }
+
+<span class="c">// 使用示例</span>
+<span class="k">const</span> ast = parse(<span class="s">'\\frac{1}{2}x^2 + \\sqrt{3}'</span>)</pre>
+
+  <h3>5.4 Canvas 渲染器（Renderer）</h3>
+  <p>核心：<strong>measure（计算布局）→ draw（逐节点绘制）</strong>两阶段。</p>
+  <pre><span class="c">// src/utils/formula/renderer.ts</span>
+<span class="k">export class</span> FormulaRenderer {
+  <span class="k">private</span> metrics: CharMetrics       <span class="c">// 预计算字符宽度表</span>
+  <span class="k">private</span> cache = <span class="k">new</span> LRUCache&lt;<span class="t">string</span>, RenderResult&gt;(200)
+
+  <span class="c">// 阶段一：递归计算布局（不绘制）</span>
+  measure(node: ASTNode, ctx: CanvasRenderingContext2D, fontSize: <span class="t">number</span>): Box
+
+  <span class="c">// 阶段二：递归绘制</span>
+  draw(node: ASTNode, ctx: CanvasRenderingContext2D, box: Box, x: <span class="t">number</span>, y: <span class="t">number</span>): <span class="t">void</span>
+
+  <span class="c">// 统一入口</span>
+  render(latex: <span class="t">string</span>, canvas: Canvas, fontSize: <span class="t">number</span>): RenderResult {
+    <span class="k">const</span> cacheKey = <span class="s">`</span>${latex}<span class="s">:</span>${fontSize}<span class="s">`</span>
+    <span class="k">if</span> (<span class="k">this</span>.cache.has(cacheKey)) <span class="k">return</span> <span class="k">this</span>.cache.get(cacheKey)!
+    <span class="k">const</span> ast = parse(tokenize(latex))
+    <span class="k">const</span> ctx = canvas.getContext(<span class="s">'2d'</span>)
+    <span class="k">const</span> box = <span class="k">this</span>.measure(ast, ctx, fontSize)
+    <span class="c">// 适配设备像素比</span>
+    <span class="k">const</span> dpr = uni.getSystemInfoSync().pixelRatio
+    canvas.width = box.width * dpr; canvas.height = box.height * dpr
+    ctx.scale(dpr, dpr)
+    <span class="k">this</span>.draw(ast, ctx, box, 0, box.baseline)
+    <span class="k">const</span> result = { width: box.width, height: box.height }
+    <span class="k">this</span>.cache.set(cacheKey, result)
+    <span class="k">return</span> result
+  }
+}</pre>
+
+  <h3>5.5 Vue 组件封装</h3>
+  <pre><span class="c">// src/components/FormulaCanvas.vue</span>
+&lt;<span class="k">template</span>&gt;
+  &lt;<span class="k">canvas</span>
+    type=<span class="s">"2d"</span>
+    <span class="k">:id</span>=<span class="s">"canvasId"</span>
+    <span class="k">:style</span>=<span class="s">"{ width: size.width + 'px', height: size.height + 'px' }"</span>
+    @<span class="k">click</span>=<span class="s">"() => emit('copy', props.latex)"</span>
+    @<span class="k">longpress</span>=<span class="s">"() => emit('export')"</span>
+  /&gt;
+&lt;/<span class="k">template</span>&gt;
+
+&lt;<span class="k">script</span> setup lang=<span class="s">"ts"</span>&gt;
+<span class="k">import</span> { ref, onMounted, watch } <span class="k">from</span> <span class="s">'vue'</span>
+<span class="k">import</span> { FormulaRenderer } <span class="k">from</span> <span class="s">'@/utils/formula/renderer'</span>
+
+<span class="k">const</span> props = defineProps&lt;{ latex: <span class="t">string</span>; fontSize?: <span class="t">number</span> }&gt;()
+<span class="k">const</span> emit = defineEmits&lt;{ copy: [latex: <span class="t">string</span>]; export: [] }&gt;()
+
+<span class="k">const</span> renderer = <span class="k">new</span> FormulaRenderer()
+<span class="k">const</span> size = ref({ width: 0, height: 0 })
+<span class="k">const</span> canvasId = <span class="s">`f-</span>${Math.random().toString(36).slice(2)}<span class="s">`</span>
+
+<span class="c">// #ifdef MP-WEIXIN</span>
+<span class="k">const</span> render = () => {
+  <span class="k">const</span> query = uni.createSelectorQuery().in(<span class="k">this</span>)
+  query.select(<span class="s">`#</span>${canvasId}<span class="s">`</span>).fields({ node: <span class="k">true</span>, size: <span class="k">true</span> })
+    .exec(<span class="k">async</span> (res) => {
+      <span class="k">const</span> r = renderer.render(props.latex, res[0].node, props.fontSize || 32)
+      size.value = { width: r.width, height: r.height }
+    })
+}
+<span class="c">// #endif</span>
+
+onMounted(render)
+watch(() => props.latex, render)
+&lt;/<span class="k">script</span>&gt;</pre>
+
+  <h3>5.6 性能优化</h3>
+  <div class="card-grid">
+    <div class="card"><h4>🔑 LRU 缓存</h4><p>缓存最近 200 条渲染结果，命中率预计 > 80%</p></div>
+    <div class="card purple"><h4>📏 预计算度量表</h4><p>启动时预计算所有字符宽度，避免运行时反复 measureText</p></div>
+    <div class="card green"><h4>🖼 虚拟列表</h4><p>公式列表仅渲染可视区域 + 上下各 3 条的 Canvas</p></div>
+    <div class="card orange"><h4>⚡ 渐进渲染</h4><p>简单公式优先，复杂公式延迟 100ms，不阻塞滚动</p></div>
+  </div>
+
+  <h3>5.7 降级策略</h3>
+  <div class="warn">
+    <ol>
+      <li><strong>预渲染图片：</strong>build 脚本预渲染 177 条公式为 PNG 上传到云存储，Canvas 失败时加载图片</li>
+      <li><strong>纯文本：</strong>极端情况直接显示 LaTeX 源码</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ==================== 6. 后端架构与数据同步 ==================== -->
+<div class="section" id="sync">
+  <h2>☁️ 后端架构与数据同步</h2>
+
+  <h3>6.1 系统架构</h3>
+  <div class="diagram">
+┌──────────────────────────────────────────────┐
+│              微信云开发平台                    │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  │
+│  │ 云数据库  │  │  云函数   │  │  云存储   │  │
+│  │ 6 集合   │  │ 4 函数   │  │ 图片/资源 │  │
+│  └──────────┘  └──────────┘  └──────────┘  │
+└──────────────────────────────────────────────┘
+       ↕ wx.cloud SDK
+┌──────────────────────────────────────────────┐
+│           math-miniapp 客户端                 │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  │
+│  │uni.storage│  │DataSyncer│  │ 离线队列  │  │
+│  │(本地优先) │  │(增量合并) │  │(FIFO)   │  │
+│  └──────────┘  └──────────┘  └──────────┘  │
+└──────────────────────────────────────────────┘
+  </div>
+
+  <h3>6.2 本地优先 + 云端同步策略</h3>
+  <p><strong>核心原则：所有写入先落本地，异步同步到云端。读取先读本地，后台拉取云端增量。</strong></p>
+  <div class="card-grid">
+    <div class="card">
+      <h4>⚡ 写入路径</h4>
+      <p>用户操作 → uni.storage 写入（0ms）→ UI 立即更新 → 后台调用云函数 → 失败加入重试队列 → 网络恢复自动重试</p>
+    </div>
+    <div class="card purple">
+      <h4>📖 读取路径</h4>
+      <p>页面加载 → 读本地数据（<50ms）→ 立即展示 → 后台拉云端增量 → 合并冲突（最后写入胜出）→ 静默刷新 UI</p>
+    </div>
+    <div class="card green">
+      <h4>🔄 增量同步</h4>
+      <p>每条数据维护 <code>updatedAt</code> 时间戳，同步时只传输上次同步之后的变更，减少数据传输量</p>
+    </div>
+    <div class="card orange">
+      <h4>📴 离线队列</h4>
+      <p>离线操作存入队列（上限 200 条），网络恢复后 FIFO 重放。幂等设计确保重复提交安全</p>
+    </div>
+  </div>
+
+  <h3>6.3 DataSyncer 同步引擎</h3>
+  <pre><span class="c">// src/services/sync.ts — 核心同步引擎</span>
+<span class="k">export class</span> DataSyncer {
+  <span class="k">private</span> queue: SyncOp[] = []
+  <span class="k">private</span> syncing = <span class="k">false</span>
+  <span class="k">private</span> lastSyncAt = <span class="s">'1970-01-01'</span>
+
+  <span class="c">// 写入：本地即时生效 + 加入离线队列</span>
+  <span class="k">async</span> write(collection: <span class="t">string</span>, data: <span class="t">any</span>): Promise&lt;<span class="t">void</span>&gt; {
+    <span class="k">const</span> localData = { ...data, updatedAt: Date.now(), _synced: <span class="k">false</span> }
+    uni.setStorageSync(<span class="s">`sync:</span>${collection}<span class="s">:</span>${data._id}<span class="s">`</span>, localData)
+    <span class="k">this</span>.queue.push({ action: <span class="s">'write'</span>, collection, data: localData })
+    <span class="k">this</span>.scheduleFlush()       <span class="c">// 300ms 防抖批量 flush</span>
+  }
+
+  <span class="c">// 读取：本地优先</span>
+  read&lt;T&gt;(collection: <span class="t">string</span>, id: <span class="t">string</span>): T | <span class="k">null</span> {
+    <span class="k">return</span> uni.getStorageSync(<span class="s">`sync:</span>${collection}<span class="s">:</span>${id}<span class="s">`</span>) || <span class="k">null</span>
+  }
+
+  <span class="c">// 批量 flush：调用 syncData 云函数</span>
+  <span class="k">private async</span> flush(): Promise&lt;<span class="t">void</span>&gt; {
+    <span class="k">if</span> (<span class="k">this</span>.syncing || <span class="k">this</span>.queue.length === 0) <span class="k">return</span>
+    <span class="k">this</span>.syncing = <span class="k">true</span>
+    <span class="k">const</span> ops = <span class="k">this</span>.queue.splice(0)
+    <span class="k">try</span> {
+      <span class="k">const</span> res = <span class="k">await</span> wx.cloud.callFunction({
+        name: <span class="s">'syncData'</span>, data: { ops, lastSyncAt: <span class="k">this</span>.lastSyncAt }
+      })
+      <span class="c">// 合并云端增量</span>
+      res.result.remoteChanges.forEach(c => <span class="k">this</span>.applyRemote(c))
+      <span class="k">this</span>.lastSyncAt = res.result.serverTime
+      <span class="c">// 标记已完成同步</span>
+      ops.forEach(op => {
+        <span class="k">const</span> key = <span class="s">`sync:</span>${op.collection}<span class="s">:</span>${op.data._id}<span class="s">`</span>
+        <span class="k">const</span> d = uni.getStorageSync(key)
+        <span class="k">if</span> (d) uni.setStorageSync(key, { ...d, _synced: <span class="k">true</span> })
+      })
+    } <span class="k">catch</span> { <span class="k">this</span>.queue.unshift(...ops) }  <span class="c">// 失败恢复</span>
+    <span class="k">finally</span> { <span class="k">this</span>.syncing = <span class="k">false</span> }
+  }
+
+  <span class="c">// 300ms 防抖：多次写入合并为一次云端请求</span>
+  <span class="k">private</span> scheduleFlush() {
+    clearTimeout(<span class="k">this</span>.flushTimer)
+    <span class="k">this</span>.flushTimer = setTimeout(() => <span class="k">this</span>.flush(), 300)
+  }
+}</pre>
+
+  <h3>6.4 云函数设计（4 个）</h3>
+  <table class="db-table">
+    <tr><th>云函数</th><th>功能</th><th>预估耗时</th></tr>
+    <tr><td><code>login</code></td><td>获取 openid，创建/查询用户记录</td><td>~200ms</td></tr>
+    <tr><td><code>syncData</code></td><td>批量执行客户端离线队列的操作；返回上次同步后的云端增量变更</td><td>~300ms</td></tr>
+    <tr><td><code>getStats</code></td><td>聚合查询用户学习统计（收藏数、进度%、正确率趋势）</td><td>~150ms</td></tr>
+    <tr><td><code>feedback</code></td><td>接收用户反馈（公式纠错、功能建议），写入 feedback 集合</td><td>~100ms</td></tr>
+  </table>
+
+  <h3>6.5 syncData 云函数实现</h3>
+  <pre><span class="c">// cloudfunctions/syncData/index.js</span>
+<span class="k">const</span> cloud = require(<span class="s">'wx-server-sdk'</span>)
+cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
+<span class="k">const</span> db = cloud.database(); <span class="k">const</span> _ = db.command
+
+exports.main = <span class="k">async</span> (event, context) => {
+  <span class="k">const</span> { ops, lastSyncAt } = event
+  <span class="k">const</span> openid = cloud.getWXContext().OPENID
+
+  <span class="c">// 1. 执行客户端提交的批量操作（upsert 模式）</span>
+  <span class="k">for</span> (<span class="k">const</span> op <span class="k">of</span> ops) {
+    <span class="k">const</span> coll = db.collection(op.collection)
+    <span class="k">if</span> (op.action === <span class="s">'write'</span>) {
+      <span class="k">const</span> { _id, ...data } = op.data
+      <span class="k">await</span> coll.doc(_id).set({
+        data: { ...data, userId: openid, updatedAt: <span class="k">new</span> Date() }
+      }).catch(() => coll.add({ data: { _id, ...data, userId: openid, createdAt: <span class="k">new</span> Date() } }))
+    } <span class="k">else if</span> (op.action === <span class="s">'delete'</span>) {
+      <span class="k">await</span> coll.doc(op.data._id).remove()
+    }
+  }
+
+  <span class="c">// 2. 返回上次同步后的云端增量变更</span>
+  <span class="k">const</span> collections = [<span class="s">'favorites'</span>, <span class="s">'notes'</span>, <span class="s">'progress'</span>, <span class="s">'quiz_records'</span>, <span class="s">'daily_challenges'</span>]
+  <span class="k">const</span> remoteChanges = {}
+  <span class="k">for</span> (<span class="k">const</span> name <span class="k">of</span> collections) {
+    <span class="k">const</span> res = <span class="k">await</span> db.collection(name)
+      .where({ userId: openid, updatedAt: _.gt(<span class="k">new</span> Date(lastSyncAt)) })
+      .limit(200).get()
+    <span class="k">if</span> (res.data.length > 0) remoteChanges[name] = res.data
+  }
+  <span class="k">return</span> { serverTime: <span class="k">new</span> Date().toISOString(), remoteChanges }
+}</pre>
+</div>
+
+<!-- ==================== 7. 页面与界面设计 ==================== -->
+<div class="section" id="pages">
+  <h2>📄 页面与界面设计</h2>
+
+  <h3>7.1 信息架构</h3>
+  <div class="diagram">
+┌──────────────────────────────────────────────────────┐
+│                    TabBar（4 个）                       │
+│   首页        搜索        收藏        我的              │
+├──────────────────────────────────────────────────────┤
+│                                                      │
+│  首页 (index)                                         │
+│  ├─ 学科入口卡片（5 大学科，带颜色标识 + 进度条）           │
+│  ├─ 快速搜索栏                                          │
+│  ├─ 每日挑战入口（连续天数 + emoji 成就）                   │
+│  └─ 推荐公式（随机 6 条 Canvas 渲染预览）                   │
+│                                                      │
+│  搜索 (search)                                        │
+│  ├─ 搜索输入框 + 搜索历史 + 搜索建议                       │
+│  ├─ 学科/难度筛选                                       │
+│  ├─ 搜索结果列表（按章节分组）                              │
+│  └─ 排序切换（按章节 / 按匹配度）                          │
+│                                                      │
+│  收藏 (favorites)                                     │
+│  ├─ 收藏列表（网格/列表切换）                               │
+│  ├─ 批量操作（全选/导出 Markdown/分享）                     │
+│  └─ 空状态引导（"还没有收藏，去逛逛吧"）                       │
+│                                                      │
+│  我的 (profile)                                       │
+│  ├─ 用户信息卡（头像 + 昵称 + 学习天数）                      │
+│  ├─ 学习统计（总进度环形图、测验成绩趋势）                      │
+│  ├─ 最近浏览（横向滚动）                                   │
+│  ├─ 错题本（错题数量 + 复习入口）                            │
+│  └─ 设置（主题/字体大小/清除缓存/反馈/关于）                    │
+│                                                      │
+├──────────────────────────────────────────────────────┤
+│  分包页面（非 Tabbar）                                  │
+│  sub-browse: 章节列表 → 公式列表 → 公式详情 + 笔记          │
+│  sub-practice: 测验设置 → 选择题/闪卡 → 每日挑战 → 结果       │
+└──────────────────────────────────────────────────────┘
+  </div>
+
+  <h3>7.2 页面路径与分包策略</h3>
+  <pre><span class="c">// pages.json — 主包 4 Tab 页 + 2 分包 7 页面</span>
+{
+  <span class="s">"pages"</span>: [                     <span class="c">// 主包（4 个 Tab 页，< 2MB）</span>
+    { <span class="s">"path"</span>: <span class="s">"pages/index/index"</span> },
+    { <span class="s">"path"</span>: <span class="s">"pages/search/search"</span> },
+    { <span class="s">"path"</span>: <span class="s">"pages/favorites/favorites"</span> },
+    { <span class="s">"path"</span>: <span class="s">"pages/profile/profile"</span> }
+  ],
+  <span class="s">"subPackages"</span>: [
+    { <span class="s">"root"</span>: <span class="s">"sub-browse"</span>,         <span class="c">// 浏览分包</span>
+      <span class="s">"pages"</span>: [
+        <span class="s">"sections/index"</span>,            <span class="c">// 章节列表</span>
+        <span class="s">"formulas/index"</span>,            <span class="c">// 公式列表（网格/列表）</span>
+        <span class="s">"detail/index"</span>,              <span class="c">// 公式详情 + 笔记编辑器</span>
+        <span class="s">"recent/index"</span>               <span class="c">// 最近浏览</span>
+      ]
+    },
+    { <span class="s">"root"</span>: <span class="s">"sub-practice"</span>,       <span class="c">// 练习分包</span>
+      <span class="s">"pages"</span>: [
+        <span class="s">"quiz/index"</span>,                <span class="c">// 测验（设置→选择题→闪卡→结果）</span>
+        <span class="s">"daily/index"</span>,               <span class="c">// 每日挑战</span>
+        <span class="s">"result/index"</span>               <span class="c">// 成绩详情</span>
+      ]
+    }
+  ],
+  <span class="s">"preloadRule"</span>: {
+    <span class="s">"pages/index/index"</span>: { <span class="s">"network"</span>: <span class="s">"all"</span>, <span class="s">"packages"</span>: [<span class="s">"sub-browse"</span>] }
+  }
+}</pre>
+
+  <h3>7.3 组件树设计</h3>
+  <div class="card-grid">
+    <div class="card">
+      <h4>📦 公共组件（9 个）</h4>
+      <p><code>FormulaCanvas</code> — Canvas 公式渲染（核心）</p>
+      <p><code>FormulaCard</code> — 公式卡片（名称 + Canvas + 标签 + 操作）</p>
+      <p><code>SearchBar</code> — 搜索输入框（防抖 + 历史 + 建议）</p>
+      <p><code>FilterPanel</code> — 学科/难度筛选</p>
+      <p><code>EmptyState</code> — 空状态占位</p>
+      <p><code>ToastMessage</code> — 轻提示</p>
+      <p><code>LoadingSkeleton</code> — 骨架屏</p>
+      <p><code>ProgressBar</code> — 进度条</p>
+      <p><code>SubjectIcon</code> — 学科图标（5 色 + emoji）</p>
+    </div>
+    <div class="card purple">
+      <h4>📄 页面级组件（8 个）</h4>
+      <p><code>SubjectCards</code> — 首页学科入口卡片</p>
+      <p><code>DailyChallengeCard</code> — 每日挑战卡片</p>
+      <p><code>SectionList</code> — 章节列表</p>
+      <p><code>FormulaList</code> — 公式列表（网格/列表切换）</p>
+      <p><code>PracticeSetup</code> — 测验设置面板</p>
+      <p><code>McqQuestion</code> — 选择题（4 选项，正确/错误反馈）</p>
+      <p><code>FlashcardQuestion</code> — 闪卡（正反面翻转动画）</p>
+      <p><code>QuizResult</code> — 测验结果（环形图 + 错题列表）</p>
+    </div>
+  </div>
+
+  <h3>7.4 状态管理（Pinia — 3 个 Store）</h3>
+  <pre><span class="c">// src/stores/formulas.ts</span>
+<span class="k">export const</span> useFormulaStore = defineStore(<span class="s">'formulas'</span>, () => {
+  <span class="k">const</span> data = ref(formulaData)                    <span class="c">// 177 条公式（静态）</span>
+  <span class="k">const</span> flatIndex = buildFlatIndex(data)           <span class="c">// 预建扁平索引（搜索用）</span>
+  <span class="k">const</span> currentSection = ref(<span class="s">'calc-limit'</span>)
+  <span class="k">const</span> isGridView = ref(<span class="k">false</span>)
+  <span class="k">const</span> currentFormulas = computed(() => data[currentSection.value]?.formulas || [])
+  <span class="k">return</span> { data, flatIndex, currentSection, isGridView, currentFormulas }
+})
+
+<span class="c">// src/stores/user.ts</span>
+<span class="k">export const</span> useUserStore = defineStore(<span class="s">'user'</span>, () => {
+  <span class="k">const</span> user = ref&lt;User | <span class="k">null</span>&gt;(<span class="k">null</span>)
+  <span class="k">const</span> login = <span class="k">async</span> () => { <span class="c">/* 调用 login 云函数 */</span> }
+  <span class="k">return</span> { user, isLogin: computed(() => !!user.value), login }
+})
+
+<span class="c">// src/stores/preferences.ts</span>
+<span class="k">export const</span> usePreferencesStore = defineStore(<span class="s">'preferences'</span>, () => {
+  <span class="k">const</span> theme = ref&lt;ThemeMode&gt;(<span class="s">'auto'</span>)
+  <span class="k">const</span> fontSize = ref(<span class="s">'medium'</span>)
+  watch(theme, applyTheme)                       <span class="c">// 切换 CSS 变量</span>
+  <span class="k">return</span> { theme, fontSize }
+})</pre>
+
+  <h3>7.5 主题系统（CSS 变量）</h3>
+  <pre><span class="c">// src/uni.scss</span>
+:root {
+  <span class="c">/* 亮色主题 */</span>
+  --bg-primary: #ffffff;        --bg-secondary: #f8f9fa;
+  --text-primary: #2d3436;      --text-secondary: #636e72;
+  --border-color: #dfe6e9;      --brand-color: #0984e3;
+  <span class="c">/* 5 学科学科色 */</span>
+  --color-calc: #0984e3;        --color-linalg: #6c5ce7;
+  --color-disc: #00b894;        --color-prob: #e17055;
+  --color-num: #fdcb6e;
+}
+.dark {
+  <span class="c">/* 暗黑主题 */</span>
+  --bg-primary: #1a1a2e;        --bg-secondary: #16213e;
+  --text-primary: #dfe6e9;      --text-secondary: #b2bec3;
+  --border-color: #2d3436;      --brand-color: #74b9ff;
+}</pre>
+
+  <h3>7.6 关键交互细节</h3>
+  <div class="card-grid">
+    <div class="card"><h4>📇 卡片展开</h4><p>点击展开详情（笔记 + 上下条导航），Canvas 高度动画 250ms ease-out</p></div>
+    <div class="card purple"><h4>🖐 长按操作</h4><p>长按 Canvas → ActionSheet：复制 LaTeX / 保存图片 / 分享</p></div>
+    <div class="card green"><h4>🔽 下拉刷新</h4><p>收藏页 & 首页 → 触发云端增量同步</p></div>
+    <div class="card orange"><h4>💬 Toast 提示</h4><p><code>uni.showToast</code>，1500ms，带 emoji 图标</p></div>
+  </div>
+</div>
+
+<!-- ==================== 8. 核心功能实现 ==================== -->
+<div class="section" id="impl">
+  <h2>⚙️ 核心功能实现细节</h2>
+
+  <h3>8.1 全文搜索（预建扁平索引 + 300ms 防抖）</h3>
+  <p>在 formula store 初始化时构建 <code>flatIndex</code>，预计算每条公式的 <code>searchText</code>（name + latex + note + detail 合并转小写），避免搜索时重复拼接。</p>
+  <pre><span class="c">// src/composables/useSearch.ts</span>
+<span class="k">export function</span> useSearch() {
+  <span class="k">const</span> query = ref(<span class="s">''</span>)
+  <span class="k">const</span> debouncedQuery = ref(<span class="s">''</span>)
+  <span class="k">const</span> subjectFilter = ref(<span class="s">''</span>)
+  <span class="k">const</span> levelFilter = ref(<span class="s">''</span>)
+  <span class="k">const</span> sortBySection = ref(<span class="k">true</span>)
+  <span class="k">let</span> timer: <span class="t">number</span>
+
+  <span class="k">const</span> setQuery = (q: <span class="t">string</span>) => {
+    query.value = q
+    clearTimeout(timer)
+    timer = setTimeout(() => { debouncedQuery.value = q.trim().toLowerCase() }, 300)
+  }
+
+  <span class="k">const</span> results = computed(() => {
+    <span class="k">if</span> (!debouncedQuery.value) <span class="k">return</span> []
+    <span class="k">const</span> q = debouncedQuery.value
+    <span class="k">const</span> list: SearchResult[] = []
+    <span class="k">const</span> store = useFormulaStore()
+    <span class="k">for</span> (<span class="k">const</span> item <span class="k">of</span> store.flatIndex) {
+      <span class="k">if</span> (subjectFilter.value && !item.sectionId.startsWith(subjectFilter.value)) <span class="k">continue</span>
+      <span class="k">if</span> (levelFilter.value && item.level !== levelFilter.value) <span class="k">continue</span>
+      <span class="k">if</span> (item.searchText.includes(q)) {
+        list.push({ sectionId: item.sectionId, sectionTitle: item.sectionTitle, formulaIndex: item.index })
+      }
+    }
+    <span class="k">if</span> (sortBySection.value) list.sort((a, b) => a.sectionId.localeCompare(b.sectionId) || a.formulaIndex - b.formulaIndex)
+    <span class="k">return</span> list
+  })
+
+  <span class="k">return</span> { query, setQuery, results, subjectFilter, levelFilter, sortBySection, ... }
+}</pre>
+
+  <h3>8.2 测验系统状态机</h3>
+  <p>完全复用 math-web 项目 <code>usePractice.ts</code> 的状态机设计，转换为 Vue 3 Composition API。</p>
+  <div class="diagram">
+┌──────────┐  开始  ┌──────────┐  答完  ┌──────────┐
+│  SETUP   │ ────→ │   QUIZ   │ ────→ │  RESULT  │
+│ 设置参数  │       │ 选择题模式 │       │ 成绩展示  │
+└──────────┘       └──────────┘       └──────────┘
+     │                   ↑                   ↑
+     │ 开始闪卡           │                   │
+     ├──────────────────┐│                   │
+     │                  ↓↓                   │
+     │           ┌──────────┐                │
+     └──────────→│ FLASHCARD│────────────────┘
+                 │  闪卡模式  │    完成
+                 └──────────┘
+
+题库来源：全部公式 / 收藏夹 / 错题本
+题目构建：shuffle → 取前 N → 随机抽 3 个错误选项
+答题节奏：正确 800ms 自动下一题，错误 1800ms（留时间看解析）</div>
+  <pre><span class="c">// src/composables/usePractice.ts</span>
+<span class="k">export function</span> usePractice() {
+  <span class="k">const</span> phase = ref&lt;Phase&gt;(<span class="s">'setup'</span>)       <span class="c">// setup | quiz | flashcard | result</span>
+  <span class="k">const</span> poolMode = ref&lt;PoolMode&gt;(<span class="s">'all'</span>)   <span class="c">// all | favorites | mistakes</span>
+  <span class="k">const</span> quizMode = ref&lt;QuizMode&gt;(<span class="s">'mcq'</span>)   <span class="c">// mcq | flashcard</span>
+  <span class="k">const</span> count = ref(10)
+  <span class="k">const</span> questions = ref&lt;Question[]&gt;([])
+  <span class="k">const</span> qIndex = ref(0);  <span class="k">const</span> score = ref(0)
+
+  <span class="k">const</span> pool = computed(() => {
+    <span class="k">if</span> (poolMode.value === <span class="s">'favorites'</span>) <span class="k">return</span> <span class="c">/* 收藏筛选 */</span>
+    <span class="k">if</span> (poolMode.value === <span class="s">'mistakes'</span>)  <span class="k">return</span> <span class="c">/* 错题筛选 */</span>
+    <span class="k">return</span> allFormulas
+  })
+
+  <span class="k">const</span> startQuiz = () => {
+    <span class="k">const</span> selected = shuffle(pool.value).slice(0, count.value)
+    questions.value = buildMcqQuestions(selected)
+    qIndex.value = 0; score.value = 0; phase.value = <span class="s">'quiz'</span>
+  }
+
+  <span class="k">const</span> handleAnswer = (optIndex: <span class="t">number</span>) => {
+    <span class="k">const</span> correct = questions.value[qIndex.value].options[optIndex].correct
+    <span class="k">if</span> (!correct) addMistake(q.sectionId, q.index)   <span class="c">// 写入错题本</span>
+    setTimeout(nextOrFinish, correct ? 800 : 1800)
+  }
+
+  <span class="k">return</span> { phase, poolMode, quizMode, count, questions, qIndex, score, startQuiz, handleAnswer, ... }
+}</pre>
+
+  <h3>8.3 每日挑战</h3>
+  <pre><span class="c">// src/composables/useDailyChallenge.ts</span>
+<span class="k">export function</span> useDailyChallenge() {
+  <span class="k">const</span> today = getToday()            <span class="c">// YYYY-MM-DD</span>
+  <span class="k">const</span> state = ref(loadState(today)) <span class="c">// 日期变更自动重置</span>
+
+  <span class="k">const</span> emoji = computed(() => {       <span class="c">// 成就阶梯</span>
+    <span class="k">if</span> (streak.value >= 30) <span class="k">return</span> <span class="s">'🔥'</span>
+    <span class="k">if</span> (streak.value >= 14) <span class="k">return</span> <span class="s">'⭐'</span>
+    <span class="k">if</span> (streak.value >= 7)  <span class="k">return</span> <span class="s">'💪'</span>
+    <span class="k">if</span> (streak.value >= 3)  <span class="k">return</span> <span class="s">'📚'</span>
+    <span class="k">return</span> <span class="s">''</span>
+  })
+
+  <span class="k">const</span> completeChallenge = <span class="k">async</span> (score, total) => {
+    state.value = { ...state.value, completed: <span class="k">true</span>, score, total, streak: streak.value + 1 }
+    saveState(state.value)
+    <span class="k">await</span> syncer.write(<span class="s">'daily_challenges'</span>, state.value)
+  }
+
+  <span class="k">return</span> { isCompleted, streak, today, emoji, completeChallenge }
+}</pre>
+
+  <h3>8.4 学习进度追踪</h3>
+  <pre><span class="c">// src/composables/useProgress.ts</span>
+<span class="k">export function</span> useProgress() {
+  <span class="k">const</span> progress = ref&lt;Record&lt;<span class="t">string</span>, <span class="t">number</span>[]&gt;&gt;({})
+
+  <span class="k">const</span> markViewed = (sectionId: <span class="t">string</span>, index: <span class="t">number</span>) => {
+    <span class="k">if</span> (!progress.value[sectionId]) progress.value[sectionId] = []
+    <span class="k">if</span> (!progress.value[sectionId].includes(index)) {
+      progress.value[sectionId].push(index)
+      syncer.write(<span class="s">'progress'</span>, { sectionId, viewedFormulas: progress.value[sectionId] })
+    }
+  }
+
+  <span class="k">const</span> getProgress = (sectionId: <span class="t">string</span>, total: <span class="t">number</span>) => {
+    <span class="k">const</span> viewed = progress.value[sectionId]?.length || 0
+    <span class="k">return</span> Math.round((viewed / total) * 100)
+  }
+
+  <span class="k">return</span> { progress, markViewed, getProgress }
+}</pre>
+
+  <h3>8.5 收藏系统</h3>
+  <pre><span class="c">// src/composables/useFavorites.ts</span>
+<span class="k">export function</span> useFavorites() {
+  <span class="k">const</span> favorites = ref&lt;Set&lt;<span class="t">string</span>&gt;&gt;(<span class="k">new</span> Set())
+  <span class="k">const</span> has = (sid: <span class="t">string</span>, i: <span class="t">number</span>) => favorites.value.has(<span class="s">`</span>${sid}<span class="s">:</span>${i}<span class="s">`</span>)
+
+  <span class="k">const</span> toggle = <span class="k">async</span> (sectionId: <span class="t">string</span>, index: <span class="t">number</span>) => {
+    <span class="k">const</span> key = <span class="s">`</span>${sectionId}<span class="s">:</span>${index}<span class="s">`</span>
+    <span class="k">const</span> next = <span class="k">new</span> Set(favorites.value)
+    next.has(key) ? next.delete(key) : next.add(key)
+    favorites.value = next
+    <span class="k">await</span> syncer.write(<span class="s">'favorites'</span>, {
+      _id: <span class="s">`</span>${userId}<span class="s">_</span>${sectionId}<span class="s">_</span>${index}<span class="s">`</span>,
+      sectionId, formulaIndex: index, isDeleted: !next.has(key)
+    })
+  }
+
+  <span class="k">return</span> { favorites, toggle, has }
+}</pre>
+</div>
+
+<!-- ==================== 9. 开发计划 ==================== -->
+<div class="section" id="plan">
+  <h2>📅 开发计划（按依赖关系排序）</h2>
+
+  <div class="note">
+    <strong>核心原则：</strong>先建基础设施、再搭功能模块、最后云端对接。每阶段产出可独立验证，不依赖后续阶段。关键路径上的技术风险（Canvas 渲染）放在最前面验证。
+  </div>
+
+  <h3>依赖关系总览</h3>
+  <div class="diagram">
+┌─────────────────────────────────────────────────────────┐
+│                    开发依赖关系图                          │
+│                                                         │
+│  P0: 项目骨架 + 数据迁移 (W1)                              │
+│       ↓                                                 │
+│  P1: Canvas 渲染引擎 (W2) ←── 关键路径，最大风险             │
+│       ↓                                                 │
+│  P2: 核心速查功能 (W3-4)  ←── 依赖 P1 渲染 + P0 数据         │
+│       ↓                ↘                               │
+│  P3: 学习功能 (W5-6)    P4: 云端同步 (W5-7) ← 可并行       │
+│       ↘                ↙                               │
+│  P5: 测试优化 + 上线 (W8)                                 │
+└─────────────────────────────────────────────────────────┘
+  </div>
+
+  <!-- ===== P0 ===== -->
+  <h3>P0 · 项目骨架与数据迁移（第 1 周）</h3>
+  <div class="card-grid">
+    <div class="card"><h4>1. 创建项目</h4><p>HBuilderX 创建 uni-app + Vue 3 + TS 项目，配置 Vite + ESLint。验证：<code>npm run dev:mp-weixin</code> 能在微信开发者工具中运行</p></div>
+    <div class="card purple"><h4>2. 数据迁移</h4><p>从 math-web 复制 <code>types.ts</code>（零改动），<code>formulas.ts</code> 重命名为 <code>formulas-university.ts</code>。验证：导入数据，确认 177 条公式完整</p></div>
+    <div class="card green"><h4>3. 页面骨架</h4><p>创建 4 个 Tab 页面 + 配置 TabBar + pages.json 分包路由。验证：4 个 Tab 可切换，分包页面可跳转</p></div>
+    <div class="card orange"><h4>4. 基础组件</h4><p>EmptyState / ToastMessage / LoadingSkeleton / SubjectIcon。验证：组件在页面中可正常渲染</p></div>
+  </div>
+  <p><strong>交付物：</strong>可构建运行的项目骨架，4 个 Tab 页可导航，公式数据可导入</p>
+
+  <!-- ===== P1 ===== -->
+  <h3>P1 · Canvas 公式渲染引擎（第 2 周）⚠️ 关键路径</h3>
+  <div class="highlight-box">
+    <p><strong>这是整个项目的最大技术风险。</strong>如果 Canvas 渲染不可行，整个方案需要调整（降级为图片方案或 WebView 方案）。必须在第 2 周完成可行性验证。</p>
+  </div>
+  <div class="card-grid">
+    <div class="card"><h4>5. Tokenizer</h4><p>实现词法分析器（P0 优先级：结构符号、希腊字母、运算符、函数名，覆盖 95% 公式）。验证：对 177 条公式逐一 tokenize，无报错</p></div>
+    <div class="card purple"><h4>6. Parser</h4><p>递归下降解析器，输出 AST（frac/sqrt/subsup/paren/op/accent/matrix）。验证：对典型公式（分数、根号、上下标、矩阵）输出正确 AST</p></div>
+    <div class="card green"><h4>7. Renderer</h4><p>Canvas 2D 两阶段渲染（measure + draw），适配设备像素比，LRU 缓存 200 条。验证：177 条公式逐条渲染，抽查 30 条与 math-web 版对比视觉效果</p></div>
+    <div class="card orange"><h4>8. 组件 + 降级</h4><p>FormulaCanvas.vue 组件封装，构建脚本预渲染 177 条公式为 PNG 降级兜底。验证：公式列表页使用组件渲染 10+ 条公式无卡顿</p></div>
+  </div>
+  <p><strong>交付物：</strong>Canvas 公式渲染引擎可用，177 条公式 ≥95% 可正确渲染，降级图片兜底就绪</p>
+
+  <!-- ===== P2 ===== -->
+  <h3>P2 · 核心速查功能（第 3-4 周）</h3>
+  <p><strong>前置依赖：</strong>P0（数据）+ P1（渲染引擎）</p>
+  <table class="db-table">
+    <tr><th style="width:50px">顺序</th><th>任务</th><th>依赖</th><th>说明</th></tr>
+    <tr><td>9</td><td><strong>公式 Store + 扁平索引</strong></td><td>P0</td><td>Pinia formulas store，预建 flatIndex（searchText 预计算），预留学段前缀 key 格式。验证：store 可导入，flatIndex 包含 177 条</td></tr>
+    <tr><td>10</td><td><strong>章节列表页 + 公式列表页</strong></td><td>P1 + 任务 9</td><td>sub-browse 分包页面。虚拟列表渲染，网格/列表切换，学科色标识。验证：各章节可正常浏览，滚动流畅</td></tr>
+    <tr><td>11</td><td><strong>公式详情页 + 笔记编辑器</strong></td><td>任务 10</td><td>Canvas 渲染公式 + 上下条导航 + 笔记 textarea（本地存储，先不同步云端）。验证：展开/收起动画正常</td></tr>
+    <tr><td>12</td><td><strong>全文搜索</strong></td><td>任务 9</td><td>300ms 防抖 + 扁平索引搜索 + 搜索历史 + 搜索建议 + 学科/难度筛选。验证：搜索"极限"能返回 calc-limit 章节的 9 条公式</td></tr>
+    <tr><td>13</td><td><strong>收藏系统</strong></td><td>任务 9</td><td>本地 Set 存储（key=university:{sid}:{index}），收藏列表页，批量复制导出。验证：收藏/取消收藏即时生效</td></tr>
+    <tr><td>14</td><td><strong>最近浏览 + 主题切换</strong></td><td>任务 10</td><td>自动记录浏览（上限 20），CSS 变量主题（自动/暗色/亮色）。验证：主题切换即时生效，最近浏览列表正确</td></tr>
+  </table>
+  <p><strong>交付物：</strong>可独立使用的公式速查工具（浏览、搜索、收藏、笔记、主题切换全部本地可用）</p>
+
+  <!-- ===== P3 + P4 ===== -->
+  <h3>P3 · 学习功能（第 5-6 周）<span style="color:#888;font-weight:normal;font-size:0.9em">　∥ 可与 P4 并行</span></h3>
+  <p><strong>前置依赖：</strong>P2（公式数据 + 收藏）</p>
+  <table class="db-table">
+    <tr><th style="width:50px">顺序</th><th>任务</th><th>依赖</th><th>说明</th></tr>
+    <tr><td>15</td><td><strong>测验系统</strong></td><td>P2</td><td>SETUP→QUIZ/FLASHCARD→RESULT 状态机。选择题 4 选 1 + 闪卡翻转，题库来源（全部/收藏/错题）。验证：完整测一遍 10 题，结果正确</td></tr>
+    <tr><td>16</td><td><strong>错题本</strong></td><td>任务 15</td><td>答错自动记录（wrongCount + lastWrong），错题复习入口。验证：做错 3 题后，错题本显示 3 条记录</td></tr>
+    <tr><td>17</td><td><strong>每日挑战</strong></td><td>任务 15</td><td>固定 5 题 + 连续天数 + 成就 emoji 阶梯（3/7/14/30 天）。验证：日期切换后自动重置，streak 计算正确</td></tr>
+    <tr><td>18</td><td><strong>学习进度追踪</strong></td><td>P2</td><td>章节百分比统计 + 进度环形图，支持重置。验证：展开 3 条公式后，对应章节进度更新</td></tr>
+  </table>
+  <p><strong>交付物：</strong>测验、每日挑战、进度追踪全部本地可用</p>
+
+  <h3>P4 · 云端对接（第 5-7 周）<span style="color:#888;font-weight:normal;font-size:0.9em">　∥ 可与 P3 并行</span></h3>
+  <p><strong>前置依赖：</strong>P2（数据模型确定后即可开始）</p>
+  <table class="db-table">
+    <tr><th style="width:50px">顺序</th><th>任务</th><th>说明</th></tr>
+    <tr><td>19</td><td><strong>微信云开发环境</strong></td><td>注册云开发，创建 6 个数据集合 + 索引 + 安全规则。验证：云开发控制台可见所有集合</td></tr>
+    <tr><td>20</td><td><strong>DataSyncer 同步引擎</strong></td><td>本地优先写入 + 离线队列 + 300ms 防抖批量 flush + 增量拉取。验证：离线操作存储到队列，联网后自动 flush 成功</td></tr>
+    <tr><td>21</td><td><strong>云函数（4 个）</strong></td><td>login → syncData → getStats → feedback。验证：云函数本地调试通过，syncData upsert 逻辑正确</td></tr>
+    <tr><td>22</td><td><strong>微信登录</strong></td><td>静默 login，获取 openid，创建/查询用户记录。验证：首次启动自动完成登录</td></tr>
+    <tr><td>23</td><td><strong>数据接入层</strong></td><td>将 P2/P3 中的收藏、笔记、进度、测验记录切换到 syncer.write()。验证：收藏一条公式后，云端数据库可见该记录</td></tr>
+    <tr><td>24</td><td><strong>个人中心页</strong></td><td>统计面板（getStats 聚合数据）+ 设置 + 反馈 + 公式图片导出。验证：统计数据与本地一致</td></tr>
+  </table>
+  <p><strong>交付物：</strong>多设备云端同步完整可用，登录/统计/反馈功能就绪</p>
+
+  <!-- ===== P5 ===== -->
+  <h3>P5 · 测试优化与上线（第 8 周）</h3>
+  <div class="card-grid">
+    <div class="card"><h4>25. 真机测试</h4><p>iOS + Android 各 3 款主流机型，覆盖：首次启动→浏览→搜索→收藏→测验→每日挑战→同步 全流程</p></div>
+    <div class="card purple"><h4>26. 性能优化</h4><p>虚拟列表调优 + Canvas 渲染性能分析 + 包体积分析 + 首屏加载时间优化。目标：首屏 < 1.5s，公式列表滚动 60fps</p></div>
+    <div class="card green"><h4>27. 边界处理</h4><p>无网络状态、空数据、极端输入（超长 LaTeX）、Canvas 降级触发、同步冲突。每种场景录屏验证</p></div>
+    <div class="card orange"><h4>28. 审核上线</h4><p>类目选择"教育 > 在线教育"，准备隐私政策 + 功能截图，提交审核，修复反馈。预留 2 周缓冲</p></div>
+  </div>
+  <p><strong>交付物：</strong>生产就绪，通过审核，正式上线</p>
+
+  <h3>任务总览</h3>
+  <table class="db-table">
+    <tr><th style="width:50px">阶段</th><th style="width:80px">周</th><th style="width:80px">任务数</th><th>关键产出</th><th style="width:100px">可并行？</th></tr>
+    <tr style="background:#e8fde8"><td><strong>P0</strong></td><td>W1</td><td>4</td><td>项目骨架 + 数据就绪</td><td>—</td></tr>
+    <tr style="background:#fff8e8"><td><strong>P1</strong></td><td>W2</td><td>4</td><td>Canvas 渲染引擎（⚠️ 关键路径）</td><td>—</td></tr>
+    <tr style="background:#e8f4fd"><td><strong>P2</strong></td><td>W3-4</td><td>6</td><td>核心速查本地可用</td><td>—</td></tr>
+    <tr style="background:#f0e6ff"><td><strong>P3</strong></td><td>W5-6</td><td>4</td><td>学习功能本地可用</td><td>∥ P4</td></tr>
+    <tr style="background:#ffe8e8"><td><strong>P4</strong></td><td>W5-7</td><td>6</td><td>云端同步 + 登录 + 统计</td><td>∥ P3</td></tr>
+    <tr style="background:#f5f5f5"><td><strong>P5</strong></td><td>W8</td><td>4</td><td>测试 → 优化 → 上线</td><td>—</td></tr>
+    <tr style="font-weight:bold"><td colspan="3">合计</td><td>28 个任务</td><td>8 周</td></tr>
+  </table>
+
+  <h3>关键路径与风险缓冲</h3>
+  <div class="card-grid">
+    <div class="card"><h4>🔴 关键路径</h4><p>P1 Canvas 渲染引擎是整个项目的单点风险。如果第 2 周结束时无法达到 95% 覆盖率，启动降级方案（全部切换到图片渲染），额外消耗 ~3 天</p></div>
+    <div class="card purple"><h4>🟡 弹性缓冲</h4><p>P3 和 P4 可并行执行。如果 P1 延期 1 周，可以压缩 P3+P4 并行周期（从 3 周压到 2 周），或延后 P4 中非关键任务（反馈、统计面板）</p></div>
+    <div class="card green"><h4>🟢 可砍范围</h4><p>如果进度压力大，P3 的闪卡模式和 P4 的 getStats/feedback 功能可作为 V1.1 迭代，优先保证核心速查 + 云端同步上线</p></div>
+  </div>
+
+  <h3>里程碑节点</h3>
+  <div class="checklist">
+    <div class="checklist-item"><strong>M1（W2 末）：</strong>Canvas 渲染引擎 ≥95% 可行 → 技术风险消除，绿灯全速开发</div>
+    <div class="checklist-item"><strong>M2（W4 末）：</strong>核心速查本地可用 → 可独立交付 MVP，具备基本使用价值</div>
+    <div class="checklist-item"><strong>M3（W6 末）：</strong>学习功能 + 云端同步可用 → 功能完整，多设备数据互通</div>
+    <div class="checklist-item"><strong>M4（W8 末）：</strong>通过审核正式上线 → 生产就绪</div>
+  </div>
+</div>
+
+<!-- ==================== 10. 风险评估 ==================== -->
+<div class="section" id="risks">
+  <h2>⚠️ 风险评估与应对策略</h2>
+
+  <div class="risk-card">
+    <strong>风险 1：Canvas 公式渲染性能问题</strong>
+    <p>小程序 Canvas 渲染复杂公式可能出现卡顿。</p>
+    <div class="solution">
+      <strong>应对：</strong>
+      <ul>
+        <li>LRU 缓存（200 条），命中率 > 80%，避免重复渲染</li>
+        <li>预计算字符度量表，减少运行时 measureText 调用</li>
+        <li>公式列表使用虚拟滚动，仅渲染可见区域</li>
+        <li>渐进式渲染：简单公式优先，复杂公式延迟 100ms</li>
+        <li>预渲染图片降级兜底</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="risk-card">
+    <strong>风险 2：数据同步冲突</strong>
+    <p>多设备同时编辑笔记或收藏时可能出现冲突。</p>
+    <div class="solution">
+      <strong>应对：</strong>
+      <ul>
+        <li>采用"最后写入胜出"策略，简单场景足够</li>
+        <li>收藏操作幂等，重复操作不影响结果</li>
+        <li>笔记编辑使用时间戳，保留最新版本</li>
+        <li>提供手动同步按钮，用户可主动触发同步</li>
+        <li>本地优先策略，离线操作联网后自动同步</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="risk-card">
+    <strong>风险 3：微信审核不通过</strong>
+    <p>小程序可能因类目选择、内容审核等原因不通过。</p>
+    <div class="solution">
+      <strong>应对：</strong>
+      <ul>
+        <li>提前阅读微信小程序审核规范</li>
+        <li>选择"教育 > 在线教育"类目（不需要特殊资质）</li>
+        <li>准备好隐私政策和用户协议</li>
+        <li>避免敏感内容和违规功能</li>
+        <li>预留 1-2 周缓冲时间应对审核反馈</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="risk-card">
+    <strong>风险 4：单人开发进度延期</strong>
+    <p>单人开发可能因各种原因导致进度延迟。</p>
+    <div class="solution">
+      <strong>应对：</strong>
+      <ul>
+        <li>每周迭代，及时调整优先级</li>
+        <li>优先实现核心功能，非核心可后续迭代</li>
+        <li>合理使用 AI 辅助开发提高效率</li>
+        <li>每周复盘进度，及时沟通阻塞点</li>
+        <li>准备 MVP 版本作为保底，先上线核心速查功能</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="risk-card">
+    <strong>风险 5：云开发成本超预期</strong>
+    <p>用户量增长可能导致云开发费用超预期。</p>
+    <div class="solution">
+      <strong>应对：</strong>
+      <ul>
+        <li>新用户有 2GB 免费额度，初期足够</li>
+        <li>优化数据库查询，减少读写次数</li>
+        <li>本地缓存策略减少云端请求</li>
+        <li>监控云开发用量，设置预算告警</li>
+        <li>必要时优化架构（如合并集合、减少字段）</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 11. 项目结构 ==================== -->
+<div class="section" id="structure">
+  <h2>📁 完整项目结构</h2>
+  <pre>math-miniapp/
+├── src/
+│   ├── components/              <span class="c">// 9 个公共组件</span>
+│   │   ├── FormulaCanvas.vue    <span class="c">// Canvas 公式渲染（核心引擎封装）</span>
+│   │   ├── FormulaCard.vue      <span class="c">// 公式卡片（可复用，含展开/收藏/笔记）</span>
+│   │   ├── SearchBar.vue        <span class="c">// 搜索输入框（防抖 + 历史 + 建议）</span>
+│   │   ├── FilterPanel.vue      <span class="c">// 学科/难度筛选</span>
+│   │   ├── EmptyState.vue       <span class="c">// 空状态占位</span>
+│   │   ├── ToastMessage.vue     <span class="c">// 轻提示</span>
+│   │   ├── LoadingSkeleton.vue  <span class="c">// 骨架屏</span>
+│   │   ├── ProgressBar.vue      <span class="c">// 进度条</span>
+│   │   └── SubjectIcon.vue      <span class="c">// 学科图标（5 色 + emoji）</span>
+│   ├── pages/                   <span class="c">// 10 个页面</span>
+│   │   ├── index/index.vue          <span class="c">// Tab: 首页</span>
+│   │   ├── search/search.vue        <span class="c">// Tab: 搜索</span>
+│   │   ├── favorites/favorites.vue  <span class="c">// Tab: 收藏</span>
+│   │   ├── profile/profile.vue      <span class="c">// Tab: 我的</span>
+│   │   ├── sub-browse/sections.vue  <span class="c">// 章节列表（分包）</span>
+│   │   ├── sub-browse/formulas.vue  <span class="c">// 公式列表（虚拟滚动）</span>
+│   │   ├── sub-browse/detail.vue    <span class="c">// 公式详情 + 笔记</span>
+│   │   ├── sub-browse/recent.vue    <span class="c">// 最近浏览</span>
+│   │   ├── sub-practice/quiz.vue    <span class="c">// 测验（选择题/闪卡）</span>
+│   │   └── sub-practice/daily.vue   <span class="c">// 每日挑战</span>
+│   ├── composables/             <span class="c">// 11 个组合式函数（从 math-web/hooks 迁移）</span>
+│   │   ├── useSearch.ts         <span class="c">// 搜索 + 扁平索引 + 300ms 防抖</span>
+│   │   ├── useFavorites.ts      <span class="c">// 收藏（本地 Set + 云端幂等同步）</span>
+│   │   ├── useRecent.ts         <span class="c">// 最近浏览（上限 20）</span>
+│   │   ├── useProgress.ts       <span class="c">// 学习进度（章节百分比）</span>
+│   │   ├── usePractice.ts       <span class="c">// 测验状态机（SETUP→QUIZ→RESULT）</span>
+│   │   ├── useDailyChallenge.ts <span class="c">// 每日挑战（连续天数 + emoji 阶梯）</span>
+│   │   ├── useNotes.ts          <span class="c">// 公式笔记（Markdown + 云端同步）</span>
+│   │   ├── useTheme.ts          <span class="c">// 主题切换（CSS 变量 + 系统跟随）</span>
+│   │   ├── useSearchHistory.ts  <span class="c">// 搜索历史（上限 10）</span>
+│   │   ├── useOnlineStatus.ts   <span class="c">// 网络状态检测</span>
+│   │   └── useKeyboardShortcuts.ts <span class="c">// 键盘快捷键</span>
+│   ├── stores/                  <span class="c">// 3 个 Pinia Store</span>
+│   │   ├── formulas.ts          <span class="c">// 公式数据 + 扁平索引（搜索用）</span>
+│   │   ├── user.ts              <span class="c">// 用户状态（openid + 登录态）</span>
+│   │   └── preferences.ts       <span class="c">// 偏好设置（主题 + 字体大小）</span>
+│   ├── services/                <span class="c">// 服务层</span>
+│   │   ├── sync.ts              <span class="c">// DataSyncer 同步引擎（核心）</span>
+│   │   ├── cloud.ts             <span class="c">// 云函数调用封装</span>
+│   │   └── auth.ts              <span class="c">// 微信登录封装</span>
+│   ├── utils/                   <span class="c">// 工具函数</span>
+│   │   ├── formula/             <span class="c">// LaTeX → Canvas 渲染引擎</span>
+│   │   │   ├── tokenizer.ts     <span class="c">// 词法分析器</span>
+│   │   │   ├── parser.ts        <span class="c">// 递归下降语法分析器</span>
+│   │   │   ├── renderer.ts      <span class="c">// Canvas 2D 渲染器</span>
+│   │   │   └── metrics.ts       <span class="c">// 字符度量表（启动时预计算）</span>
+│   │   ├── storage.ts           <span class="c">// uni.storage 封装（JSON 损坏降级）</span>
+│   │   ├── cache.ts             <span class="c">// LRU 缓存（200 条渲染结果）</span>
+│   │   ├── highlight.ts         <span class="c">// 搜索高亮（rich-text 节点）</span>
+│   │   └── formulaImage.ts      <span class="c">// Canvas → 图片导出</span>
+│   ├── data/                    <span class="c">// 公式数据（直接复用 math-web 项目）</span>
+│   │   ├── types.ts             <span class="c">// TypeScript 类型（零改动复制）</span>
+│   │   └── formulas-university.ts      <span class="c">// 177 条大学公式（零改动复制，改名以预留多学段扩展）</span>
+│   ├── static/                  <span class="c">// 静态资源</span>
+│   │   ├── tab/                 <span class="c">// TabBar 图标</span>
+│   │   └── icons/               <span class="c">// 学科图标等</span>
+│   ├── App.vue
+│   ├── main.ts
+│   ├── manifest.json
+│   ├── pages.json
+│   └── uni.scss
+├── cloudfunctions/              <span class="c">// 4 个云函数</span>
+│   ├── login/        <span class="c">// 获取 openid + 创建/查询用户</span>
+│   ├── syncData/     <span class="c">// 批量同步 + 返回增量变更</span>
+│   ├── getStats/     <span class="c">// 聚合用户学习统计</span>
+│   └── feedback/     <span class="c">// 收集用户反馈</span>
+├── scripts/                    <span class="c">// 构建脚本</span>
+│   └── pre-render.ts           <span class="c">// 预渲染 177 条公式为 PNG（降级兜底）</span>
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
+└── README.md</pre>
+</div>
+
+<!-- ==================== 12. 性能优化 ==================== -->
+<div class="section" id="perf">
+  <h2>⚡ 性能优化策略</h2>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <h4>📦 包体积</h4>
+      <ul><li>分包加载，主包 < 2MB</li><li>按需引入，tree-shaking</li><li>图片 WebP 格式</li><li>预加载规则优化</li></ul>
+    </div>
+    <div class="feature-card">
+      <h4>🚀 渲染性能</h4>
+      <ul><li>虚拟列表（公式列表）</li><li>Canvas LRU 缓存</li><li>渐进式渲染</li><li>骨架屏</li></ul>
+    </div>
+    <div class="feature-card">
+      <h4>💾 数据优化</h4>
+      <ul><li>本地缓存优先</li><li>增量同步</li><li>批量操作合并</li><li>300ms 防抖 flush</li></ul>
+    </div>
+    <div class="feature-card">
+      <h4>🔋 电量优化</h4>
+      <ul><li>减少 Canvas 重绘</li><li>CSS 动画代替 JS</li><li>减少网络请求</li><li>及时释放资源</li></ul>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 13. 后续演进路线 ==================== -->
+<div class="section" id="roadmap">
+  <h2>🗺️ 后续演进路线</h2>
+
+  <div class="highlight-box">
+    <p><strong>总方向：</strong>从"大学公式速查工具"逐步演进为<strong>"全学段数学公式学习平台"</strong>，覆盖初中 → 高中 → 大学三个阶段，支持用户按学段筛选和个性化学习。</p>
+  </div>
+
+  <div class="week-timeline">
+    <div class="wt-item"><div class="week" style="font-size:1.5em">📗 V1.0</div><div class="label">大学版<br>8 周 MVP</div></div>
+    <div class="wt-item"><div class="week" style="font-size:1.5em">📘 V2.0</div><div class="label">高中版<br>+ 学段选择</div></div>
+    <div class="wt-item"><div class="week" style="font-size:1.5em">📙 V3.0</div><div class="label">初中版<br>全学段平台</div></div>
+    <div class="wt-item"><div class="week" style="font-size:1.5em">🚀 V4.0</div><div class="label">AI 智能<br>学习助手</div></div>
+  </div>
+
+  <h3>13.1 V1.0 — 大学版（当前方案）</h3>
+  <div class="card-grid">
+    <div class="card"><h4>📊 数据规模</h4><p>5 学科 · 34 章节 · 177 条公式 · 145KB 数据文件</p></div>
+    <div class="card purple"><h4>👤 目标用户</h4><p>大学生（期末备考、考研复习）<br>默认学段 = 大学，无学段选择器</p></div>
+    <div class="card green"><h4>🏗️ 架构预埋</h4><p>存储 key 格式预留 grade 前缀<br>公式数据文件命名为 formulas-university.ts<br>Store 中预留 currentGrade 字段</p></div>
+  </div>
+
+  <h3>13.2 V2.0 — 高中版 + 学段选择器</h3>
+  <p><strong>目标：</strong>新增高中数学公式库，增加学段选择入口。</p>
+  <div class="card-grid">
+    <div class="card">
+      <h4>📊 新增数据</h4>
+      <p>新增 <code>formulas-senior.ts</code> 数据文件</p>
+      <p>预计覆盖学科：集合与逻辑、函数与导数、三角函数、数列、解析几何、立体几何、概率统计、向量与复数、不等式 等（9-12 个学科）</p>
+      <p>预计 40+ 章节 · 200+ 条公式</p>
+    </div>
+    <div class="card purple">
+      <h4>🎛️ 学段选择器</h4>
+      <p>首页顶部新增学段切换 Tab：大学 ⇄ 高中</p>
+      <p>切换后 Tab 栏内容、搜索范围、测验题库全部跟随当前学段</p>
+      <p>用户最近选择的学段持久化到本地 + 云端</p>
+    </div>
+    <div class="card green">
+      <h4>🏗️ 架构升级点</h4>
+      <p>引入 <code>Grade</code> 枚举和 <code>FormulaRegistry</code> 注册表</p>
+      <p>公式数据按学段分文件，按需加载（不用的学段不加载）</p>
+      <p>V1.0 用户收藏/笔记/进度数据自动迁移（一次性 key 前缀升级）</p>
+    </div>
+  </div>
+
+  <h4>架构演进代码</h4>
+  <pre><span class="c">// V2.0 — src/data/types.ts 新增</span>
+<span class="k">export type</span> Grade = <span class="s">'university'</span> | <span class="s">'senior-high'</span> | <span class="s">'junior-high'</span>
+
+<span class="c">// V2.0 — src/data/registry.ts（公式注册表）</span>
+<span class="k">import</span> universityFormulas <span class="k">from</span> <span class="s">'./formulas-university'</span>
+<span class="k">import</span> seniorFormulas    <span class="k">from</span> <span class="s">'./formulas-senior'</span>
+
+<span class="k">export const</span> GRADE_REGISTRY: Record&lt;Grade, FormulaMap&gt; = {
+  <span class="s">'university'</span>:  universityFormulas,
+  <span class="s">'senior-high'</span>: seniorFormulas,
+  <span class="s">'junior-high'</span>: {} as FormulaMap,  <span class="c">// V3.0 填充</span>
+}
+
+<span class="c">// V2.0 — src/stores/formulas.ts 调整</span>
+<span class="k">export const</span> useFormulaStore = defineStore(<span class="s">'formulas'</span>, () => {
+  <span class="k">const</span> currentGrade = ref&lt;Grade&gt;(<span class="s">'university'</span>)
+  <span class="k">const</span> data = computed(() => GRADE_REGISTRY[currentGrade.value])
+  <span class="k">const</span> flatIndex = computed(() => buildFlatIndex(data.value))
+  <span class="k">const</span> switchGrade = (grade: Grade) => { currentGrade.value = grade }
+  <span class="k">return</span> { currentGrade, data, flatIndex, switchGrade }
+})</pre>
+
+  <h4>学段选择器 UI 示意</h4>
+  <div class="diagram">
+┌──────────────────────────────────────┐
+│  📐 数学公式速查                       │
+│                                      │
+│  ┌──────────┐  ┌──────────┐         │
+│  │ 🎓 大学   │  │ 📚 高中   │         │  ← V2.0 新增：学段切换 Tab
+│  │ (当前)   │  │         │         │
+│  └──────────┘  └──────────┘         │
+│                                      │
+│  ┌──────┐ ┌──────┐ ┌──────┐        │
+│  │ 高数 │ │ 线代 │ │ 离散 │  ...    │  ← 学科入口根据学段动态变化
+│  └──────┘ └──────┘ └──────┘        │
+└──────────────────────────────────────┘
+  </div>
+
+  <table class="db-table">
+    <tr><th>改动维度</th><th>V1.0</th><th>V2.0</th><th>改动量</th></tr>
+    <tr><td>数据文件</td><td>1 个（formulas-university.ts）</td><td>2 个（+ formulas-senior.ts）</td><td>新增 1 文件</td></tr>
+    <tr><td>类型定义</td><td>5 个 Subject</td><td>+ Grade 枚举 + GradeMeta 接口</td><td>~15 行</td></tr>
+    <tr><td>公式 Store</td><td>直接引用数据</td><td>通过 GRADE_REGISTRY 按学段获取</td><td>~20 行</td></tr>
+    <tr><td>首页</td><td>直接展示学科卡片</td><td>先展示学段选择器，再展示学科卡片</td><td>新增 1 组件</td></tr>
+    <tr><td>搜索/测验</td><td>搜索/题库范围 177 条</td><td>仅搜索/出题当前学段数据</td><td>范围计算跟随 store</td></tr>
+    <tr><td>收藏/笔记/进度</td><td>key = university:{sid}:{index}</td><td>key = {grade}:{sid}:{index}</td><td>数据迁移脚本</td></tr>
+  </table>
+
+  <div class="note">
+    <strong>V1 → V2 兼容性保障：</strong>V1.0 用户的 key 格式从 <code>university:{sectionId}:{index}</code> 已预留 grade 前缀。V2.0 升级时无需数据迁移——新学段数据使用新的 key 前缀，老数据不动。首次加载时检测并完成格式升级（< 50ms）。
+  </div>
+
+  <h3>13.3 V3.0 — 初中版 + 全学段平台</h3>
+  <p><strong>目标：</strong>新增初中公式库，完善全学段覆盖。</p>
+  <div class="card-grid">
+    <div class="card">
+      <h4>📊 新增数据</h4>
+      <p>新增 <code>formulas-junior.ts</code></p>
+      <p>预计覆盖学科：数与式、方程与不等式、函数、图形的性质、图形的变化、统计与概率 等（6-8 个学科）</p>
+      <p>预计 30+ 章节 · 150+ 条公式</p>
+    </div>
+    <div class="card purple">
+      <h4>🔖 用户偏好记忆</h4>
+      <p>记住上次选择的学段，下次启动自动恢复</p>
+      <p>搜索历史、测验偏好按学段独立存储</p>
+      <p>每个学段的收藏/笔记/进度数据隔离但可共存</p>
+    </div>
+    <div class="card green">
+      <h4>📈 V3.0 数据全景</h4>
+      <p><strong>3 学段 · 20+ 学科 · 100+ 章节 · 500+ 条公式</strong></p>
+      <p>从初一用到考研的全周期数学学习伴侣</p>
+    </div>
+  </div>
+
+  <h3>13.4 V4.0 — AI 智能学习助手（远期规划）</h3>
+  <div class="card-grid">
+    <div class="card">
+      <h4>🤖 AI 公式讲解</h4>
+      <p>集成 DeepSeek API（参考 english-app 项目的 aiDiary 云函数），用户可对不理解的公式一键请求 AI 讲解</p>
+      <p>支持追问：AI 根据公式内容和用户笔记生成个性化解释</p>
+    </div>
+    <div class="card purple">
+      <h4>📸 OCR 拍照搜题</h4>
+      <p>拍照识别手写/印刷数学公式，自动匹配对应公式条目</p>
+      <p>技术路线：微信 OCR API 或云函数 + 第三方 OCR 服务</p>
+    </div>
+    <div class="card green">
+      <h4>📊 学习分析报告</h4>
+      <p>基于用户学习数据（浏览、测验、收藏、每日打卡），生成周报/月报</p>
+      <p>可视化薄弱章节，推荐针对性复习</p>
+    </div>
+    <div class="card orange">
+      <h4>👥 社区共享笔记</h4>
+      <p>用户可公开分享笔记，浏览他人优质笔记</p>
+      <p>点赞/收藏机制，优质笔记置顶推荐</p>
+    </div>
+  </div>
+
+  <h3>13.5 三版本数据总览</h3>
+  <table class="db-table">
+    <tr><th>版本</th><th style="text-align:center">学段</th><th style="text-align:center">学科数</th><th style="text-align:center">章节数</th><th style="text-align:center">公式数</th><th style="text-align:center">数据文件</th><th style="text-align:center">关键变化</th></tr>
+    <tr style="background:#e8fde8"><td><strong>V1.0</strong></td><td style="text-align:center">大学</td><td style="text-align:center">5</td><td style="text-align:center">34</td><td style="text-align:center">177</td><td style="text-align:center">~145KB</td><td style="text-align:center">架构预埋</td></tr>
+    <tr style="background:#fff8e8"><td><strong>V2.0</strong></td><td style="text-align:center">+ 高中</td><td style="text-align:center">12-15</td><td style="text-align:center">75+</td><td style="text-align:center">~380</td><td style="text-align:center">~290KB</td><td style="text-align:center">学段选择器</td></tr>
+    <tr style="background:#ffe8e8"><td><strong>V3.0</strong></td><td style="text-align:center">+ 初中</td><td style="text-align:center">20+</td><td style="text-align:center">100+</td><td style="text-align:center">~530</td><td style="text-align:center">~435KB</td><td style="text-align:center">全学段平台</td></tr>
+    <tr style="background:#f0e0ff"><td><strong>V4.0</strong></td><td style="text-align:center">全学段</td><td style="text-align:center">20+</td><td style="text-align:center">100+</td><td style="text-align:center">~530</td><td style="text-align:center">~435KB</td><td style="text-align:center">AI 助手</td></tr>
+  </table>
+
+  <h3>13.6 V1.0 关键技术预埋（不额外增加工作量）</h3>
+  <div class="card-grid">
+    <div class="card"><h4>🔑 存储 Key 格式</h4><p>收藏/笔记/进度的 key 从一开始就设计为 <code>{grade}:{sectionId}:{index}</code>，V1.0 中 grade 硬编码为 <code>university</code></p></div>
+    <div class="card purple"><h4>📦 数据文件命名</h4><p>命名为 <code>formulas-university.ts</code> 而非 <code>formulas.ts</code>，后续加文件即可</p></div>
+    <div class="card green"><h4>🎛️ Store 预留字段</h4><p>Pinia formula store 中预留 <code>currentGrade</code> 字段，V1.0 硬编码</p></div>
+    <div class="card orange"><h4>🧩 组件解耦</h4><p>学科卡片、公式列表等组件从 store 动态读取，不硬编码学科名</p></div>
+  </div>
+
+  <h3>13.7 时间线展望</h3>
+  <div class="timeline">
+    <div class="timeline-item">
+      <span class="duration">V1.0 · 8 周</span>
+      <h4>📗 大学版 MVP — 当前方案</h4>
+      <ul><li>5 学科 · 34 章节 · 177 条公式 · 全部功能</li><li>预埋 grade 前缀 + formulas-university.ts + currentGrade</li><li>Canvas 渲染引擎覆盖大学公式所有 LaTeX 结构</li></ul>
+    </div>
+    <div class="timeline-item">
+      <span class="duration">V2.0 · +4 周</span>
+      <h4>📘 高中版 + 学段选择器</h4>
+      <ul><li>新增高中数学公式数据（~200 条，新文件）</li><li>实现学段选择器 + FormulaRegistry 注册表</li><li>Canvas 引擎零改动——高中公式 LaTeX 比大学简单</li></ul>
+    </div>
+    <div class="timeline-item">
+      <span class="duration">V3.0 · +3 周</span>
+      <h4>📙 初中版 + 全学段平台</h4>
+      <ul><li>新增初中数学公式数据（~150 条，新文件）</li><li>用户偏好记忆、搜索历史按学段隔离</li><li>达到 3 学段 · 500+ 公式完整覆盖</li></ul>
+    </div>
+    <div class="timeline-item">
+      <span class="duration">V4.0 · 待定</span>
+      <h4>🚀 AI 智能学习助手</h4>
+      <ul><li>AI 公式讲解（DeepSeek API，参考 english-app）</li><li>OCR 拍照搜题 + 学习分析报告 + 社区笔记</li><li>需评估 API 成本和用户需求后决定优先级</li></ul>
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>Canvas 引擎零改动可覆盖全部学段：</strong>初中/高中数学公式的 LaTeX 语法复杂度 ≤ 大学公式（无重积分、偏微分、矩阵对角化等），V1.0 的 Canvas 渲染引擎可直接渲染高中和初中公式，数据迁移仅需新增 <code>formulas-{grade}.ts</code> 文件。
+  </div>
+</div>
+
+<!-- ==================== 14. 总结 ==================== -->
+<div class="section" id="summary">
+  <h2>📝 总结</h2>
+  <div class="highlight-box">
+    <p><strong>项目价值：</strong>为大学生提供高效便捷的数学公式速查工具，支持离线使用、云端同步、学习追踪，帮助提升学习效率。</p>
+    <p><strong>技术方案：</strong>uni-app + Vue 3 + TypeScript + 微信云开发，自研 Canvas 公式渲染引擎，本地优先 + 云端增量同步。</p>
+    <p><strong>开发计划：</strong>8 周，4 个里程碑，每周迭代，渐进式交付。</p>
+  </div>
+
+  <h3>关键决策一览</h3>
+  <table class="db-table">
+    <tr><th style="width:130px">决策项</th><th>选择</th><th>依据</th></tr>
+    <tr><td>公式渲染</td><td>自研 Canvas 引擎</td><td>小程序不支持 DOM API；Canvas 是唯一高性能原生方案</td></tr>
+    <tr><td>数据持久化</td><td>本地优先 + 云同步</td><td>保证离线可用；乐观更新即时反馈；多设备增量同步</td></tr>
+    <tr><td>状态管理</td><td>Pinia（3 个 Store）</td><td>Vue 3 官方推荐；比 math-web 项目的 App 聚合状态更清晰</td></tr>
+    <tr><td>搜索</td><td>预建扁平索引 + 暴力匹配</td><td>177 条数据量级不需要复杂索引；预计算 searchText 即可</td></tr>
+    <tr><td>代码复用</td><td>types.ts 直接复制，formulas.ts 改名为 formulas-university.ts</td><td>数据层完全一致，改名预留多学段扩展</td></tr>
+    <tr><td>样式</td><td>SCSS + CSS 变量</td><td>uni-app 原生支持；暗黑模式无需 JS 干预</td></tr>
+    <tr><td>分包</td><td>主包 4 页 + 2 分包</td><td>主包 < 2MB；浏览 + 练习分包按需加载</td></tr>
+  </table>
+
+  <h3>核心优势</h3>
+  <div class="checklist">
+    <div class="checklist-item"><strong>功能完整：</strong>保留 math-web PWA 所有功能，不遗漏任何核心特性</div>
+    <div class="checklist-item"><strong>原生体验：</strong>自研 Canvas 引擎渲染公式，流畅交互，无 WebView 卡顿</div>
+    <div class="checklist-item"><strong>云端同步：</strong>微信云开发，数据安全可靠，多设备无缝同步</div>
+    <div class="checklist-item"><strong>性能优异：</strong>LRU 缓存 + 虚拟列表 + 渐进渲染 + 本地优先</div>
+    <div class="checklist-item"><strong>可扩展性：</strong>模块化设计，数据层零改动复用，易于维护</div>
+  </div>
+</div>
+
+</div>
+
+<footer>
+  <p>📐 数学公式速查微信小程序 — 完整开发方案</p>
+  <p>math-mini-app/ &nbsp;|&nbsp; uni-app + Vue 3 + 微信云开发 &nbsp;|&nbsp; 8 周 4 里程碑</p>
+</footer>
+</div>
+</body>
+</html>

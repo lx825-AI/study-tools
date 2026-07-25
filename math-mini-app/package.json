@@ -1,0 +1,36 @@
+{
+  "name": "math-miniapp",
+  "version": "1.0.0",
+  "description": "数学公式速查微信小程序",
+  "scripts": {
+    "dev:h5": "uni",
+    "dev:mp-weixin": "uni -p mp-weixin",
+    "build:h5": "uni build",
+    "build:mp-weixin": "uni build -p mp-weixin && node -e \"var fs=require('fs');var p='dist/build/mp-weixin/cloudfunctions';var s='cloudfunctions';if(fs.existsSync(s)){if(fs.existsSync(p)){fs.rmSync(p,{recursive:true})}fs.cpSync(s,p,{recursive:true});console.log('cloudfunctions synced to dist')}\"",
+    "test": "vitest run",
+    "type-check": "vue-tsc --noEmit",
+    "gen-icons": "node scripts/gen-icons.mjs"
+  },
+  "dependencies": {
+    "@dcloudio/uni-app": "3.0.0-5000720260410001",
+    "@dcloudio/uni-components": "3.0.0-5000720260410001",
+    "@dcloudio/uni-h5": "3.0.0-5000720260410001",
+    "@dcloudio/uni-mp-weixin": "3.0.0-5000720260410001",
+    "pinia": "^2.3.1",
+    "vue": "^3.4.21"
+  },
+  "devDependencies": {
+    "@dcloudio/types": "^3.4.8",
+    "@dcloudio/uni-automator": "3.0.0-5000720260410001",
+    "@dcloudio/uni-cli-shared": "3.0.0-5000720260410001",
+    "@dcloudio/uni-stacktracey": "3.0.0-5000720260410001",
+    "@dcloudio/vite-plugin-uni": "3.0.0-5000720260410001",
+    "@vue/tsconfig": "^0.7.0",
+    "sass": "^1.100.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3",
+    "vite": "5.2.8",
+    "vitest": "^3.1.1",
+    "vue-tsc": "^2.2.8"
+  }
+}

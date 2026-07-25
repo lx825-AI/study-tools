@@ -6,10 +6,12 @@
   "scripts": {
     "build:english": "cd English-web && npm run build",
     "build:math": "cd math-web && npm run build",
+    "build:math-mini": "cd math-mini-app && npm run build:mp-weixin",
     "build:all": "npm run build:english && npm run build:math",
     "test:english": "cd English-web && npm test",
     "test:math": "cd math-web && npm test",
-    "test:all": "npm run test:english && npm run test:math",
+    "test:math-mini": "cd math-mini-app && npm test",
+    "test:all": "npm run test:english && npm run test:math && npm run test:math-mini",
     "ci": "npm run test:all && npm run build:all"
   }
 }

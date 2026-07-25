@@ -1,0 +1,99 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "数学公式速查",
+        "navigationBarBackgroundColor": "#667eea",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/search/search",
+      "style": {
+        "navigationBarTitleText": "搜索",
+        "navigationBarBackgroundColor": "#667eea",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/favorites/favorites",
+      "style": {
+        "navigationBarTitleText": "我的收藏",
+        "navigationBarBackgroundColor": "#667eea",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/profile/profile",
+      "style": {
+        "navigationBarTitleText": "我的",
+        "navigationBarBackgroundColor": "#667eea",
+        "navigationBarTextStyle": "white"
+      }
+    }
+  ],
+  "subPackages": [
+    {
+      "root": "sub-browse",
+      "pages": [
+        { "path": "sections/index", "style": { "navigationBarTitleText": "章节列表" } },
+        { "path": "formulas/index", "style": { "navigationBarTitleText": "公式列表" } },
+        { "path": "detail/index", "style": { "navigationBarTitleText": "公式详情" } },
+        { "path": "recent/index", "style": { "navigationBarTitleText": "最近浏览" } }
+      ]
+    },
+    {
+      "root": "sub-practice",
+      "pages": [
+        { "path": "quiz/index", "style": { "navigationBarTitleText": "公式测验" } },
+        { "path": "daily/index", "style": { "navigationBarTitleText": "每日挑战" } },
+        { "path": "result/index", "style": { "navigationBarTitleText": "测验结果" } }
+      ]
+    }
+  ],
+  "preloadRule": {
+    "pages/index/index": {
+      "network": "all",
+      "packages": ["sub-browse"]
+    }
+  },
+  "tabBar": {
+    "color": "#999",
+    "selectedColor": "#667eea",
+    "backgroundColor": "#fff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "static/tab/home.png",
+        "selectedIconPath": "static/tab/home-active.png"
+      },
+      {
+        "pagePath": "pages/search/search",
+        "text": "搜索",
+        "iconPath": "static/tab/search.png",
+        "selectedIconPath": "static/tab/search-active.png"
+      },
+      {
+        "pagePath": "pages/favorites/favorites",
+        "text": "收藏",
+        "iconPath": "static/tab/star.png",
+        "selectedIconPath": "static/tab/star-active.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "static/tab/user.png",
+        "selectedIconPath": "static/tab/user-active.png"
+      }
+    ]
+  },
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "数学公式速查",
+    "navigationBarBackgroundColor": "#667eea",
+    "backgroundColor": "#f5f6fa"
+  }
+}
