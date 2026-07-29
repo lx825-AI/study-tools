@@ -120,6 +120,27 @@ math-mini-app/  -- 数学公式速查微信小程序（uni-app + Vue 3 + TS + Pi
 ### 代码审查修复（15 项）
 - 2 CRITICAL + 7 HIGH + 6 MEDIUM，详见 English-mini-app/CLAUDE.md
 
+## 最近更新（2026-07-28）— English-mini-app v2.2
+
+### 工程化建设
+- ESLint + Prettier 配置就绪
+- 新增 4 个测试文件，测试增至 180 用例（+82）
+- 16 个云函数提取 common/ 共享模块，消除重复样板代码
+
+### 安全修复
+- deleteWordbooks/checkAdmin 硬编码 ADMIN_OPENID 改为环境变量
+- deleteWordbooks/getWordbook 硬编码云环境 ID 改为动态获取
+
+### UI 优化
+- study.vue 完成流程简化：删除庆祝页，学完直接跳转完成页，redirectTo 消除返回空白
+- complete.vue 重构：固定页面布局，单词回顾 ≤10 词固定、>10 词滚动
+- index.vue 提取 DailyQuote/ModeSwitch/DeckPicker 组件
+
+### Bug 修复
+- 深度模式完成页面单词数量 3 倍 bug（resultsLog 按 cardId 去重）
+- 统计界面数量同步修正（cardsStudied/correct/wrong 改用去重计数）
+- complete.vue 左右边距不一致 + 详情弹窗内容溢出修复
+
 ## 最近更新（2026-07-25）
 
 ### 学习界面优化
