@@ -160,3 +160,42 @@ math-mini-app/  -- 数学公式速查微信小程序（uni-app + Vue 3 + TS + Pi
 - 拼写功能改为独立页面
 - 学习完成页面单词详情预览
 - 复习统计信息增强
+
+## 最近更新（2026-08-01）— English-mini-app v2.3
+
+### v2.3 功能修复（7 项）
+- 复习队列软上限 50（不再受 dailyGoal 严格限制）
+- 快速模式首页统计聚合（english_app_quick_* + english_app_today_*）
+- study.vue 集成 useSessionRecovery composable
+- wrongDates 写入修复（"本周新增"统计恢复工作）
+- 错词队列连接（搜索过滤后点练习不再加载全部）
+- 快速模式阶段推进限 0→1
+- markAnswer 用 effectiveMode 替代 learnMode 判断
+
+### v2.3 深度/快速模式审查修复（7 项）
+- goPrevCard 用 reviewReturnIndex 替代硬编码 0
+- onSpellResult 模式感知 + 深度模式跟踪
+- _consecutiveFails 清零防跨会话污染
+- 快速模式提示文字修正
+- 删除 advanceCard 死代码
+- 非深度模式也设 lastCardId
+- 首页快速模式按钮显示实际队列量
+
+### v2.3 艾宾浩斯算法修复
+- easeFactor 自适应间隔恢复（CRITICAL，主流程永不更新的 bug）
+- 逾期通过门控改用 prevStage
+- migrateCardsEbbinghaus NaN 检查
+- 删除冗余 initEbbinghaus + fuzzy 死代码
+- 测试 39→48 用例（+9）
+
+### v2.3 云函数自包含化
+- 16 个云函数移除 common/ 依赖，内联 init.js + logger.js
+- wx-server-sdk 版本固定为 ~2.6.0
+- 通过 CloudBase CLI 批量部署
+
+### v2.3 UI 调整
+- decks.vue 底部工具栏（错词本 + 生词本）
+- mine.vue 删除错词/生词入口
+- 完成页删除分享海报
+- 测试 180→189 用例
+
