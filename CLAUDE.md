@@ -30,19 +30,15 @@ math-mini-app/     -- 数学公式小程序（uni-app + Vue 3 + TS + Pinia）
 - math-mini-app: 微信小程序（appid 待配置）
 - GitHub Pages + Actions 自动部署
 
-## 最近更新（2026-08-01）— English-mini-app v2.3
+## 最近更新（2026-08-07）— English-mini-app v2.4
 
-**功能修复（7项）**：复习队列软上限、快速模式统计聚合、useSessionRecovery 集成、wrongDates 写入、错词队列连接、阶段推进限 0→1、effectiveMode 判断
+**公告系统**：独立公告管理页 + 悬浮按钮 + 最新公告弹窗优化
 
-**模式审查（7项）**：goPrevCard returnIndex、onSpellResult 模式感知+深度跟踪、_consecutiveFails 清零、提示修正、lastCardId 全模式、首页队列量
+**管理员系统**：本地令牌鉴权 + 云函数 OPENID 后备，无需配置环境变量
 
-**艾宾浩斯修复**：easeFactor 自适应间隔恢复（CRITICAL）、逾期门控 prevStage、NaN 检查、删冗余 init/fuzzy
+**代码审查**：17 项公告/反馈模块问题全部修复
 
-**云函数**：16 个自包含化（删 common/）、wx-server-sdk ~2.6.0、CLI 批量部署
-
-**UI**：decks 底部工具栏（错词+生词）、mine 清理、完成页删海报
-
-**测试**：180→189（ebbinghaus +9）
+**云函数**：输入校验、OPENID 统一后备、login 日志打印
 
 ---
 
