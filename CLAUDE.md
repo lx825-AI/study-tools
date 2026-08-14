@@ -16,7 +16,7 @@ math-mini-app/     -- 数学公式小程序（uni-app + Vue 3 + TS + Pinia）
 | 项目 | 构建 | 测试 |
 |------|------|------|
 | English-web | `npm run build` | `npm test` |
-| English-mini-app | `npm run build:mp-weixin` | 189 用例（Vitest） |
+| English-mini-app | `npm run build:mp-weixin` | 203 用例（Vitest） |
 | Math-web | `npm run build` | `npm test` |
 | math-mini-app | `npm run build:mp-weixin` | 45 用例 |
 
@@ -30,15 +30,15 @@ math-mini-app/     -- 数学公式小程序（uni-app + Vue 3 + TS + Pinia）
 - math-mini-app: 微信小程序（appid 待配置）
 - GitHub Pages + Actions 自动部署
 
-## 最近更新（2026-08-07）— English-mini-app v2.4
+## 最近更新（2026-08-14）— English-mini-app v2.5
 
-**公告系统**：独立公告管理页 + 悬浮按钮 + 最新公告弹窗优化
+**词书云存储**：20 套词书 JSON 上传云存储（自动化上传脚本）+ getWordbook 分页读取验证通过
 
-**管理员系统**：本地令牌鉴权 + 云函数 OPENID 后备，无需配置环境变量
+**管理员加固**：客户端硬编码令牌移除，校验改走云端（OPENID 白名单 + 口令）；修复环境变量未配置时鉴权绕过的越权漏洞
 
-**代码审查**：17 项公告/反馈模块问题全部修复
+**代码清理**：删除 2 个零引用组件 + 4 个孤儿云函数（云函数 16→12）
 
-**云函数**：输入校验、OPENID 统一后备、login 日志打印
+**测试**：189→203（admin +10、wordbooks +4）
 
 ---
 
