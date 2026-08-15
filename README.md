@@ -2,10 +2,10 @@
 
 学习工具集合：两个 PWA 网页应用 + 两个微信小程序。
 
-- **[English-web](English-web/)** — 基于 SM-2 间隔重复算法的英语词汇闪卡 PWA，内置高考/CET-4/CET-6/考研 5 套词书（~22K 词）
-- **[English-mini-app](English-mini-app/)** — 英语背单词微信小程序（uni-app + 微信云开发）
-- **[math-web](math-web/)** — 大学数学公式速查 PWA（React + KaTeX），覆盖 5 学科 34 章节 177 条公式
-- **[math-mini-app](math-mini-app/)** — 数学公式速查微信小程序（uni-app + 自研 Canvas 公式渲染引擎 + 云端同步）
+- **[English-web](english/English-web/)** — 基于 SM-2 间隔重复算法的英语词汇闪卡 PWA，内置高考/CET-4/CET-6/考研 5 套词书（~22K 词）
+- **[English-mini-app](english/English-mini-app/)** — 英语背单词微信小程序（uni-app + 微信云开发）
+- **[math-web](math/math-web/)** — 大学数学公式速查 PWA（React + KaTeX），覆盖 5 学科 34 章节 177 条公式
+- **[math-mini-app](math/math-mini-app/)** — 数学公式速查微信小程序（uni-app + 自研 Canvas 公式渲染引擎 + 云端同步）
 
 ## 快速开始
 
@@ -15,9 +15,9 @@ npm run test:all     # 运行全部测试
 npm run build:all    # 构建全部项目
 
 # 或单独操作
-cd English-web   && npm install && npm run build
-cd math-web      && npm install && npm run build
-cd math-mini-app && npm install && npm test && npm run build:mp-weixin
+cd english/English-web   && npm install && npm run build
+cd math/math-web         && npm install && npm run build
+cd math/math-mini-app    && npm install && npm test && npm run build:mp-weixin
 ```
 
 ## 线上访问

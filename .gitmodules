@@ -1,0 +1,3 @@
+[submodule "english/English-mini-app"]
+	path = english/English-mini-app
+	url = https://github.com/lx825-AI/English-mini-app.git

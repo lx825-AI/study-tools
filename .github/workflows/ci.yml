@@ -12,31 +12,31 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: English-web
+        working-directory: english/English-web
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
           cache: npm
-          cache-dependency-path: English-web/package-lock.json
+          cache-dependency-path: english/English-web/package-lock.json
       - run: npm ci
       - run: npm test
       - run: npm run build
 
   math:
-    name: Math-mini-app — Test & Build
+    name: math-web — Test & Build
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: math-web
+        working-directory: math/math-web
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
           cache: npm
-          cache-dependency-path: math-web/package-lock.json
+          cache-dependency-path: math/math-web/package-lock.json
       - run: npm ci
       - run: npm test
       - run: npm run build

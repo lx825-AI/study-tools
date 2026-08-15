@@ -5,10 +5,12 @@
 ## 项目结构
 
 ```
-English-web/       -- 英语闪卡 PWA（纯 JS，esbuild）
-English-mini-app/  -- 英语背单词 uni-app（Vue 3 + 微信云开发）→ 详见子目录 CLAUDE.md
-math-web/          -- 数学公式 PWA（React + TS + Vite + KaTeX）
-math-mini-app/     -- 数学公式小程序（uni-app + Vue 3 + TS + Pinia）
+english/
+  English-web/       -- 英语闪卡 PWA（纯 JS，esbuild）
+  English-mini-app/  -- 英语背单词 uni-app（Vue 3 + 微信云开发）→ 详见子目录 CLAUDE.md
+math/
+  math-web/          -- 数学公式 PWA（React + TS + Vite + KaTeX）
+  math-mini-app/     -- 数学公式小程序（uni-app + Vue 3 + TS + Pinia）
 ```
 
 ## 构建与测试
@@ -44,4 +46,4 @@ math-mini-app/     -- 数学公式小程序（uni-app + Vue 3 + TS + Pinia）
 
 ---
 
-*详细更新记录见 `English-mini-app/CLAUDE.md`*
+*详细更新记录见 `english/English-mini-app/CLAUDE.md`*
