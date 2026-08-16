@@ -32,6 +32,38 @@ math/
 - math-mini-app: 微信小程序（appid 待配置）
 - GitHub Pages + Actions 自动部署
 
+## 最近更新（2026-08-16）— English-mini-app v2.5
+
+**卡片编辑表单扩展**：cards 页编辑弹窗新增词组短语/同义词/反义词/易混淆词 4 个编辑框，解析逻辑抽 card-form.js 纯函数模块；startEdit 对旧格式数据（字符串 definitions/例句元素）防崩溃防脏数据
+
+**每日目标滚轮**：新增 GoalWheel 组件（纯 view + touch 手势 + transform 自绘：40px 大数字、主题深浅色自适应、渐隐遮罩、松手吸附最近档）；mine 设置弹窗 + decks 导入弹窗接入；导入页与引导页选项统一最高 100 词/天；默认目标 30→10 全链路统一；滚轮历经原生 picker/picker-view/scroll-view 三版绕行后手势自绘定稿（含 9 项审查问题修复）
+
+**清理**：删除 3 个零引用文件（DailyQuote.vue、utils/useTheme.js、session-persistence.js）；学习页移除卡片顺序计数器
+
+**测试**：220→262（card-form +24、滚轮纯函数 +18）
+
+## 最近更新（2026-08-15）— English-web 反向对齐 v2.7
+
+**删除 Web 独有功能（19 项）**：智能混合模式、运行时排序切换、全局搜索、键盘快捷键、移动端手势、彩带、牌组导出、外部词书导入、系统通知提醒、备份提醒+数据备份区、云同步（半成品死代码）、小程序引导条、卡片批量粘贴导入、演示数据、学习头部错题复习按钮、每日一句换一句按钮、新词数设置、预览隐藏释义、错词 CSV 导出——Web 与小程序功能严格对齐
+
+**保留**：PWA 离线/安装、拼写模式、预览搜索、卡片批量删除、统计面板、分享、错词本练习/移出、快速模式、内置词书导入
+
+**测试**：115→114
+
+## 最近更新（2026-08-15）— English-web 功能对齐 v2.6
+
+**词书统一**：新增 gen-wordbooks.js/wordbook-lib.js 生成脚本，Web 全部 10 套词书替换为小程序新数据（5 替换沿用旧 key + 新增初中/核心系列 5 本，共 28102 词，100% 音标）；SW 预缓存减为 2 本 + runtime 按需缓存；导入面板加词书来源声明
+
+**快速浏览模式**：新增 quick-mode.js（对齐小程序语义：线性过词、stage 0→1、不写遗忘历史、独立 quick-log 日志）
+
+**错词本 tab**：新增 wrong-words.js 面板（EF≤1.8 列表、批量练习、导出 CSV、移出）
+
+**每日一句 + 分享**：新增 daily-quote.js（37 条名言与小程序同源）；分享学习成果按钮接线 shareAchievement
+
+**测试**：99→115（wordbook-lib +7、quick-mode +5、wrong-words +5、daily-quote +3 等）；冒烟 12/12 + SW 离线 4/4 通过
+
+---
+
 ## 最近更新（2026-08-14）— English-mini-app v2.6
 
 **英式发音**：新增 `getAccentPreference()` 统一读取发音偏好，study/preview/spell 三处硬编码 'us' 全部接通，有道 dictvoice type=1 英式发音生效；tts.js 抽出 `buildTtsUrl` 纯函数
