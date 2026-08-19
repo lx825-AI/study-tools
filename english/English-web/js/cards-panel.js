@@ -96,7 +96,7 @@ var FlashcardApp = window.FlashcardApp || {};
         '</div>' +
         '<div class="edit-card-back">' + App.escHtml(back) + '</div>' +
       '</div>' +
-      '<div class="edit-card-count" title="难度等级">⚡' + (c.difficulty || 0) + '</div>' +
+      '<div class="edit-card-count" title="艾宾浩斯阶段">🧠' + (c.ebbinghausStage || 0) + '</div>' +
       deleteHtml +
     '</div>';
   }

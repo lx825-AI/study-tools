@@ -135,6 +135,7 @@ var FlashcardApp = window.FlashcardApp || {};
     /* 学习作答 */
     document.getElementById('btnFail').addEventListener('click', function () { App.answerStudy(false); });
     document.getElementById('btnPass').addEventListener('click', function () { App.answerStudy(true); });
+    document.getElementById('btnPrevCard').addEventListener('click', function () { App.goPrevCard(); });
     document.getElementById('btnRestart').addEventListener('click', function () {
       if (App.isReviewMode) { App.startFailedReview(); }
       else { App.startStudy(); }

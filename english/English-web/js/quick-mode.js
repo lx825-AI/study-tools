@@ -1,4 +1,4 @@
-/* quick-mode.js —— 快速学习模式（对齐小程序：线性过词、独立日志、不污染深度复习） */
+/* quick-mode.js —— 快速学习模式（对齐小程序：stage<5 队列、仅 stage 0→1、答错追踪） */
 var FlashcardApp = window.FlashcardApp || {};
 (function (App) {
   'use strict';
@@ -6,7 +6,7 @@ var FlashcardApp = window.FlashcardApp || {};
   /* 快速模式独立日志键（与深度模式 flashcard-learning-log 分离） */
   App.QUICK_LOG_KEY = 'flashcard-quick-log';
 
-  /** 开始快速模式：当前牌组全部卡片线性过一遍 */
+  /** 开始快速模式：stage<5 的卡片按优先级排序，截断到每日目标 */
   App.startQuickMode = function () {
     var deck = App.getCurrentDeck();
     if (!deck || deck.cards.length === 0) return;
@@ -15,41 +15,50 @@ var FlashcardApp = window.FlashcardApp || {};
     App.isReviewMode = false;
     App.reviewSourceDeckId = null;
 
-    /* buildStudyQueue 对 quick 走"所有卡片"分支，按难度（EF 升序）排列 */
+    /* buildStudyQueue 对 quick 走 stage<5 + 优先级排序 + dailyGoal 截断分支 */
     App.studyQueue = App.buildStudyQueue(deck);
+    /* 会话级字段初始化（不持久化，镜像小程序 initStudy） */
+    App.studyQueue.forEach(function (c) {
+      App.initEbbinghaus(c);
+      c._sessionAppearances = 0;
+      c._consecutiveFails = 0;
+    });
     App.studyIndex = 0;
     App.studyPassed = 0;
     App.studyFailed = 0;
     App.isFlipped = false;
     App.studyStartTime = Date.now();
+    App.studyCompletedWords = 0;
+    App.studyInitialQueueLength = App.studyQueue.length;
+    App.studyResults = [];
+    App.studyLastCardId = null;
+    App.isReviewing = false;
+    App.studyReviewReturnIndex = 0;
     App.renderStudyPanel();
   };
 
   /**
-   * 快速模式作答（对齐小程序语义）：
-   * - 答对：ebbinghausStage 仅 0→1、nextReview 设为明天、repetitions 至少为 1
-   * - 答错：不改动卡片
-   * - 不写 ebbinghausHistory，不调 SM-2 —— 不污染深度复习的历史与难度
+   * 快速模式作答（对齐小程序 markAnswer quick 分支）：
+   * - 答对且 stage===0：经 applyEbbinghaus 推进 0→1（EF+0.1、reps+1、写一条历史、明天复习）
+   * - 答对且 stage>0：原样保留（不降级、不推进）
+   * - 答错：wrongCount++/wrongDates/_consecutiveFails++，不降阶段、不动 EF
    */
   App.applyQuickResult = function (card, passed) {
     if (!card) return;
-    if (passed) {
-      card.ebbinghausStage = 1;
-      var next = new Date();
-      next.setDate(next.getDate() + 1);
-      card.ebbinghausNextReview = next.toISOString().slice(0, 10);
-      if (!card.repetitions) card.repetitions = 1;
-    }
-  };
+    App.initEbbinghaus(card);
 
-  /** 快速模式独立日志：按日累计 {correct, wrong} */
-  App.trackQuick = function (correct) {
-    var today = new Date().toISOString().slice(0, 10);
-    var log = App.loadQuickLog();
-    if (!log[today]) log[today] = { correct: 0, wrong: 0 };
-    if (correct) log[today].correct++;
-    else log[today].wrong++;
-    try { localStorage.setItem(App.QUICK_LOG_KEY, JSON.stringify(log)); } catch (e) { /* 忽略存储错误 */ }
+    if (passed) {
+      if (!card.ebbinghausStage || card.ebbinghausStage === 0) {
+        App.applyEbbinghaus(card, true, 'correct');
+      }
+      /* stage>0 答对：原样保留 */
+    } else {
+      var today = new Date().toISOString().slice(0, 10);
+      card.wrongCount = (card.wrongCount || 0) + 1;
+      card.wrongDates = card.wrongDates || [];
+      card.wrongDates.push(today);
+      card._consecutiveFails = (card._consecutiveFails || 0) + 1;
+    }
   };
 
   /** 读取快速模式日志 */

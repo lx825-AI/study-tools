@@ -6,7 +6,7 @@ var FlashcardApp = window.FlashcardApp || {};
   /* 学习记录 key */
   App.LEARNING_LOG_KEY = 'flashcard-learning-log';
 
-  /* 加载学习日志: { 'YYYY-MM-DD': { correct: N, wrong: N } } */
+  /* 加载学习日志: { 'YYYY-MM-DD': { correct, wrong, cardsStudied, duration, completedGoal } } */
   App.loadLearningLog = function () {
     try {
       let raw = localStorage.getItem(App.LEARNING_LOG_KEY);
@@ -14,14 +14,52 @@ var FlashcardApp = window.FlashcardApp || {};
     } catch (e) { return {}; }
   };
 
-  /* 记录一次学习（correct: 1=对, 0=错） */
-  App.trackLearning = function (correct) {
-    let today = new Date().toISOString().slice(0, 10);
-    let log = App.loadLearningLog();
-    if (!log[today]) log[today] = { correct: 0, wrong: 0 };
-    if (correct) log[today].correct++;
-    else log[today].wrong++;
-    try { localStorage.setItem(App.LEARNING_LOG_KEY, JSON.stringify(log)); } catch (e) {}
+  /**
+   * 会话结果去重（对齐小程序 processedCards）：同一卡片多次作答只保留最后一次结果
+   * @param {Array} results - [{cardId, word, passed}]
+   * @returns {Array} 去重后的结果（保持顺序）
+   */
+  App.dedupeStudyResults = function (results) {
+    if (!Array.isArray(results) || results.length === 0) return [];
+    var seen = {};
+    var unique = [];
+    /* 尾到头遍历：后出现的作答覆盖先出现的（保留每卡最后一次结果） */
+    for (var i = results.length - 1; i >= 0; i--) {
+      var r = results[i];
+      if (!seen[r.cardId]) {
+        seen[r.cardId] = true;
+        unique.unshift(r);
+      }
+    }
+    return unique;
+  };
+
+  /**
+   * 会话完成汇总写入日志（对齐小程序 saveProgress）：
+   * 按卡去重统计 correct/wrong，附 cardsStudied/duration/completedGoal；当日覆盖语义
+   */
+  App.finalizeStudyLog = function () {
+    var results = App.studyResults;
+    if (!Array.isArray(results) || results.length === 0) return;
+    var unique = App.dedupeStudyResults(results);
+    if (unique.length === 0) return;
+
+    var today = new Date().toISOString().slice(0, 10);
+    var correct = unique.filter(function (r) { return r.passed; }).length;
+    var duration = App.studyStartTime ? Math.round((Date.now() - App.studyStartTime) / 1000) : 0;
+    var entry = {
+      date: today,
+      cardsStudied: unique.length,
+      correct: correct,
+      wrong: unique.length - correct,
+      duration: duration,
+      completedGoal: App.studyCompletedWords >= App.studyInitialQueueLength,
+    };
+
+    var key = (App.studyMode === 'quick') ? App.QUICK_LOG_KEY : App.LEARNING_LOG_KEY;
+    var log = (key === App.QUICK_LOG_KEY) ? App.loadQuickLog() : App.loadLearningLog();
+    log[today] = entry; /* 覆盖当日条目（对齐小程序 logs[today] = progressData） */
+    try { localStorage.setItem(key, JSON.stringify(log)); } catch (e) { /* 忽略存储错误 */ }
   };
 
   /* 计算连续打卡天数 */
@@ -50,11 +88,14 @@ var FlashcardApp = window.FlashcardApp || {};
     tomorrow.setDate(tomorrow.getDate() + 1);
     let tomorrowKey = tomorrow.toISOString().slice(0, 10);
 
-    /* 总词汇量/已掌握 */
+    /* 总词汇量/已掌握（口径对齐小程序：ebbinghausStage≥7） */
     let allCards = [];
     App.state.decks.forEach(function (d) { allCards = allCards.concat(d.cards); });
     let totalCards = allCards.length;
-    let masteredCount = allCards.filter(function (c) { return (c.easeFactor || 2.5) >= 2.8; }).length;
+    let masteredCount = allCards.filter(function (c) {
+      App.initEbbinghaus(c);
+      return (c.ebbinghausStage || 0) >= App.EB_MASTERED_STAGE;
+    }).length;
 
     /* SM-2 + 艾宾浩斯 统计 */
     /* 艾宾浩斯阶段分布 */
@@ -74,7 +115,8 @@ var FlashcardApp = window.FlashcardApp || {};
     let streak = App.calcStreak(log);
 
     /* 每日目标 */
-    let dailyGoal = parseInt(localStorage.getItem('flashcard-daily-goal') || '20', 10);
+    let dailyGoal = parseInt(localStorage.getItem('flashcard-daily-goal') || '10', 10);
+    if (!isFinite(dailyGoal) || dailyGoal <= 0) dailyGoal = 10; /* 默认 10（对齐小程序）+ 损坏值兜底 */
     let todayTotal = todayData.correct + todayData.wrong;
     let goalPercent = Math.min(100, Math.round(todayTotal / dailyGoal * 100));
 
@@ -97,7 +139,7 @@ var FlashcardApp = window.FlashcardApp || {};
         '</div>' +
         '<div class="stat-card">' +
           '<div class="stat-value">' + masteredCount + '</div>' +
-          '<div class="stat-label">已掌握 (EF≥2.8)</div>' +
+          '<div class="stat-label">已掌握 (艾宾浩斯)</div>' +
         '</div>' +
         '<div class="stat-card">' +
           '<div class="stat-value">' + todayTotal + '</div>' +

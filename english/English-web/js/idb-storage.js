@@ -75,6 +75,8 @@ var FlashcardApp = window.FlashcardApp || {};
     if (card.antonyms && card.antonyms.length > 0) stripped.an = card.antonyms;
     if (card.confused && card.confused.length > 0) stripped.cf = card.confused;
     if (card.ebbinghausHistory && card.ebbinghausHistory.length > 0) stripped.eh = card.ebbinghausHistory;
+    if (card.wrongCount) stripped.wc = card.wrongCount;
+    if (card.wrongDates && card.wrongDates.length > 0) stripped.wd = card.wrongDates;
     return stripped;
   }
 
@@ -101,6 +103,8 @@ var FlashcardApp = window.FlashcardApp || {};
       ebbinghausStage: stripped.es || 0,
       ebbinghausNextReview: stripped.en || '',
       ebbinghausHistory: stripped.eh || [],
+      wrongCount: stripped.wc || 0,
+      wrongDates: stripped.wd || [],
     };
   }
 

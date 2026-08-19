@@ -1,14 +1,22 @@
 # English Flashcard PWA
 
-SPA 英语词汇闪卡应用，使用 SM-2 间隔重复 + 艾宾浩斯遗忘曲线算法。纯 JavaScript，零运行时依赖。功能与微信小程序版（English-mini-app）对齐。
+SPA 英语词汇闪卡应用，使用艾宾浩斯遗忘曲线算法（v2.8 起单轨，SM-2 已删除）。纯 JavaScript，零运行时依赖。功能与微信小程序版（English-mini-app）对齐。
 
-## 学习模式
+## 学习模式（v2.8 起与小程序行为完全一致）
 
-- **📖 学习新词**：从未学过的单词开始第一轮学习
-- **🔁 今日复习**：按艾宾浩斯遗忘曲线复习今日到期的单词
+- **📖 学习新词（深度模式）**：动态队列——答完 splice 移除后按阶段重插（答错 idx+3；答对 stage≤1→idx+5、stage2→idx+10、stage3→idx+15），出现≥3次或阶段≥4 永久移出（wordsCompleted+1）；计数点 ●●○；「← 上一个」回看
+- **🔁 今日复习**：到期词按紧急度综合评分排序（逾期 10/20/35/50 + 阶段 5/10/15 + EF 5/10/15 + wrongCount 0/5/10），软上限 50
 - **📋 错题强化**：集中攻克所有牌组中 EF≤1.8 且已学过的难词
-- **⚡ 快速浏览**：线性过词快速刷词（对齐小程序语义——答对仅 stage 0→1 + 明天复习，不写 ebbinghausHistory，独立日志 `flashcard-quick-log`，不污染深度复习）
+- **⚡ 快速浏览**：队列仅 stage<5（新词→到期→逾期降序→阶段升序，截断到每日目标）；答对仅 stage 0→1（经 applyEbbinghaus：EF+0.1、reps+1、写一条历史；stage>0 答对原样保留）；答错 wrongCount++/wrongDates/_consecutiveFails++
 - **⌨️ 拼写验证**：学习中内嵌拼写模式，看释义输入英文，自动判断正误
+
+## 学习算法（v2.8 单轨）
+
+- **SM-2 已删除**：EF/repetitions 统一由 `applyEbbinghaus(card, passed, quality)` 维护；调度日期仅 `ebbinghausNextReview`（旧 nextReview/interval/difficulty 字段冻结保留，不再写入）
+- 答对：stage++（quality==='correct'）、EF+0.1（封顶 3.5）、reps+1、间隔自适应 `round(interval×EF/2.5)` 下限 1、逾期>7天且 prevStage>1 降 1 级门控、history 带 quality
+- 答错：智能回退（stage≤2 或连败≥2 → 1，否则退 1 级）+ 逾期惩罚（1-3天 0/4-7天 1/>7天 2）取 min 不叠加、EF-0.2（下限 1.3）、reps=0、_consecutiveFails++
+- 会话恢复 TTL 2 小时；旧线性 new 快照恢复时 index 重置迁移
+- 统计落库：会话完成时按卡去重汇总（当日覆盖语义），日志结构 `{date, cardsStudied, correct, wrong, duration, completedGoal}`；已掌握口径 = ebbinghausStage≥7
 
 ## 项目结构
 
@@ -24,8 +32,8 @@ js/
   ui.js             -- 牌组选择渲染、面板切换（panelMap 含 wrong）、导航徽章、renderAll
   daily-quote.js    -- 每日英语名言（37 条，与小程序同源）、pickTodayQuote/renderDailyQuote
   deck-panel.js     -- 牌组 CRUD（学习/编辑/删除）
-  quick-mode.js     -- 快速浏览模式（startQuickMode/applyQuickResult/trackQuick/loadQuickLog）
-  study-panel.js    -- 多模式学习 + 拼写模式（⌨️ 内嵌）+ SM-2/艾宾浩斯作答 + 进度持久化
+  quick-mode.js     -- 快速浏览模式（startQuickMode/applyQuickResult/loadQuickLog）
+  study-panel.js    -- 多模式学习 + 拼写模式（⌨️ 内嵌）+ 艾宾浩斯作答（单轨）+ 进度持久化
   wrong-words.js    -- 错词本面板（collectFailedCards 复用、批量练习、EF 重置移出）
   preview-panel.js  -- 表格预览（200+ 卡片虚拟滚动）、搜索、高亮
   cards-panel.js    -- 卡片列表（100+ 虚拟滚动）、批量选择与删除
@@ -46,6 +54,22 @@ scripts/
 ## 词书系统
 
 10 套词书与小程序（English-mini-app）同源：`scripts/gen-wordbooks.js` 读取 `English-mini-app/wordbooks-cloud/` 的 10 个乱序 JSON（与小程序默认导入一致）生成紧凑单行 JS（约 8MB）。前 5 本替换旧词书（沿用旧 key/旧 name，已导入用户按 name 去重），后 5 本为新增。学习队列固定按 EF 升序排列（难的在前）。SW 仅预缓存 2 本最常用（高中+四级），其余按需 runtime cache。BOOK_CONFIG 与 import.js 的 BUILTIN_WORDBOOKS 需同步维护。
+
+## 最近更新（2026-08-19）— v2.8 学习算法全量对齐小程序
+
+**单轨化**：删除 SM-2（applySM2 与 nextReview/interval 双轨），applyEbbinghaus 重写为小程序 ES5 等价实现——智能回退（连败≥2 才回 1 级）、逾期惩罚不叠加、EF 自适应间隔（+0.1/-0.2、封顶 3.5/下限 1.3）、逾期>7天答对降级门控、history 带 quality、initEbbinghaus 防御（NaN/夹紧/截断 100）
+
+**深度动态队列**：新词模式 splice 重插（错+3/对+5/+10/+15）、出现≥3次或阶段≥4 移出、●●○ 计数点、回看按钮；进度显示"已学 N/M 词"
+
+**快速模式**：队列 stage<5 + 优先级排序 + dailyGoal 截断；答对仅 0→1（已学词不再被降级——修复核心 bug）；答错 wrongCount/wrongDates 追踪
+
+**复习模式**：calcUrgencyScore 紧急度排序 + 软上限 50
+
+**统计**：逐答计数改为会话完成按卡去重汇总（当日覆盖），日志含 duration/completedGoal；已掌握口径 stage≥7
+
+**测试**：123→163（ebbinghaus 改写+16、quick-mode 重写、study-queue +9、deep-mode +10、stats-panel +8）
+
+**审查修复（2026-08-19）**：与小程序逐行比对后修复 7 项——回看态守卫移至 answerStudy/checkSpelling 首行（防拼写绕过改写调度+污染统计）、quick 分支空卡守卫（防删卡后 TypeError）、exitReviewMode 清理残留会话（防旧统计复显）、快照存 elapsed 恢复重锚 startTime（时长不计关闭空闲，对齐 timerSeconds 口径）、完成面板 ✅/❌ 与 accuracy 统一按卡去重口径、恢复快照与牌组做 id 交叉校验、returnToModeSelect 已完成会话不再覆盖日志；每日目标默认 20→10 + NaN 兜底（对齐小程序）；测试 163→175
 
 ## 最近更新（2026-08-15）— v2.7 反向对齐小程序
 
@@ -72,7 +96,7 @@ scripts/
 }
 ```
 
-- **ebbinghausStage** (0-7)：0=新词，1-6=复习阶段，7=已掌握
+- **ebbinghausStage** (0-7)：0=新词，1-6=复习阶段，7=已掌握（90 天后仍会到期再进复习队列，与小程序一致）
 - **ebbinghausNextReview**：下次艾宾浩斯复习日期
 - **ebbinghausHistory**：[{stage, date, passed}] 复习记录
 - 兼容旧数据：initEbbinghaus() 自动迁移，无艾宾浩斯字段的卡片从 SM-2 状态推断初始阶段
@@ -90,15 +114,15 @@ scripts/
 | 6    | 30天 | 第六次复习 |
 | 7    | 90天 | 已掌握（不再主动推送复习）|
 
-- 通过 → 推进到下一阶段
-- 失败 → 回退到阶段 1，重新开始遗忘曲线
-- SM-2 仍负责 easeFactor 调整（难度追踪）
+- 通过 → 推进到下一阶段（quality='correct'）；逾期>7 天且 prevStage>1 时答对触发降级门控
+- 失败 → 智能回退（stage≤2 或连败≥2 → 阶段 1，否则退 1 级）+ 逾期惩罚取 min 不叠加
+- easeFactor/repetitions 由 applyEbbinghaus 统一维护（EF+0.1/-0.2、间隔 ×EF/2.5 自适应）
 
 ## 学习进度持久化
 
 - sessionStorage 保存当前学习队列（模式、队列、索引、成绩）
 - beforeunload / visibilitychange 事件触发保存
-- renderStudyPanel 时自动检查并恢复未完成的进度（30分钟过期）
+- renderStudyPanel 时自动检查并恢复未完成的进度（2 小时过期；快照存累计 elapsed 秒，恢复时重锚 startTime 不计关闭空闲）
 
 ## 数据规范化
 
@@ -121,7 +145,7 @@ npm run dev     -- npx serve dist/ 本地预览
 
 ## 关键状态 key
 
-- `flashcard-data` — 牌组 + 卡片 + SM-2 + 艾宾浩斯状态
+- `flashcard-data` — 牌组 + 卡片 + 艾宾浩斯状态（SM-2 字段已退役保留）
 - `flashcard-learning-log` — 每日学习记录（深度模式）
 - `flashcard-quick-log` — 快速模式独立每日记录
 - `flashcard-daily-goal` — 每日目标词数
