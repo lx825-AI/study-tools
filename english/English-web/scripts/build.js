@@ -27,7 +27,8 @@ console.log('✓ CSS merged (' + cssContent.length + ' bytes)');
 const JS_ORDER = [
   'js/idb-storage.js', 'js/state.js',
   'js/models.js', 'js/utils.js', 'js/ebbinghaus.js',
-  'js/ui.js', 'js/deck-panel.js', 'js/study-panel.js',
+  'js/ui.js', 'js/daily-quote.js', 'js/deck-panel.js',
+  'js/quick-mode.js', 'js/study-panel.js', 'js/wrong-words.js',
   'js/preview-panel.js', 'js/cards-panel.js',
   'js/import.js', 'js/stats-panel.js',
   'data/word-schema.js', 'js/app.js'
@@ -52,7 +53,12 @@ const WORDBOOKS = [
   'kaoyan-enriched',
   'cet4-syllabus-enriched',
   'cet6-core-enriched',
-  'cet6-syllabus-enriched'
+  'cet6-syllabus-enriched',
+  'junior-high',
+  'junior-high-core',
+  'senior-high-core',
+  'cet4-core',
+  'kaoyan-core'
 ];
 
 WORDBOOKS.forEach(name => {

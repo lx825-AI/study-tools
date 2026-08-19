@@ -1,6 +1,6 @@
 /* Service Worker —— 离线缓存 */
-var CACHE_APP = 'flashcard-app-v7';
-var CACHE_DATA = 'flashcard-data-v7';
+var CACHE_APP = 'flashcard-app-v8';
+var CACHE_DATA = 'flashcard-data-v8';
 var STATIC_FILES = [
   './',
   './index.html',
@@ -10,13 +10,11 @@ var STATIC_FILES = [
   './icon.svg'
 ];
 
-/* 词书文件列表 —— 预缓存以确保离线可学习 */
+/* 词书文件列表 —— 仅预缓存最常用的 2 本（共 10 本约 8MB，
+   其余 8 本在首次加载时经 cache-first 分支按需缓存，避免安装期拉全量） */
 var WORDBOOK_FILES = [
   './wordbooks/senior-high-enriched.js',
-  './wordbooks/cet4-syllabus-enriched.js',
-  './wordbooks/cet6-core-enriched.js',
-  './wordbooks/cet6-syllabus-enriched.js',
-  './wordbooks/kaoyan-enriched.js'
+  './wordbooks/cet4-syllabus-enriched.js'
 ];
 
 /* 安装：预缓存应用核心文件 + 词书 */
