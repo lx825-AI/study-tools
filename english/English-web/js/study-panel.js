@@ -8,12 +8,11 @@ var FlashcardApp = window.FlashcardApp || {};
   App.isFlipped = false;
   App.studyPassed = 0;
   App.studyFailed = 0;
-  App.studyOrder = 'difficulty';      // 'difficulty' | 'random' | 'sequential'
   App.studyStartTime = null;
   App.spellMode = false;              /* 拼写模式开关 */
   App.spellAnswered = false;          /* 当前卡片是否已拼写作答 */
 
-  /* 学习模式: 'new' | 'review' | 'failed' | 'mixed' */
+  /* 学习模式: 'new' | 'review' | 'failed' | 'quick' */
   App.studyMode = 'review';
   /* 每次新词学习数量 */
   App.newWordsPerSession = parseInt(localStorage.getItem('flashcard-new-words-per-session') || '10', 10);
@@ -58,24 +57,14 @@ var FlashcardApp = window.FlashcardApp || {};
     } else if (App.studyMode === 'review') {
       cards = App.getReviewCards(deck);
     } else {
-      /* mixed / legacy: 所有卡片 */
+      /* quick / 兜底: 所有卡片 */
       cards = deck.cards.map(function (c) { return Object.assign({}, c); });
     }
 
-    /* 排序 */
-    if (App.studyOrder === 'random') {
-      for (var i = cards.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var tmp = cards[i]; cards[i] = cards[j]; cards[j] = tmp;
-      }
-    } else if (App.studyOrder === 'sequential') {
-      /* 保持原序 */
-    } else {
-      /* difficulty: 低 EF 优先（难的在前） */
-      cards.sort(function (a, b) {
-        return (a.easeFactor || 2.5) - (b.easeFactor || 2.5);
-      });
-    }
+    /* 低 EF 优先（难的在前） */
+    cards.sort(function (a, b) {
+      return (a.easeFactor || 2.5) - (b.easeFactor || 2.5);
+    });
 
     return cards;
   };
@@ -149,38 +138,6 @@ var FlashcardApp = window.FlashcardApp || {};
     App.renderStudyPanel();
   };
 
-  /** 智能混合：复习优先 + 新词补充 */
-  App.startMixed = function () {
-    var deck = App.getCurrentDeck();
-    if (!deck || deck.cards.length === 0) return;
-
-    App.studyMode = 'mixed';
-    App.isReviewMode = false;
-    App.reviewSourceDeckId = null;
-
-    var reviewCards = App.getReviewCards(deck);
-    var newCards = App.getNewWordCards(deck, Math.max(3, App.newWordsPerSession - reviewCards.length));
-
-    App.studyQueue = reviewCards.concat(newCards);
-    /* 低 EF 优先 */
-    App.studyQueue.sort(function (a, b) {
-      return (a.easeFactor || 2.5) - (b.easeFactor || 2.5);
-    });
-
-    if (App.studyQueue.length === 0) {
-      App.showToast('✅ 暂无学习内容', 'info', 2000);
-      App.renderStudyPanel();
-      return;
-    }
-
-    App.studyIndex = 0;
-    App.studyPassed = 0;
-    App.studyFailed = 0;
-    App.isFlipped = false;
-    App.studyStartTime = Date.now();
-    App.renderStudyPanel();
-  };
-
   /** 错题复习 */
   App.startFailedReview = function () {
     var failedCards = App.collectFailedCards();
@@ -246,7 +203,6 @@ var FlashcardApp = window.FlashcardApp || {};
         mode: App.studyMode,
         isReview: App.isReviewMode,
         reviewSourceDeckId: App.reviewSourceDeckId,
-        order: App.studyOrder,
         queue: App.studyQueue,
         index: App.studyIndex,
         passed: App.studyPassed,
@@ -267,10 +223,10 @@ var FlashcardApp = window.FlashcardApp || {};
         sessionStorage.removeItem('flashcard-study-progress');
         return false;
       }
-      App.studyMode = progress.mode || 'review';
+      /* 旧会话 mode='mixed' 归一化为 review（智能混合模式已删除） */
+      App.studyMode = (progress.mode === 'mixed') ? 'review' : (progress.mode || 'review');
       App.isReviewMode = progress.isReview || false;
       App.reviewSourceDeckId = progress.reviewSourceDeckId || null;
-      App.studyOrder = progress.order || 'difficulty';
       App.studyQueue = progress.queue || [];
       App.studyIndex = progress.index || 0;
       App.studyPassed = progress.passed || 0;
@@ -299,11 +255,9 @@ var FlashcardApp = window.FlashcardApp || {};
       empty.style.display = 'none';
       content.style.display = 'block';
       var studyHeader = document.querySelector('#studyContent .study-header');
-      var shortcutHint = document.querySelector('#studyContent .shortcut-hint');
       var cardScene = document.querySelector('#studyContent .card-scene');
       var studyActions = document.querySelector('#studyContent .study-actions');
       if (studyHeader) studyHeader.style.display = '';
-      if (shortcutHint) shortcutHint.style.display = '';
       if (cardScene) cardScene.style.display = '';
       if (studyActions) studyActions.style.display = '';
       App.showToast('📌 已恢复上次学习进度 (' + (App.studyIndex + 1) + '/' + App.studyQueue.length + ')', 'info', 2000);
@@ -341,7 +295,7 @@ var FlashcardApp = window.FlashcardApp || {};
       if (App.studyMode === 'new') modeLabel = ' 📖 新词学习';
       else if (App.studyMode === 'review') modeLabel = ' 🔁 复习巩固';
       else if (App.studyMode === 'failed') modeLabel = ' 📋 错题强化';
-      else if (App.studyMode === 'mixed') modeLabel = ' 🎯 智能混合';
+      else if (App.studyMode === 'quick') modeLabel = ' ⚡ 快速浏览';
 
       var title = App.studyFailed === 0 ? '完美通关！🎉' :
         accuracy >= 70 ? '不错哦！👍' : '继续加油！💪';
@@ -358,10 +312,6 @@ var FlashcardApp = window.FlashcardApp || {};
           '<span class="complete-stat">⏱ ' + timeStr + '</span>' +
           '<span class="complete-stat">⚡ ' + rate + '词/分</span>' +
         '</div>';
-
-      if (App.studyPassed > 0 && App.studyFailed <= total / 3) {
-        App.spawnConfetti();
-      }
 
       /* 按钮区域 */
       var restartBtn = document.getElementById('btnRestart');
@@ -385,14 +335,14 @@ var FlashcardApp = window.FlashcardApp || {};
         restartBtn.textContent = {
           'new': '📖 再学一组新词',
           'review': '🔁 再来一组复习',
-          'mixed': '🎯 再来一组混合',
           'failed': '🔄 再复习一轮',
+          'quick': '⚡ 再快速过一遍',
         }[App.studyMode] || '再来一轮';
 
         restartBtn.onclick = function () {
           if (App.studyMode === 'new') App.startNewWords();
           else if (App.studyMode === 'review') App.startReview();
-          else if (App.studyMode === 'mixed') App.startMixed();
+          else if (App.studyMode === 'quick') App.startQuickMode();
           else App.startReview();
         };
 
@@ -424,11 +374,9 @@ var FlashcardApp = window.FlashcardApp || {};
     var guideEl = document.getElementById('studyModeGuide');
     if (guideEl) guideEl.remove();
     var studyHeader = document.querySelector('#studyContent .study-header');
-    var shortcutHint = document.querySelector('#studyContent .shortcut-hint');
     var cardScene = document.querySelector('#studyContent .card-scene');
     var studyActions = document.querySelector('#studyContent .study-actions');
     if (studyHeader) studyHeader.style.display = '';
-    if (shortcutHint) shortcutHint.style.display = '';
     if (cardScene) cardScene.style.display = '';
     if (studyActions) studyActions.style.display = '';
 
@@ -450,7 +398,7 @@ var FlashcardApp = window.FlashcardApp || {};
       'new': '📖 新词学习',
       'review': '🔁 复习巩固',
       'failed': '📋 错题强化',
-      'mixed': '🎯 智能混合',
+      'quick': '⚡ 快速浏览',
     }[App.studyMode] || '';
 
     var deckName = App.isReviewMode
@@ -619,17 +567,6 @@ var FlashcardApp = window.FlashcardApp || {};
             '<div class="mode-card-arrow">→</div>' +
           '</div>' +
 
-          /* 智能混合 */
-          '<div class="mode-card" id="modeCardMixed">' +
-            '<div class="mode-card-icon">🎯</div>' +
-            '<div class="mode-card-body">' +
-              '<div class="mode-card-title">智能混合</div>' +
-              '<div class="mode-card-desc">复习优先，穿插新词，高效利用时间</div>' +
-              '<div class="mode-card-count">复习' + reviewCount + ' + 新词' + Math.min(newCount, App.newWordsPerSession) + '</div>' +
-            '</div>' +
-            '<div class="mode-card-arrow">→</div>' +
-          '</div>' +
-
           /* 错题强化 */
           '<div class="mode-card" id="modeCardFailed">' +
             '<div class="mode-card-icon">📋</div>' +
@@ -637,6 +574,17 @@ var FlashcardApp = window.FlashcardApp || {};
               '<div class="mode-card-title">错题强化</div>' +
               '<div class="mode-card-desc">集中攻克所有牌组中 EF≤1.8 的难词</div>' +
               '<div class="mode-card-count">跨牌组收集</div>' +
+            '</div>' +
+            '<div class="mode-card-arrow">→</div>' +
+          '</div>' +
+
+          /* 快速浏览 */
+          '<div class="mode-card" id="modeCardQuick">' +
+            '<div class="mode-card-icon">⚡</div>' +
+            '<div class="mode-card-body">' +
+              '<div class="mode-card-title">快速浏览</div>' +
+              '<div class="mode-card-desc">线性过词快速刷词，进度独立记录，不影响深度复习</div>' +
+              '<div class="mode-card-count">' + deck.cards.length + ' 个单词过一遍</div>' +
             '</div>' +
             '<div class="mode-card-arrow">→</div>' +
           '</div>' +
@@ -664,19 +612,10 @@ var FlashcardApp = window.FlashcardApp || {};
             '<span class="overview-label">总进度</span>' +
           '</div>' +
         '</div>' +
-
-        /* 新词数量设置 */
-        '<div class="mode-setting">' +
-          '<label>每次新词数:</label>' +
-          '<input type="number" id="newWordsPerSessionInput" value="' + App.newWordsPerSession +
-            '" min="3" max="50" step="1" style="width:60px;text-align:center;">' +
-          '<button class="btn btn-outline btn-sm" id="btnSaveNewWordsCount">保存</button>' +
-        '</div>' +
       '</div>';
 
     /* 替换 studyContent 下的内容（保留 header + scene 容器但隐藏它们） */
     var studyHeader = document.querySelector('#studyContent .study-header');
-    var shortcutHint = document.querySelector('#studyContent .shortcut-hint');
     var cardScene = document.querySelector('#studyContent .card-scene');
     var studyActions = document.querySelector('#studyContent .study-actions');
 
@@ -695,7 +634,6 @@ var FlashcardApp = window.FlashcardApp || {};
 
     /* 隐藏学习组件 */
     if (studyHeader) studyHeader.style.display = 'none';
-    if (shortcutHint) shortcutHint.style.display = 'none';
     if (cardScene) cardScene.style.display = 'none';
     if (studyActions) studyActions.style.display = 'none';
     var spellSection = document.getElementById('spellModeSection');
@@ -710,23 +648,13 @@ var FlashcardApp = window.FlashcardApp || {};
       App.studyMode = 'review';
       App.startReview();
     });
-    document.getElementById('modeCardMixed').addEventListener('click', function () {
-      App.studyMode = 'mixed';
-      App.startMixed();
-    });
     document.getElementById('modeCardFailed').addEventListener('click', function () {
       App.studyMode = 'failed';
       App.startFailedReview();
     });
-
-    document.getElementById('btnSaveNewWordsCount').addEventListener('click', function () {
-      var v = parseInt(document.getElementById('newWordsPerSessionInput').value, 10);
-      if (v >= 3 && v <= 50) {
-        App.newWordsPerSession = v;
-        localStorage.setItem('flashcard-new-words-per-session', String(v));
-        App.showToast('每次新词数已设为 ' + v, 'success', 1500);
-        App._renderModeGuide(deck);
-      }
+    document.getElementById('modeCardQuick').addEventListener('click', function () {
+      App.studyMode = 'quick';
+      App.startQuickMode();
     });
   };
 
@@ -742,7 +670,18 @@ var FlashcardApp = window.FlashcardApp || {};
     var deck = App.isReviewMode && card._deckId ? App.getDeck(card._deckId) : App.getCurrentDeck();
     var deckCard = deck ? deck.cards.find(function (c) { return c.id === card.id; }) : null;
 
-    if (deckCard) {
+    if (App.studyMode === 'quick') {
+      /* 快速模式：仅推进 stage 0→1，独立日志，不碰 SM-2/艾宾浩斯历史 */
+      App.applyQuickResult(deckCard, passed);
+      if (deckCard) {
+        card.ebbinghausStage = deckCard.ebbinghausStage;
+        card.ebbinghausNextReview = deckCard.ebbinghausNextReview;
+        card.repetitions = deckCard.repetitions;
+      }
+      if (passed) { App.studyPassed++; }
+      else { App.studyFailed++; }
+      App.trackQuick(passed ? 1 : 0);
+    } else if (deckCard) {
       /* SM-2 难度调整 */
       App.applySM2(deckCard, passed);
 
@@ -774,11 +713,9 @@ var FlashcardApp = window.FlashcardApp || {};
       var guideEl2 = document.getElementById('studyModeGuide');
       if (guideEl2) guideEl2.remove();
       var header2 = document.querySelector('#studyContent .study-header');
-      var hint2 = document.querySelector('#studyContent .shortcut-hint');
       var scene2 = document.querySelector('#studyContent .card-scene');
       var actions2 = document.querySelector('#studyContent .study-actions');
       if (header2) header2.style.display = '';
-      if (hint2) hint2.style.display = '';
       if (scene2) scene2.style.display = '';
       if (actions2) actions2.style.display = '';
       var spellSection2 = document.getElementById('spellModeSection');
@@ -787,8 +724,8 @@ var FlashcardApp = window.FlashcardApp || {};
       App.renderStudyPanel();
       App.renderDeckSelect();
     } else {
-      /* 最后 3 张时重排序 */
-      if (App.studyIndex >= App.studyQueue.length - 3) {
+      /* 最后 3 张时重排序（快速模式保持线性，不重排） */
+      if (App.studyMode !== 'quick' && App.studyIndex >= App.studyQueue.length - 3) {
         var remaining = App.studyQueue.slice(App.studyIndex);
         remaining.sort(function (a, b) {
           return (a.easeFactor || 2.5) - (b.easeFactor || 2.5);
@@ -890,7 +827,7 @@ var FlashcardApp = window.FlashcardApp || {};
       if (passBtn) passBtn.style.display = '';
       if (failBtn) failBtn.textContent = '✗ 不会';
 
-      /* 保持输入框禁用，用户需通过按钮或快捷键作答 */
+      /* 保持输入框禁用，用户需通过按钮作答 */
       input.disabled = true;
     }
   };
@@ -902,32 +839,6 @@ var FlashcardApp = window.FlashcardApp || {};
     var feedback = document.getElementById('spellFeedback');
     if (input) { input.value = ''; input.disabled = false; input.className = ''; }
     if (feedback) { feedback.textContent = ''; feedback.className = 'spell-feedback'; }
-  };
-
-  App.cycleOrder = function () {
-    var orderCycle = { difficulty: 'random', random: 'sequential', sequential: 'difficulty' };
-    App.studyOrder = orderCycle[App.studyOrder];
-    var labels = {
-      difficulty: { icon: '⚡', label: '智能排序' },
-      random:     { icon: '🔀', label: '乱序' },
-      sequential: { icon: '📋', label: '正序' }
-    };
-    var info = labels[App.studyOrder];
-    ['btnStudyOrder'].forEach(function (btnId) {
-      var btn = document.getElementById(btnId);
-      if (!btn) return;
-      btn.innerHTML = '<span class="order-icon">' + info.icon + '</span><span class="order-label">' + info.label + '</span><span class="order-arrow">▾</span>';
-    });
-
-    var deck = App.getCurrentDeck();
-    if (!deck) return;
-    App.studyQueue = App.buildStudyQueue(deck);
-    App.studyIndex = 0;
-    App.isFlipped = false;
-    App.studyPassed = 0;
-    App.studyFailed = 0;
-
-    App.renderStudyPanel();
   };
 
 })(FlashcardApp);

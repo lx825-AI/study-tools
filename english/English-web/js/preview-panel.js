@@ -3,8 +3,6 @@ var FlashcardApp = window.FlashcardApp || {};
 (function (App) {
   'use strict';
 
-  App.previewAnswersVisible = true;
-
   /* 虚拟滚动配置 */
   var ROW_HEIGHT = 36;          /* 每行近似高度 px */
   var BUFFER = 12;              /* 上下缓冲区行数 */
@@ -28,9 +26,6 @@ var FlashcardApp = window.FlashcardApp || {};
     document.getElementById('previewCount').textContent = deck.cards.length;
     document.getElementById('previewSearch').value = '';
 
-    let btnToggle = document.getElementById('btnToggleAnswer');
-    btnToggle.textContent = App.previewAnswersVisible ? '🙈 隐藏释义' : '👁️ 显示释义';
-
     /* 重置虚拟滚动状态 */
     App._pvCards = null;
     App._pvRange = [0, 0];
@@ -40,7 +35,7 @@ var FlashcardApp = window.FlashcardApp || {};
   };
 
   /** 渲染单行 HTML */
-  function rowHTML(c, i, showPos, cls, highlightWord) {
+  function rowHTML(c, i, showPos, highlightWord) {
     let front = App.getCardFront(c);
     let back = App.getCardBack(c);
     let pos = c.pos || '';
@@ -55,7 +50,7 @@ var FlashcardApp = window.FlashcardApp || {};
         '<button class="speak-btn-sm speak-preview-btn" title="朗读">🔊</button>' +
       '</td>' +
       (showPos ? '<td class="col-pos">' + App.escHtml(pos) + '</td>' : '') +
-      '<td class="col-back' + cls + '">' + backHtml + '</td>' +
+      '<td class="col-back">' + backHtml + '</td>' +
     '</tr>';
   }
 
@@ -90,10 +85,9 @@ var FlashcardApp = window.FlashcardApp || {};
     App._pvRange = [firstVisible, lastVisible];
     App._pvScrollTop = scrollTop;
 
-    var cls = App.previewAnswersVisible ? '' : ' hidden-answer';
     var html = '';
     for (var i = firstVisible; i < lastVisible; i++) {
-      html += rowHTML(cards[i], i, App._pvShowPos, cls, App._pvHighlight);
+      html += rowHTML(cards[i], i, App._pvShowPos, App._pvHighlight);
     }
 
     /* 用 top spacer 占位已滚过的行，bottom spacer 占位剩余行 */
@@ -105,7 +99,6 @@ var FlashcardApp = window.FlashcardApp || {};
 
   App._renderPreviewTable = function (cards, highlightWord) {
     var tbody = document.getElementById('previewTbody');
-    var cls = App.previewAnswersVisible ? '' : ' hidden-answer';
     var showPos = cards.some(function (c) { return c.pos; });
 
     updateThead(showPos);
@@ -122,7 +115,7 @@ var FlashcardApp = window.FlashcardApp || {};
       }
 
       tbody.innerHTML = cards.map(function (c, i) {
-        return rowHTML(c, i, showPos, cls, highlightWord);
+        return rowHTML(c, i, showPos, highlightWord);
       }).join('');
       return;
     }

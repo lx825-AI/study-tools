@@ -191,47 +191,18 @@ nav button:hover:not(.active) {
 
 /* 触屏设备触摸目标最小 44px */
 @media (hover: none) and (pointer: coarse) {
-  .btn, nav button, .order-toggle, .btn-back-mode,
+  .btn, nav button, .btn-back-mode,
   .theme-toggle, .speak-btn, .accent-toggle {
     min-width: var(--touch-target-min);
     min-height: var(--touch-target-min);
   }
-  .speak-btn-sm, .gsr-speak-btn {
+  .speak-btn-sm {
     min-width: var(--touch-target-sm);
     min-height: var(--touch-target-sm);
   }
   .deck-actions { gap: 8px; }
   .study-actions { gap: 12px; }
 }
-
-/* 顺序切换按钮 */
-.order-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 6px 14px;
-  border: 2px solid var(--primary-border);
-  border-radius: var(--radius);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  background: var(--primary-bg);
-  color: var(--primary);
-  transition: all 0.2s;
-  font-family: inherit;
-  white-space: nowrap;
-}
-.order-toggle:hover {
-  border-color: var(--primary);
-  background: var(--primary);
-  color: #fff;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
-}
-.order-toggle:active { transform: translateY(0) scale(0.97); }
-.order-toggle .order-icon { font-size: 15px; line-height: 1; }
-.order-toggle .order-label { line-height: 1; }
-.order-toggle .order-arrow { font-size: 10px; opacity: 0.6; margin-left: 2px; }
 
 /* 面板切换动画（尊重用户偏好） */
 @media (prefers-reduced-motion: no-preference) {

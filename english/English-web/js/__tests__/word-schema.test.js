@@ -133,3 +133,35 @@ describe('migrateCardsSchema', () => {
     expect(c3.back).toBe('好的');
   });
 });
+
+describe('removeDemoDecks', () => {
+  beforeEach(() => {
+    App.state.decks = [];
+    App.state.currentDeckId = null;
+  });
+
+  it('删除名称含（演示）的牌组，保留用户牌组', () => {
+    App.state.decks = [
+      { id: 'demo1', name: '四级高频词汇（演示）', cards: [] },
+      { id: 'demo2', name: '六级高频词汇（演示）', cards: [] },
+      { id: 'user1', name: '四级大纲词汇（含词性）', cards: [] },
+    ];
+    App.removeDemoDecks();
+    expect(App.state.decks.map((d) => d.id)).toEqual(['user1']);
+  });
+
+  it('当前选中牌组被删除时重置为 null', () => {
+    App.state.decks = [{ id: 'demo1', name: '四级高频词汇（演示）', cards: [] }];
+    App.state.currentDeckId = 'demo1';
+    App.removeDemoDecks();
+    expect(App.state.currentDeckId).toBeNull();
+  });
+
+  it('无演示牌组时不改动', () => {
+    App.state.decks = [{ id: 'user1', name: '四级大纲词汇', cards: [] }];
+    App.state.currentDeckId = 'user1';
+    App.removeDemoDecks();
+    expect(App.state.decks).toHaveLength(1);
+    expect(App.state.currentDeckId).toBe('user1');
+  });
+});

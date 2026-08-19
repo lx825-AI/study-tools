@@ -19,6 +19,7 @@ var FlashcardApp = window.FlashcardApp || {};
 
   /* 牌组面板 */
   App.renderDeckPanel = function () {
+    if (App.renderDailyQuote) App.renderDailyQuote();
     let grid = document.getElementById('deckGrid');
     let empty = document.getElementById('decksEmpty');
 
@@ -51,7 +52,6 @@ var FlashcardApp = window.FlashcardApp || {};
         '<div class="deck-actions">' +
           '<button class="btn btn-outline btn-sm" data-action="study" data-deck="' + d.id + '">学习</button>' +
           '<button class="btn btn-outline btn-sm" data-action="edit" data-deck="' + d.id + '">编辑</button>' +
-          '<button class="btn btn-outline btn-sm" data-action="export" data-deck="' + d.id + '" title="导出为JSON">导出</button>' +
           '<button class="btn btn-danger btn-sm" data-action="delete" data-deck="' + d.id + '">删除</button>' +
         '</div>' +
       '</div>';
@@ -71,7 +71,7 @@ var FlashcardApp = window.FlashcardApp || {};
     if (bottomBtn) bottomBtn.classList.add('active');
 
     document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('visible'); });
-    let panelMap = { decks: 'panelDecks', study: 'panelStudy', preview: 'panelPreview', cards: 'panelCards', stats: 'panelStats' };
+    let panelMap = { decks: 'panelDecks', study: 'panelStudy', preview: 'panelPreview', cards: 'panelCards', stats: 'panelStats', wrong: 'panelWrong' };
     let panelId = panelMap[tab];
     if (panelId) document.getElementById(panelId).classList.add('visible');
 
@@ -81,6 +81,7 @@ var FlashcardApp = window.FlashcardApp || {};
     if (tab === 'preview') App.renderPreviewPanel();
     if (tab === 'cards') App.renderCardsPanel();
     if (tab === 'stats') App.renderStatsPanel();
+    if (tab === 'wrong') App.renderWrongWordsPanel();
   };
 
   /* 更新导航标签上的待复习角标 */
@@ -129,6 +130,7 @@ var FlashcardApp = window.FlashcardApp || {};
     App.renderStudyPanel();
     App.renderPreviewPanel();
     if (App.renderStatsPanel) App.renderStatsPanel();
+    if (App.renderWrongWordsPanel) App.renderWrongWordsPanel();
     App.updateNavBadges();
   };
 

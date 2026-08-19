@@ -125,3 +125,30 @@
   gap: 8px;
   flex-wrap: wrap;
 }
+
+/* 每日一句卡片 */
+.quote-card {
+  margin-bottom: 20px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  border-left: 4px solid var(--primary);
+}
+.quote-text {
+  font-size: 15px;
+  font-style: italic;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+.quote-zh {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--text-secondary, #64748b);
+}
+.quote-author {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-muted, #94a3b8);
+  text-align: right;
+}

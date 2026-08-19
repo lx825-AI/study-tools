@@ -16,7 +16,13 @@ const files = [
   'utils.js',
   'ebbinghaus.js',
   '../data/word-schema.js',
+  'ui.js',
+  'daily-quote.js',
+  'quick-mode.js',
   'study-panel.js',
+  'wrong-words.js',
+  'import.js',
+  'stats-panel.js',
 ];
 
 files.forEach(f => {

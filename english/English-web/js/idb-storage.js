@@ -8,15 +8,6 @@ var FlashcardApp = window.FlashcardApp || {};
   var STORE_NAME = 'app-data';
   var DATA_KEY = 'flashcard-data';
 
-  /* localStorage 保留的轻量键 */
-  var LOCAL_KEYS = [
-    'flashcard-daily-goal',
-    'flashcard-theme',
-    'flashcard-tts-accent',
-    'flashcard-new-words-per-session',
-    'flashcard-reminder',
-  ];
-
   /** 打开数据库 */
   function openDB() {
     return new Promise(function (resolve, reject) {

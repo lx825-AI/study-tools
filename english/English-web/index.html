@@ -16,107 +16,14 @@
 <link rel="stylesheet" href="css/mode.css">
 <link rel="stylesheet" href="css/preview.css">
 <link rel="stylesheet" href="css/stats.css">
-<style>
-/* 全局搜索栏 */
-.global-search-wrap {
-  margin-bottom: 16px;
-  position: relative;
-}
-.global-search-wrap input {
-  width: 100%;
-  padding: 10px 16px;
-  border: 2px solid var(--border);
-  border-radius: var(--radius);
-  font-size: 15px;
-  outline: none;
-  background: var(--surface);
-  color: var(--text-primary);
-  transition: border-color 0.2s;
-  font-family: inherit;
-}
-.global-search-wrap input:focus { border-color: var(--primary); }
-.global-search-results {
-  display: none;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: var(--surface);
-  border: 2px solid var(--border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-  z-index: 50;
-  max-height: 320px;
-  overflow-y: auto;
-  margin-top: 4px;
-}
-.gsr-item {
-  padding: 10px 16px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border-bottom: 1px solid var(--border-light);
-  transition: background 0.15s;
-}
-.gsr-item:last-child { border-bottom: none; }
-.gsr-item:hover { background: var(--surface-hover); }
-.gsr-word { font-weight: 600; min-width: 90px; }
-.gsr-phonetic { font-size: 11px; color: var(--text-muted); margin-left: 4px; font-family: "Lucida Sans Unicode","Arial Unicode MS",sans-serif; }
-.gsr-pos { display: inline-block; padding: 1px 6px; border-radius: 4px; background: var(--primary-bg); color: var(--primary); font-size: 11px; font-weight: 600; margin: 0 6px; white-space: nowrap; }
-.gsr-def { color: var(--text-secondary); flex: 1; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.gsr-deck { color: var(--text-muted); font-size: 12px; white-space: nowrap; }
-.gsr-empty { padding: 20px; text-align: center; color: var(--text-muted); font-size: 14px; }
-.gsr-speak-btn {
-  background: none;
-  border: 1.5px solid var(--border);
-  border-radius: 50%;
-  width: 26px;
-  height: 26px;
-  cursor: pointer;
-  font-size: 13px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: var(--text-muted);
-  transition: all 0.15s;
-}
-.gsr-speak-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-bg); }
-.gsr-speak-btn:active { transform: scale(0.9); }
-
-/* 移动端响应式 */
-@media (max-width: 480px) {
-  #app { padding: 12px 12px 32px; }
-  header h1 { font-size: 22px; }
-  nav button { font-size: 12px; padding: 8px 10px; }
-  .deck-actions .btn { font-size: 12px; padding: 4px 10px; }
-  .deck-card { flex-wrap: wrap; }
-  .deck-actions { width: 100%; justify-content: flex-end; margin-top: 4px; }
-}
-</style>
 </head>
 <body>
-
-<!-- 微信小程序引导条 -->
-<div class="mp-guide-bar" id="mpGuideBar">
-  <span class="mp-guide-icon">📱</span>
-  <span class="mp-guide-text">在微信搜索「英语背单词」体验小程序版，学习进度云同步！</span>
-  <button class="mp-guide-btn" id="btnMpGuide">打开微信</button>
-  <button class="mp-guide-close" id="btnMpClose">✕</button>
-</div>
 
 <div id="app">
   <header>
     <h1>📚 Flashcard 抽认卡</h1>
     <button class="theme-toggle" id="themeToggle" title="切换暗色模式">🌙</button>
   </header>
-
-  <!-- 全局搜索 -->
-  <div class="global-search-wrap">
-    <input type="search" id="globalSearch" placeholder="🔍 搜索所有牌组中的单词..." autocomplete="off">
-    <div class="global-search-results" id="globalSearchResults"></div>
-  </div>
 
   <div class="deck-selector">
     <select id="deckSelect">
@@ -131,10 +38,12 @@
     <button data-tab="preview">📖 预览</button>
     <button data-tab="cards">✏️ 卡片</button>
     <button data-tab="stats">📊 统计</button>
+    <button data-tab="wrong">📋 错词本</button>
   </nav>
 
   <!-- 牌组管理面板 -->
   <div id="panelDecks" class="panel visible">
+    <div id="dailyQuoteCard" class="quote-card"></div>
     <div class="add-deck-form">
       <input id="deckNameInput" type="text" placeholder="输入牌组名称，例如「四级单词」" maxlength="30">
       <button class="btn btn-primary" id="btnAddDeck">创建</button>
@@ -159,16 +68,8 @@
       <div class="study-header">
         <button class="btn-back-mode" id="btnBackToMode" title="返回模式选择">← 返回</button>
         <div class="study-deck-name" id="studyDeckName"></div>
-        <button class="order-toggle" id="btnStudyOrder" title="点击切换排序：智能排序 → 乱序 → 正序"><span class="order-icon">⚡</span><span class="order-label">智能排序</span><span class="order-arrow">▾</span></button>
         <div class="study-progress" id="studyProgress"></div>
         <div class="progress-bar"><div class="progress-bar-fill" id="progressFill"></div></div>
-        <button class="btn btn-outline btn-sm review-failed-btn" id="btnReviewFailed" title="收集所有牌组中不会的词集中复习">📋 错题复习</button>
-      </div>
-      <div class="shortcut-hint">
-        <span><kbd>Space</kbd> 翻转</span>
-        <span><kbd>←</kbd> 不会</span>
-        <span><kbd>→</kbd> 会了</span>
-        <span><kbd>?</kbd> 全部快捷键</span>
       </div>
       <div class="card-scene">
         <div class="flashcard" id="flashcard">
@@ -234,7 +135,6 @@
       </div>
       <div class="preview-controls">
         <input type="text" id="previewSearch" placeholder="搜索单词...">
-        <button class="btn btn-outline btn-sm" id="btnToggleAnswer">🙈 隐藏释义</button>
       </div>
       <div class="preview-scroll" style="overflow-x:auto">
         <table class="preview-table">
@@ -269,13 +169,6 @@
         <input id="cardFrontInput" type="text" placeholder="正面（问题/单词）" maxlength="200">
         <input id="cardBackInput" type="text" placeholder="反面（答案/释义）" maxlength="500">
         <button class="btn btn-primary btn-block" id="btnAddCard">添加卡片</button>
-        <div class="batch-import-area" style="margin-top:12px;">
-          <details>
-            <summary style="cursor:pointer;font-size:13px;color:var(--text-secondary);">📋 批量粘贴导入</summary>
-            <textarea id="batchImportText" rows="5" placeholder="每行一个单词，格式：&#10;abandon 放弃；遗弃&#10;ability 能力；才能&#10;..." style="width:100%;margin-top:8px;padding:10px;border:2px solid var(--border);border-radius:var(--radius);font-size:14px;resize:vertical;background:var(--surface);color:var(--text-primary);"></textarea>
-            <button class="btn btn-primary btn-block" id="btnBatchImport" style="margin-top:8px;">批量导入</button>
-          </details>
-        </div>
       </div>
     </div>
   </div>
@@ -286,6 +179,9 @@
       <p>统计数据将在学习中自动累积</p>
     </div>
   </div>
+
+  <!-- 错词本面板 -->
+  <div id="panelWrong" class="panel"></div>
 
   <!-- 底部移动端导航栏 -->
   <nav class="bottom-nav" id="bottomNav">
@@ -310,16 +206,19 @@
       <span class="bottom-nav-icon">📊</span>
       <span class="bottom-nav-label">统计</span>
     </button>
+    <button data-tab="wrong">
+      <span class="bottom-nav-icon">📋</span>
+      <span class="bottom-nav-label">错词本</span>
+    </button>
   </nav>
 
   <!-- 导入词书弹窗 -->
   <div class="import-modal-overlay" id="importModal" style="display:none">
     <div class="import-modal" style="max-width:440px;width:calc(100% - 32px)">
       <h3>📥 导入词书</h3>
-      <p>内置词书或外部数据均可导入，已导入的不会重复添加</p>
+      <p>选择内置词书导入，已导入的不会重复添加</p>
       <div class="modal-options" id="importBookList"></div>
       <p id="importStatus" style="font-size:13px;margin-bottom:12px;min-height:20px;"></p>
-      <input type="file" id="importFileInput" accept=".json,.txt,.csv,.text" style="display:none">
       <button class="modal-cancel" id="btnModalCancel">取消</button>
     </div>
   </div>
@@ -332,8 +231,11 @@
 <script src="js/utils.js"></script>
 <script src="js/ebbinghaus.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/daily-quote.js"></script>
 <script src="js/deck-panel.js"></script>
+<script src="js/quick-mode.js"></script>
 <script src="js/study-panel.js"></script>
+<script src="js/wrong-words.js"></script>
 <script src="js/preview-panel.js"></script>
 <script src="js/cards-panel.js"></script>
 <script src="js/import.js"></script>

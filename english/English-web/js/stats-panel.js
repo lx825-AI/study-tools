@@ -6,57 +6,6 @@ var FlashcardApp = window.FlashcardApp || {};
   /* 学习记录 key */
   App.LEARNING_LOG_KEY = 'flashcard-learning-log';
 
-  /* 提醒功能 */
-  App._REMINDER_KEY = 'flashcard-reminder';
-  App._REMINDER_TIMER = null;
-
-  App._loadReminderSettings = function () {
-    try {
-      var raw = localStorage.getItem(App._REMINDER_KEY);
-      return raw ? JSON.parse(raw) : { enabled: false, time: '09:00' };
-    } catch (e) { return { enabled: false, time: '09:00' }; }
-  };
-
-  App._saveReminderSettings = function (settings) {
-    try { localStorage.setItem(App._REMINDER_KEY, JSON.stringify(settings)); } catch (e) {}
-  };
-
-  App._isReminderEnabled = function () {
-    return App._loadReminderSettings().enabled;
-  };
-
-  App._getReminderTime = function () {
-    return App._loadReminderSettings().time;
-  };
-
-  App._setupReminderTimer = function () {
-    if (App._REMINDER_TIMER) clearInterval(App._REMINDER_TIMER);
-    var settings = App._loadReminderSettings();
-    if (!settings.enabled) return;
-    App._REMINDER_TIMER = setInterval(function () {
-      var now = new Date();
-      var current = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-      if (current === settings.time) {
-        App._fireReminder();
-      }
-    }, 60000);
-  };
-
-  App._fireReminder = function () {
-    if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification('📚 学习时间到！', {
-        body: '该复习英语单词了，打开闪卡开始练习吧。',
-        icon: './icon.svg',
-        tag: 'flashcard-reminder'
-      });
-    } else if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission().then(function (perm) {
-        if (perm === 'granted') App._fireReminder();
-      });
-    }
-    App.showToast('📚 学习时间到！该复习单词了', 'info', 5000);
-  };
-
   /* 加载学习日志: { 'YYYY-MM-DD': { correct: N, wrong: N } } */
   App.loadLearningLog = function () {
     try {
@@ -259,101 +208,16 @@ var FlashcardApp = window.FlashcardApp || {};
       '<div class="section-title" style="margin-top:24px;">📅 最近 30 天</div>' +
       '<div class="heatmap">' + App._renderHeatmap(log) + '</div>' +
 
-      /* 数据备份 */
-      (function () {
-        var lastBackup = App.getLastBackupDate ? App.getLastBackupDate() : null;
-        var backupInfo = '';
-        if (lastBackup) {
-          var daysAgo = Math.floor((new Date() - new Date(lastBackup)) / 86400000);
-          backupInfo = '<span>上次备份: ' + lastBackup + '</span>';
-          if (daysAgo > 7) {
-            backupInfo += '<span class="backup-warn">（' + daysAgo + ' 天前，建议立即备份）</span>';
-          } else {
-            backupInfo += '<span>（' + daysAgo + ' 天前）</span>';
-          }
-        } else {
-          backupInfo = '<span class="backup-warn">尚未备份，建议导出数据以防丢失</span>';
-        }
-        return '<div class="section-title" style="margin-top:24px;">💾 数据备份</div>' +
-        '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-          '<button id="btnExportAll" class="btn btn-outline btn-sm">📥 导出全部数据</button>' +
-          '<button id="btnImportAll" class="btn btn-outline btn-sm">📤 导入数据恢复</button>' +
-          '<button id="btnExportFailed" class="btn btn-outline btn-sm">📋 导出错题集</button>' +
-          '<input type="file" id="backupImportFileInput" accept=".json" style="display:none;">' +
-        '</div>' +
-        '<div class="backup-info">' + backupInfo + '</div>' +
-        '<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">导出包含所有牌组、学习进度和偏好设置。导入将<strong>替换</strong>当前全部数据。</div>';
-      })();
+      /* 分享 */
+      '<div class="section-title" style="margin-top:24px;">📣 分享</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+        '<button id="btnShareAchievement" class="btn btn-outline btn-sm">🏆 分享学习成果</button>' +
+      '</div>';
 
-      /* 云同步入口 */
-      (function () {
-        return '<div class="section-title" style="margin-top:24px;">☁️ 云端同步</div>' +
-        '<div class="sync-section">' +
-          '<div class="sync-status sync-ok">' +
-            '<span class="sync-dot sync-dot-ok"></span>' +
-            '<span>数据保存在本地浏览器中。导出备份文件后，可在其他设备上导入恢复。</span>' +
-          '</div>' +
-          '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">' +
-            '<button id="btnSyncFromURL" class="btn btn-outline btn-sm">🔗 从 URL 导入</button>' +
-          '</div>' +
-          '<div style="font-size:12px;color:var(--text-muted);margin-top:4px;">将备份 JSON 文件托管在任意 HTTPS 服务器上，即可跨设备同步数据。</div>' +
-        '</div>';
-      })() +
-
-      /* 学习提醒 */
-      (function () {
-        var settings = App._loadReminderSettings();
-        var checked = settings.enabled ? ' checked' : '';
-        var disabled = settings.enabled ? '' : ' disabled';
-        return '<div class="section-title" style="margin-top:24px;">⏰ 学习提醒</div>' +
-        '<div class="reminder-settings">' +
-          '<label class="reminder-row">' +
-            '<input type="checkbox" id="reminderEnabled"' + checked + '>' +
-            '<span>开启每日学习提醒</span>' +
-          '</label>' +
-          '<div class="reminder-row">' +
-            '<span>提醒时间:</span>' +
-            '<input type="time" id="reminderTime" value="' + settings.time + '"' + disabled + '>' +
-          '</div>' +
-          '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
-            '<button class="btn btn-outline btn-sm" id="btnTestReminder">🔔 测试提醒</button>' +
-            '<button class="btn btn-outline btn-sm" id="btnNotifyGuide">🔔 通知权限引导</button>' +
-          '</div>' +
-          '<div style="font-size:12px;color:var(--text-muted);margin-top:6px;">提醒仅在安装为桌面应用后支持系统通知。页面打开时会在设定时间弹出提示。</div>' +
-        '</div>';
-      })();
-
-    /* 绑定导出按钮 */
-    let btnExport = document.getElementById('btnExportAll');
-    if (btnExport) {
-      btnExport.addEventListener('click', App.exportAllData);
-    }
-
-    /* 绑定导出错题按钮 */
-    let btnExportFailed = document.getElementById('btnExportFailed');
-    if (btnExportFailed) {
-      btnExportFailed.addEventListener('click', App.exportFailedCards);
-    }
-
-    /* 绑定导入按钮 → 触发文件选择 */
-    let btnImport = document.getElementById('btnImportAll');
-    let importInput = document.getElementById('backupImportFileInput');
-    if (btnImport && importInput) {
-      btnImport.addEventListener('click', function () { importInput.click(); });
-      importInput.addEventListener('change', function () {
-        let file = importInput.files && importInput.files[0];
-        if (!file) return;
-        let reader = new FileReader();
-        reader.onload = function () {
-          try {
-            App.importAllData(reader.result);
-          } catch (e) {
-            App.showToast('导入失败：文件格式不正确', 'error');
-          }
-          importInput.value = '';
-        };
-        reader.readAsText(file);
-      });
+    /* 绑定分享学习成果按钮 */
+    let btnShare = document.getElementById('btnShareAchievement');
+    if (btnShare) {
+      btnShare.addEventListener('click', App.shareAchievement);
     }
 
     /* 绑定每日目标保存事件（innerHTML 同步赋值后 DOM 已可用） */
@@ -366,49 +230,6 @@ var FlashcardApp = window.FlashcardApp || {};
             localStorage.setItem('flashcard-daily-goal', v);
             App.renderStatsPanel();
           }
-        });
-      }
-
-      /* 绑定提醒设置 */
-      var reminderCheckbox = document.getElementById('reminderEnabled');
-      var reminderTimeInput = document.getElementById('reminderTime');
-      var testReminderBtn = document.getElementById('btnTestReminder');
-      if (reminderCheckbox) {
-        reminderCheckbox.addEventListener('change', function () {
-          var settings = App._loadReminderSettings();
-          settings.enabled = this.checked;
-          App._saveReminderSettings(settings);
-          if (reminderTimeInput) reminderTimeInput.disabled = !this.checked;
-          App._setupReminderTimer();
-        });
-      }
-      if (reminderTimeInput) {
-        reminderTimeInput.addEventListener('change', function () {
-          var settings = App._loadReminderSettings();
-          settings.time = this.value;
-          App._saveReminderSettings(settings);
-          App._setupReminderTimer();
-        });
-      }
-      if (testReminderBtn) {
-        testReminderBtn.addEventListener('click', function () {
-          App._fireReminder();
-        });
-      }
-
-      /* 绑定通知引导按钮 */
-      var notifyGuideBtn = document.getElementById('btnNotifyGuide');
-      if (notifyGuideBtn) {
-        notifyGuideBtn.addEventListener('click', function () {
-          App.showNotificationGuide();
-        });
-      }
-
-      /* 绑定云同步按钮 */
-      var syncUrlBtn = document.getElementById('btnSyncFromURL');
-      if (syncUrlBtn) {
-        syncUrlBtn.addEventListener('click', function () {
-          App.syncFromURL();
         });
       }
   };
@@ -427,91 +248,6 @@ var FlashcardApp = window.FlashcardApp || {};
       cells += '<div class="heat-cell heat-level-' + level + '" title="' + title + '"></div>';
     }
     return cells;
-  };
-
-  /* 导出全部数据为 JSON 文件下载 */
-  App.exportAllData = function () {
-    let backup = {
-      version: 1,
-      exportedAt: new Date().toISOString(),
-      decks: App.state.decks,
-      currentDeckId: App.state.currentDeckId,
-      learningLog: App.loadLearningLog(),
-      dailyGoal: parseInt(localStorage.getItem('flashcard-daily-goal') || '20', 10),
-      theme: localStorage.getItem('flashcard-theme') || 'auto',
-    };
-    let json = JSON.stringify(backup, null, 2);
-    let blob = new Blob(['﻿' + json], { type: 'application/json;charset=utf-8' });
-    let url = URL.createObjectURL(blob);
-    let a = document.createElement('a');
-    a.href = url;
-    a.download = 'flashcard-backup-' + new Date().toISOString().slice(0, 10) + '.json';
-    a.click();
-    URL.revokeObjectURL(url);
-    if (App.recordBackup) App.recordBackup();
-    App.showToast('数据已导出', 'success');
-  };
-
-  /* 导出错题集为 CSV 文件 */
-  App.exportFailedCards = function () {
-    var failedCards = App.collectFailedCards();
-    if (failedCards.length === 0) {
-      App.showToast('暂无错题可导出', 'warn');
-      return;
-    }
-    /* CSV header: word,phonetic,pos,definitions,easeFactor,deck */
-    var rows = [['单词', '音标', '词性', '释义', 'EF系数', '所属牌组']];
-    failedCards.forEach(function (f) {
-      rows.push([
-        f.card.word || f.card.front || '',
-        f.card.phonetic || '',
-        f.card.pos || '',
-        (f.card.definitions || [f.card.back || '']).join('; '),
-        String((f.card.easeFactor || 2.5).toFixed(1)),
-        f.deckName
-      ]);
-    });
-    var csv = '﻿' + rows.map(function (r) {
-      return r.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(',');
-    }).join('\n');
-    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = 'flashcard-failed-' + new Date().toISOString().slice(0, 10) + '.csv';
-    a.click();
-    URL.revokeObjectURL(url);
-    App.showToast('已导出 ' + failedCards.length + ' 个错题', 'success');
-  };
-
-  /* 从 JSON 文件导入恢复全部数据 */
-  App.importAllData = function (raw) {
-    let backup = JSON.parse(raw);
-    if (!backup.version || !Array.isArray(backup.decks)) {
-      throw new Error('Invalid backup format');
-    }
-    if (!confirm(
-      '即将导入备份数据（' + backup.decks.length + ' 个牌组，共 ' +
-      backup.decks.reduce(function (s, d) { return s + d.cards.length; }, 0) + ' 张卡片）。\n\n' +
-      '导入将替换当前全部数据，是否继续？'
-    )) return;
-
-    App.state.decks = backup.decks;
-    App.state.currentDeckId = backup.currentDeckId || null;
-    App.saveData();
-
-    if (backup.learningLog) {
-      try { localStorage.setItem(App.LEARNING_LOG_KEY, JSON.stringify(backup.learningLog)); } catch (e) {}
-    }
-    if (backup.dailyGoal) {
-      localStorage.setItem('flashcard-daily-goal', String(backup.dailyGoal));
-    }
-    if (backup.theme) {
-      localStorage.setItem('flashcard-theme', backup.theme);
-    }
-
-    App.renderAll();
-    App.showToast('数据已恢复', 'success');
   };
 
 })(FlashcardApp);
