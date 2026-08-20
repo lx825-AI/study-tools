@@ -126,7 +126,9 @@ describe('拼写模式（纯练习 + 盲拼）', () => {
     expect(document.getElementById('spellInputArea').style.display).toBe('block');
     expect(document.getElementById('btnToggleSpell').classList.contains('spell-active')).toBe(true);
     const frontHtml = document.getElementById('cardFrontText').innerHTML;
-    expect(frontHtml).toContain('盲拼');
+    /* 盲拼下划线：abandon 7 字母 → 7 个下划线（带间隔），保留辅助文字 */
+    expect((frontHtml.match(/_/g) || []).length).toBe(7);
+    expect(frontHtml).toContain('听发音拼写');
     expect(frontHtml).not.toContain('abandon');
     expect(frontHtml).not.toContain('phonetic');
     expect(frontHtml).not.toContain('●');
@@ -147,5 +149,29 @@ describe('拼写模式（纯练习 + 盲拼）', () => {
     App.toggleSpellMode();
     expect(spyFocus).toHaveBeenCalled();
     spyFocus.mockRestore();
+  });
+});
+
+describe('buildSpellBlindMask 盲拼下划线遮罩', () => {
+  it('单字母词：一个下划线', () => {
+    expect(App.buildSpellBlindMask({ front: 'a' })).toBe('_');
+  });
+
+  it('多字母词：带间隔下划线数量等于字母数', () => {
+    const mask = App.buildSpellBlindMask({ front: 'abandon' });
+    expect((mask.match(/_/g) || []).length).toBe(7);
+    expect(mask).toBe('_ _ _ _ _ _ _');
+  });
+
+  it('多词短语：按空白分组，词间保留双空格', () => {
+    expect(App.buildSpellBlindMask({ front: 'give up' })).toBe('_ _ _ _  _ _');
+  });
+
+  it('带撇号：撇号原样保留', () => {
+    expect(App.buildSpellBlindMask({ front: "don't" })).toBe("_ _ _ ' _");
+  });
+
+  it('空卡返回空串', () => {
+    expect(App.buildSpellBlindMask({})).toBe('');
   });
 });

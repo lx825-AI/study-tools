@@ -177,6 +177,14 @@
 }
 .btn-fail:active, .btn-pass:active { transform: scale(0.97); }
 
+/* 回看态作答按钮灰暗处理（对齐小程序 answer-buttons.dimmed） */
+.study-actions .btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 /* 学习完成 */
 .study-complete {
   text-align: center;

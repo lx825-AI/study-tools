@@ -52,6 +52,8 @@ math/
 
 **测试**：175→187；Playwright 端到端 23/23 通过
 
+**追加打磨**：盲拼提示改下划线遮罩（按单词字母数显示带间隔下划线，buildSpellBlindMask 纯函数）；回看态会了/不会按钮灰暗处理（disabled + opacity 0.35，对齐小程序 dimmed）；测试 187→192
+
 ## 最近更新（2026-08-19）— English-web 学习算法全量对齐 v2.8
 
 **单轨化**：删除 SM-2 双轨（applySM2/nextReview/interval），applyEbbinghaus 重写为小程序等价实现——智能回退、逾期惩罚不叠加、EF 自适应间隔、逾期答对降级门控、防御性补齐（NaN/夹紧/历史截断）

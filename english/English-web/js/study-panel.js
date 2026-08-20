@@ -561,11 +561,11 @@ var FlashcardApp = window.FlashcardApp || {};
         ((App.studyIndex / App.studyQueue.length) * 100) + '%';
     }
 
-    /* 正面（拼写模式为盲拼：仅 🔒 占位 + 发音提示，不显示词形/音标/释义） */
+    /* 正面（拼写模式为盲拼：下划线对应单词字母数 + 发音提示，不显示词形/音标/释义） */
     var frontHtml;
     var frontHint = document.querySelector('#flashcard .card-front .card-hint');
     if (App.spellMode) {
-      frontHtml = '<div class="spell-blind-placeholder">🔒 盲拼中</div>' +
+      frontHtml = '<div class="spell-blind-placeholder">' + App.buildSpellBlindMask(card) + '</div>' +
         '<div class="spell-blind-sub">听发音拼写</div>';
       if (frontHint) frontHint.textContent = '🔊 听发音，在下方输入拼写';
     } else {
@@ -946,6 +946,16 @@ var FlashcardApp = window.FlashcardApp || {};
       var spellInput = document.getElementById('spellInput');
       if (spellInput) spellInput.focus();
     }
+  };
+
+  /** 盲拼下划线遮罩：每个字母一个下划线（带间隔），按空白分组，连字符/撇号原样保留 */
+  App.buildSpellBlindMask = function (card) {
+    var word = card.front || card.word || '';
+    return word.split(/\s+/).map(function (group) {
+      return group.split('').map(function (ch) {
+        return /[a-zA-Z]/.test(ch) ? '_' : ch;
+      }).join(' ');
+    }).join('  ');
   };
 
   /** 拼写检查（纯练习：不翻卡、不推进队列、不写学习日志；对/错均停留当前词，可重拼/重试） */
