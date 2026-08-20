@@ -558,11 +558,12 @@ var FlashcardApp = window.FlashcardApp || {};
         ((App.studyIndex / App.studyQueue.length) * 100) + '%';
     }
 
-    /* 正面（拼写模式为盲拼槽位：逐格输入字母，不显示词形/音标/释义） */
+    /* 正面（拼写模式为盲拼槽位：逐格输入字母，不显示词形/音标/释义；判定反馈在格子下方卡片内部） */
     var frontHtml;
     var frontHint = document.querySelector('#flashcard .card-front .card-hint');
     if (App.spellMode) {
       frontHtml = '<div class="spell-slots">' + App.buildSpellSlotHtml(card) + '</div>' +
+        '<div class="spell-feedback" id="spellFeedback"></div>' +
         '<div class="spell-blind-sub">听发音拼写</div>';
       if (frontHint) frontHint.textContent = '🔊 听发音，在卡片上拼写';
     } else {
@@ -978,12 +979,13 @@ var FlashcardApp = window.FlashcardApp || {};
     return out;
   };
 
-  /** 清空槽位值/解除禁用/移除错误高亮类 */
+  /** 清空槽位值/解除禁用/移除错误与正确高亮类 */
   App._clearSpellSlots = function (slots) {
     for (var i = 0; i < slots.length; i++) {
       slots[i].value = '';
       slots[i].disabled = false;
       slots[i].classList.remove('spell-slot-wrong');
+      slots[i].classList.remove('spell-slot-correct');
     }
   };
 
@@ -1005,15 +1007,16 @@ var FlashcardApp = window.FlashcardApp || {};
     var normalized = userInput.toLowerCase();
 
     if (normalized === correctAnswer) {
-      /* 正确：✅ + 朗读 + 清空槽位可重拼，停留当前词 */
+      /* 正确：✅ + 朗读 + 字母保留槽位（绿色边框，不清空重拼，对齐小程序 slot-correct），停留当前词 */
       feedback.textContent = '✅ 拼写正确！' + (card.phonetic ? ' ' + card.phonetic : '');
       feedback.className = 'spell-feedback spell-correct';
-      App._clearSpellSlots(slots);
+      for (var ci = 0; ci < slots.length; ci++) {
+        slots[ci].classList.remove('spell-slot-wrong');
+        slots[ci].classList.add('spell-slot-correct');
+      }
       if (typeof App.speak === 'function') App.speak(card.front || card.word);
-      var firstCorrect = document.querySelector('.spell-slots .spell-slot');
-      if (firstCorrect) firstCorrect.focus();
     } else {
-      /* 错误：❌ + 正确答案 + 槽位短暂红色高亮（禁入），600ms 后清空重拼 */
+      /* 错误：❌ + 正确答案 + 槽位短暂红色高亮（禁入），600ms 后清空重拼且答案消失（防照着拼写） */
       feedback.innerHTML = '❌ 正确答案：<strong>' + App.escHtml(card.front || card.word) + '</strong>';
       feedback.className = 'spell-feedback spell-wrong';
       for (var i = 0; i < slots.length; i++) {
@@ -1024,6 +1027,8 @@ var FlashcardApp = window.FlashcardApp || {};
         App._spellWrongTimer = null;
         var freshSlots = document.querySelectorAll('.spell-slots .spell-slot');
         App._clearSpellSlots(freshSlots);
+        var freshFeedback = document.getElementById('spellFeedback');
+        if (freshFeedback) { freshFeedback.textContent = ''; freshFeedback.className = 'spell-feedback'; }
         var firstWrong = document.querySelector('.spell-slots .spell-slot');
         if (firstWrong) firstWrong.focus();
       }, App.SPELL_WRONG_DELAY);
@@ -1048,6 +1053,14 @@ var FlashcardApp = window.FlashcardApp || {};
     if (!App.spellMode) return;
     var slot = e.target.closest && e.target.closest('.spell-slot');
     if (!slot) return;
+    /* 正确后修改字母 → 回到输入态，清除陈旧 ✅ 与绿色高亮（对齐小程序 handleSlotInput） */
+    var fbEl = document.getElementById('spellFeedback');
+    if (fbEl && fbEl.className.indexOf('spell-correct') >= 0) {
+      fbEl.textContent = '';
+      fbEl.className = 'spell-feedback';
+      var allSlots = document.querySelectorAll('.spell-slots .spell-slot');
+      for (var k = 0; k < allSlots.length; k++) allSlots[k].classList.remove('spell-slot-correct');
+    }
     var v = (slot.value || '').replace(/[^a-zA-Z]/g, '');
     slot.value = v ? v.slice(-1) : '';
     if (!v) return;

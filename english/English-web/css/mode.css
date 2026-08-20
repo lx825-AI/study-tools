@@ -283,6 +283,10 @@
   color: var(--danger-text);
   animation: shake 0.4s ease;
 }
+.spell-slot-correct {
+  border-color: var(--success);
+  color: var(--success);
+}
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   20% { transform: translateX(-6px); }

@@ -145,21 +145,37 @@ describe('槽位交互（document 委托）', () => {
     expect(slots[0].value).toBe('b');
   });
 
-  it('末槽且全槽填满自动判定 ✅', () => {
+  it('末槽且全槽填满自动判定 ✅（字母保留槽位 + 绿色高亮，不清空重拼）', () => {
     const card = setupStudy();
     const slots = getSlots();
     fillWord(slots, 'abandon');
     expect(document.getElementById('spellFeedback').textContent).toContain('✅');
     expect(App.speak).toHaveBeenCalledWith('abandon');
-    /* 判定后槽位清空可重拼 */
-    expect(slots[0].value).toBe('');
-    expect(slots[6].value).toBe('');
+    /* 对齐小程序：正确后字母保留槽位、绿色边框、不清空 */
+    expect(slots[0].value).toBe('a');
+    expect(slots[6].value).toBe('n');
+    expect(slots[0].classList.contains('spell-slot-correct')).toBe(true);
+    expect(slots[6].classList.contains('spell-slot-correct')).toBe(true);
+    expect(slots[0].disabled).toBe(false);
     /* 纯练习：完全不推进 */
     expect(App.studyIndex).toBe(0);
     expect(App.studyQueue.length).toBe(1);
     expect(App.studyPassed).toBe(0);
     expect(App.studyResults.length).toBe(0);
     expect(card.ebbinghausStage).toBe(0);
+  });
+
+  it('正确后修改字母：清除陈旧 ✅ 与绿色高亮，回到输入态', () => {
+    setupStudy();
+    const slots = getSlots();
+    fillWord(slots, 'abandon');
+    expect(slots[0].classList.contains('spell-slot-correct')).toBe(true);
+
+    typeSlot(slots[2], 'x');
+    expect(document.getElementById('spellFeedback').textContent).toBe('');
+    expect(slots[0].classList.contains('spell-slot-correct')).toBe(false);
+    expect(slots[3].classList.contains('spell-slot-correct')).toBe(false);
+    expect(slots[2].value).toBe('x');
   });
 
   it('仅末槽有值时输入不触发判定（乱序填充防护）', () => {
@@ -245,6 +261,8 @@ describe('checkSpelling 语义（纯练习）', () => {
     expect(slots[0].value).toBe('');
     expect(slots[0].disabled).toBe(false);
     expect(slots[0].classList.contains('spell-slot-wrong')).toBe(false);
+    /* 答案随清空一起消失（防照着拼写） */
+    expect(document.getElementById('spellFeedback').textContent).toBe('');
     expect(document.activeElement).toBe(slots[0]);
     /* 纯练习：不翻卡不推进不碰调度 */
     expect(App.studyIndex).toBe(0);
@@ -340,6 +358,17 @@ describe('toggleSpellMode 槽位渲染', () => {
     expect(document.getElementById('btnFail').style.display).toBe('');
     expect(document.getElementById('btnToggleSpell').classList.contains('spell-active')).toBe(false);
     expect(document.getElementById('cardFrontText').innerHTML).toContain('abandon');
+  });
+
+  it('判定反馈位于卡片内部拼写格子下方（section 内无 feedback）', () => {
+    setupStudy();
+    App.toggleSpellMode();
+    const front = document.getElementById('cardFrontText');
+    const fb = front.querySelector('#spellFeedback');
+    expect(fb).not.toBeNull();
+    expect(document.getElementById('spellModeSection').querySelector('#spellFeedback')).toBeNull();
+    /* 反馈紧挨拼写格子下方 */
+    expect(front.querySelector('.spell-slots').nextElementSibling).toBe(fb);
   });
 
   it('回看态禁止切换拼写模式（与 checkSpelling 守卫一致）', () => {

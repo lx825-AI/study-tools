@@ -65,7 +65,6 @@ window.mountStudyDOM = function () {
         '<div class="study-actions"></div>' +
         '<div class="spell-mode-section" id="spellModeSection" style="display:none">' +
           '<button id="btnToggleSpell"></button>' +
-          '<div id="spellFeedback"></div>' +
         '</div>' +
       '</div>' +
       '<div id="studyComplete" style="display:none">' +
