@@ -10,6 +10,13 @@ var FlashcardApp = window.FlashcardApp || {};
   App.studyFailed = 0;
   App.studyStartTime = null;
   App.spellMode = false;              /* 拼写模式开关（纯练习，不参与学习进度） */
+  /* 拼写槽位状态（单隐藏输入框方案，对齐小程序 SpellInput） */
+  App._spellSlotData = null;          /* parseWordSlots 缓存 {groups, letterCount} */
+  App._spellLetters = [];             /* 字母数组，长度==letterCount */
+  App._spellCheckState = 'idle';      /* 'idle' | 'correct' | 'wrong' */
+  App._spellInputFocused = false;     /* 隐藏输入框聚焦态（光标闪烁门控） */
+  App._spellSubmitTimer = null;       /* 150ms 满词判定防抖 */
+  App._spellWrongTimer = null;        /* 2000ms 揭示清空重试 */
 
   /* 学习模式: 'new' | 'review' | 'failed' | 'quick' */
   App.studyMode = 'review';
@@ -273,6 +280,10 @@ var FlashcardApp = window.FlashcardApp || {};
     }
     App.isFlipped = false;
     App.renderStudyPanel();
+    if (App.spellMode) { /* 全量渲染重建隐藏框后恢复聚焦 */
+      var hi = document.getElementById('spellHiddenInput');
+      if (hi) hi.focus();
+    }
   };
 
   /* ========== 学习进度持久化（sessionStorage） ========== */
@@ -558,13 +569,21 @@ var FlashcardApp = window.FlashcardApp || {};
         ((App.studyIndex / App.studyQueue.length) * 100) + '%';
     }
 
-    /* 正面（拼写模式为盲拼槽位：逐格输入字母，不显示词形/音标/释义；判定反馈在格子下方卡片内部） */
+    /* 正面（拼写模式为盲拼：下划线展示位 + 单隐藏输入框，不显示词形/音标/释义；判定反馈在格子下方卡片内部） */
     var frontHtml;
     var frontHint = document.querySelector('#flashcard .card-front .card-hint');
     if (App.spellMode) {
-      frontHtml = '<div class="spell-slots">' + App.buildSpellSlotHtml(card) + '</div>' +
+      var spellSlotData = App.parseWordSlots(App.getCardFront(card));
+      App._spellSlotData = spellSlotData;
+      App._spellLetters = Array(spellSlotData.letterCount).fill('');
+      App._spellCheckState = 'idle';
+      /* 结构约束：spellHiddenInput 必须在 #spellSlots 容器外（局部渲染不重建它，焦点不丢） */
+      frontHtml = '<div class="spell-slots" id="spellSlots"></div>' +
         '<div class="spell-feedback" id="spellFeedback"></div>' +
-        '<div class="spell-blind-sub">听发音拼写</div>';
+        '<div class="spell-blind-sub">听发音拼写</div>' +
+        '<input id="spellHiddenInput" class="spell-hidden-input" type="text"' +
+        ' maxlength="' + (spellSlotData.letterCount + 4) + '"' +
+        ' autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" aria-label="拼写输入">';
       if (frontHint) frontHint.textContent = '🔊 听发音，在卡片上拼写';
     } else {
       frontHtml = App.escHtml(App.getCardFront(card));
@@ -611,6 +630,7 @@ var FlashcardApp = window.FlashcardApp || {};
     }
 
     document.getElementById('cardFrontText').innerHTML = frontHtml + diffHtml;
+    if (App.spellMode) App._renderSpellSlots();
 
     /* 背面 — 优先使用源牌组中的完整卡片数据 */
     var parts = [];
@@ -939,162 +959,216 @@ var FlashcardApp = window.FlashcardApp || {};
   App.toggleSpellMode = function () {
     if (App.isReviewing) return; /* 回看态禁拼写（与 checkSpelling 守卫一致） */
     App.spellMode = !App.spellMode;
-    /* UI 全权交给 renderStudyPanel 重建（盲拼槽位/按钮显隐/切换文案），并触发一次自动播放（对齐小程序进拼写页播一次） */
+    /* UI 全权交给 renderStudyPanel 重建（下划线槽位/隐藏输入框/按钮显隐/切换文案），并触发一次自动播放（对齐小程序进拼写页播一次） */
     App.renderStudyPanel();
     if (App.spellMode) {
-      var firstSlot = document.querySelector('.spell-slots .spell-slot');
-      if (firstSlot) firstSlot.focus();
+      var hiddenInput = document.getElementById('spellHiddenInput');
+      if (hiddenInput) hiddenInput.focus(); /* 点击链内聚焦 = 用户手势 → 移动端弹键盘 */
     }
   };
 
-  /** 槽位化盲拼：字母→单字符输入框（仅字母槽连续编号），空白→间隔，其余字符→固定展示 */
-  App.buildSpellSlotHtml = function (card) {
-    var word = card.front || card.word || '';
+  /* 错误揭示时长（毫秒），测试用常量（对齐小程序 2000ms 后清空重试） */
+  App.SPELL_WRONG_DELAY = 2000;
+
+  /** 局部渲染下划线槽位区（只写 #spellSlots.innerHTML；隐藏输入框在容器外不重建，焦点不丢） */
+  App._renderSpellSlots = function () {
+    var wrap = document.getElementById('spellSlots');
+    if (!wrap || !App._spellSlotData) return;
+    var data = App._spellSlotData;
+    var letters = App._spellLetters || [];
+    var state = App._spellCheckState || 'idle';
+    var cursorIdx = App.firstEmptySlotIndex(letters);
+    var showCaret = state === 'idle' && App._spellInputFocused && cursorIdx >= 0;
+    /* wrong 期逐格对比（用户输入保留，对位保持/错位红显） */
+    var reveal = null;
+    if (state === 'wrong') {
+      reveal = [];
+      data.groups.forEach(function (g) {
+        g.forEach(function (s) {
+          if (s.kind === 'letter') {
+            reveal[s.letterIndex] = (letters[s.letterIndex] || '').toLowerCase() === s.char.toLowerCase();
+          }
+        });
+      });
+    }
     var html = '';
-    var idx = 0;
-    word.split(/\s+/).forEach(function (group, gi) {
-      if (gi > 0) html += '<span class="spell-slot-gap"></span>';
-      group.split('').forEach(function (ch) {
-        if (/[a-zA-Z]/.test(ch)) {
-          html += '<input class="spell-slot" type="text" maxlength="1" autocomplete="off"' +
-            ' autocapitalize="none" autocorrect="off" spellcheck="false"' +
-            ' data-idx="' + idx + '" aria-label="第 ' + (idx + 1) + ' 个字母">';
-          idx++;
+    data.groups.forEach(function (group) {
+      html += '<div class="slot-group">';
+      group.forEach(function (slot) {
+        if (slot.kind === 'letter') {
+          var cls = '';
+          if (state === 'wrong') cls = reveal[slot.letterIndex] ? 'slot-filled' : 'slot-wrong-char';
+          else if (state === 'correct') cls = 'slot-filled slot-correct';
+          else if (showCaret && slot.letterIndex === cursorIdx) cls = 'slot-cursor';
+          else if (letters[slot.letterIndex]) cls = 'slot-filled';
+          html += '<span class="slot-char ' + cls + '">' + App.escHtml(letters[slot.letterIndex] || '_');
+          if (showCaret && slot.letterIndex === cursorIdx) html += '<span class="slot-caret"></span>';
+          html += '</span>';
         } else {
-          html += '<span class="spell-slot-fixed">' + App.escHtml(ch) + '</span>';
+          html += '<span class="slot-static">' + App.escHtml(slot.char) + '</span>';
         }
       });
+      html += '</div>';
     });
-    return html;
-  };
-
-  /* 错误高亮时长（毫秒），测试用常量 */
-  App.SPELL_WRONG_DELAY = 600;
-
-  /** 读取全部槽位拼接值（DOM 序 == data-idx 序） */
-  App.readSpellSlots = function () {
-    var slots = document.querySelectorAll('.spell-slots .spell-slot');
-    var out = '';
-    for (var i = 0; i < slots.length; i++) out += slots[i].value;
-    return out;
-  };
-
-  /** 清空槽位值/解除禁用/移除错误与正确高亮类 */
-  App._clearSpellSlots = function (slots) {
-    for (var i = 0; i < slots.length; i++) {
-      slots[i].value = '';
-      slots[i].disabled = false;
-      slots[i].classList.remove('spell-slot-wrong');
-      slots[i].classList.remove('spell-slot-correct');
+    /* 答案行（错误揭示期）：完整正确词，下划线样式无光标 */
+    if (state === 'wrong') {
+      html += '<div class="answer-row">';
+      data.groups.forEach(function (group) {
+        html += '<div class="slot-group">';
+        group.forEach(function (slot) {
+          if (slot.kind === 'letter') {
+            html += '<span class="slot-char slot-filled">' + App.escHtml(slot.char) + '</span>';
+          } else {
+            html += '<span class="slot-static">' + App.escHtml(slot.char) + '</span>';
+          }
+        });
+        html += '</div>';
+      });
+      html += '</div>';
     }
+    wrap.innerHTML = html;
   };
 
-  /** 拼写检查（纯练习：不翻卡、不推进队列、不写学习日志；对/错均停留当前词，可重拼/重试） */
+  /** 隐藏输入框值全量重建（native 值为真值源，退格=值变短，末尾字母自动撤回） */
+  App._handleSpellInput = function (value) {
+    if (App._spellCheckState === 'wrong') return; /* 揭示禁入期 */
+    var data = App._spellSlotData;
+    if (!data) return;
+    var result = App.rebuildSlotLetters(value, data.letterCount);
+    App._spellLetters = result.letters;
+    if (App._spellCheckState === 'correct') {
+      if (result.filled) return; /* 同值重复事件（Android 偶发）：忽略，不二次朗读 */
+      App._spellCheckState = 'idle'; /* 退格改字母 → 回输入态，清除陈旧 ✅ */
+      var fb = document.getElementById('spellFeedback');
+      if (fb) { fb.textContent = ''; fb.className = 'spell-feedback'; }
+    }
+    App._renderSpellSlots();
+    if (result.filled) App._scheduleSpellCheck();
+  };
+
+  /** 满词 150ms 单例防抖判定（对齐小程序 scheduleCheck：让末字母先渲染 + 防重复 input 事件） */
+  App._scheduleSpellCheck = function () {
+    if (App._spellSubmitTimer) { clearTimeout(App._spellSubmitTimer); App._spellSubmitTimer = null; }
+    App._spellSubmitTimer = setTimeout(function () {
+      App._spellSubmitTimer = null;
+      if (App._spellCheckState === 'wrong') return;
+      App.checkSpelling(); /* 未满/守卫不通过时内部返回 */
+    }, 150);
+  };
+
+  /** 拼写判定（纯练习：不翻卡、不推进队列、不写学习日志；对/错均停留当前词） */
   App.checkSpelling = function () {
     if (App.isReviewing) return; /* 回看状态禁止拼写作答（与 answerStudy 守卫一致） */
     if (!App.spellMode) return;
     if (App.studyQueue.length === 0 || App.studyIndex >= App.studyQueue.length) return;
+    if (App._spellCheckState !== 'idle') return; /* wrong 揭示期/正确态不重复判定（防 Enter 重复朗读） */
+    var letters = App._spellLetters || [];
+    var typed = letters.join('');
+    if (typed.length !== (App._spellSlotData ? App._spellSlotData.letterCount : -1)) return;
 
-    var feedback = document.getElementById('spellFeedback');
-    var userInput = App.readSpellSlots().trim();
-    if (!userInput) return;
-
-    if (App._spellWrongTimer) { clearTimeout(App._spellWrongTimer); App._spellWrongTimer = null; }
-    var slots = document.querySelectorAll('.spell-slots .spell-slot');
     var card = App.studyQueue[App.studyIndex];
-    /* 两侧统一剥除非字母：撇号/连字符是槽位中的固定展示，不可输入 */
-    var correctAnswer = (card.front || card.word || '').toLowerCase().replace(/[^a-z]/g, '');
-    var normalized = userInput.toLowerCase();
+    /* 两侧统一剥除非字母：撇号/连字符是固定展示不可输入（"don't" 填 dont 判对） */
+    var correctAnswer = App.lettersOnly(card.front || card.word || '').toLowerCase();
+    var normalized = typed.toLowerCase();
 
     if (normalized === correctAnswer) {
-      /* 正确：✅ + 朗读 + 字母保留槽位（绿色边框，不清空重拼，对齐小程序 slot-correct），停留当前词 */
-      feedback.textContent = '✅ 拼写正确！' + (card.phonetic ? ' ' + card.phonetic : '');
-      feedback.className = 'spell-feedback spell-correct';
-      for (var ci = 0; ci < slots.length; ci++) {
-        slots[ci].classList.remove('spell-slot-wrong');
-        slots[ci].classList.add('spell-slot-correct');
+      /* 正确：✅ + 朗读 + 字母保留（绿色下划线，可退格改字母），停留当前词 */
+      App._spellCheckState = 'correct';
+      var fb = document.getElementById('spellFeedback');
+      if (fb) {
+        fb.textContent = '✅ 拼写正确！' + (card.phonetic ? ' ' + card.phonetic : '');
+        fb.className = 'spell-feedback spell-correct';
       }
+      App._renderSpellSlots();
       if (typeof App.speak === 'function') App.speak(card.front || card.word);
     } else {
-      /* 错误：❌ + 正确答案 + 槽位短暂红色高亮（禁入），600ms 后清空重拼且答案消失（防照着拼写） */
-      feedback.innerHTML = '❌ 正确答案：<strong>' + App.escHtml(card.front || card.word) + '</strong>';
-      feedback.className = 'spell-feedback spell-wrong';
-      for (var i = 0; i < slots.length; i++) {
-        slots[i].disabled = true;
-        slots[i].classList.add('spell-slot-wrong');
-      }
+      /* 错误：收键盘 + 错位红显指错 + 下方下划线样式展示完整答案，2000ms 后自动清空盲拼重试 */
+      App._spellCheckState = 'wrong';
+      if (App._spellWrongTimer) { clearTimeout(App._spellWrongTimer); App._spellWrongTimer = null; }
+      var fb2 = document.getElementById('spellFeedback');
+      if (fb2) { fb2.textContent = '❌ 拼写错误'; fb2.className = 'spell-feedback spell-wrong'; } /* 不含答案 */
+      var hi = document.getElementById('spellHiddenInput');
+      if (hi) hi.blur(); /* 收键盘 */
+      App._renderSpellSlots(); /* 错位红 + 答案行 */
       App._spellWrongTimer = setTimeout(function () {
         App._spellWrongTimer = null;
-        var freshSlots = document.querySelectorAll('.spell-slots .spell-slot');
-        App._clearSpellSlots(freshSlots);
-        var freshFeedback = document.getElementById('spellFeedback');
-        if (freshFeedback) { freshFeedback.textContent = ''; freshFeedback.className = 'spell-feedback'; }
-        var firstWrong = document.querySelector('.spell-slots .spell-slot');
-        if (firstWrong) firstWrong.focus();
+        if (!App.spellMode || App._spellCheckState !== 'wrong') return; /* 防御跨卡残留 */
+        App._spellLetters = Array(App._spellSlotData.letterCount).fill('');
+        App._spellCheckState = 'idle';
+        var hi2 = document.getElementById('spellHiddenInput');
+        if (hi2) hi2.value = '';
+        var fb3 = document.getElementById('spellFeedback');
+        if (fb3) { fb3.textContent = ''; fb3.className = 'spell-feedback'; }
+        App._renderSpellSlots(); /* 清空 + 答案行消失 */
+        var hi3 = document.getElementById('spellHiddenInput');
+        if (hi3) hi3.focus(); /* 重弹键盘；iOS 可能拦截 → 点槽位区兜底 */
       }, App.SPELL_WRONG_DELAY);
     }
   };
 
-  /** 重置拼写状态（切换卡片/开关拼写时调用；槽位随后由 innerHTML 重建，此处为防御性清理） */
+  /** 重置拼写状态（切换卡片/开关拼写时调用；DOM 随后由 innerHTML 重建，此处为状态与定时器清理） */
   App._resetSpellState = function () {
     if (App._spellWrongTimer) { clearTimeout(App._spellWrongTimer); App._spellWrongTimer = null; }
+    if (App._spellSubmitTimer) { clearTimeout(App._spellSubmitTimer); App._spellSubmitTimer = null; }
+    App._spellLetters = [];
+    App._spellSlotData = null;
+    App._spellCheckState = 'idle';
+    App._spellInputFocused = false;
     var feedback = document.getElementById('spellFeedback');
     if (feedback) { feedback.textContent = ''; feedback.className = 'spell-feedback'; }
-    var slots = document.querySelectorAll('.spell-slots .spell-slot');
-    App._clearSpellSlots(slots);
   };
 
-  /* ========== 槽位输入事件委托 ==========
-   * 槽位由 renderStudyPanel 每次重建 innerHTML，故在 document 上委托
+  /* ========== 拼写输入事件委托 ==========
+   * 下划线展示位由 _renderSpellSlots 局部重建，单隐藏输入框在容器外，故在 document 上委托
    * （绑定在 IIFE 顶层而非 app.js init：测试环境不加载 app.js，此处加载时 document 已存在） */
 
-  /* 输入：值过滤（仅字母、取末字符）→ 自动跳格 → 末槽且全满才自动判定 */
+  /* 输入：单隐藏输入框，native 值为真值源，全量重建字母槽 */
   document.addEventListener('input', function (e) {
     if (!App.spellMode) return;
-    var slot = e.target.closest && e.target.closest('.spell-slot');
-    if (!slot) return;
-    /* 正确后修改字母 → 回到输入态，清除陈旧 ✅ 与绿色高亮（对齐小程序 handleSlotInput） */
-    var fbEl = document.getElementById('spellFeedback');
-    if (fbEl && fbEl.className.indexOf('spell-correct') >= 0) {
-      fbEl.textContent = '';
-      fbEl.className = 'spell-feedback';
-      var allSlots = document.querySelectorAll('.spell-slots .spell-slot');
-      for (var k = 0; k < allSlots.length; k++) allSlots[k].classList.remove('spell-slot-correct');
-    }
-    var v = (slot.value || '').replace(/[^a-zA-Z]/g, '');
-    slot.value = v ? v.slice(-1) : '';
-    if (!v) return;
-    var slots = document.querySelectorAll('.spell-slots .spell-slot');
-    var i = [].indexOf.call(slots, slot);
-    if (i < slots.length - 1) { slots[i + 1].focus(); return; }
-    /* 末格：全部槽位填满才自动判定（防乱序填充误判） */
-    for (var j = 0; j < slots.length; j++) { if (!slots[j].value) return; }
+    if (!e.target || e.target.id !== 'spellHiddenInput') return;
+    App._handleSpellInput(e.target.value);
+  });
+
+  /* Enter 提交（对齐小程序 confirm；判定有守卫，正确态/揭示期/未满均安全） */
+  document.addEventListener('keydown', function (e) {
+    if (!App.spellMode) return;
+    if (!e.target || e.target.id !== 'spellHiddenInput' || e.key !== 'Enter') return;
+    e.preventDefault();
     App.checkSpelling();
   });
 
-  /* Backspace：空槽回退上一格并清空其值（有字符时交给浏览器默认删除） */
-  document.addEventListener('keydown', function (e) {
-    if (!App.spellMode) return;
-    var slot = e.target.closest && e.target.closest('.spell-slot');
-    if (!slot || e.key !== 'Backspace' || slot.value) return;
-    var slots = document.querySelectorAll('.spell-slots .spell-slot');
-    var i = [].indexOf.call(slots, slot);
-    if (i > 0) { e.preventDefault(); slots[i - 1].value = ''; slots[i - 1].focus(); }
+  /* 点槽位区聚焦隐藏框（揭示禁入期不弹键盘）；退格天然撤回无需 keydown 处理 */
+  document.addEventListener('click', function (e) {
+    if (!App.spellMode || App._spellCheckState === 'wrong') return;
+    if (!e.target || !e.target.closest) return;
+    if (!e.target.closest('.spell-slots')) return;
+    var hi = document.getElementById('spellHiddenInput');
+    if (hi) hi.focus();
   });
 
-  /* 移动端键盘避让（槽位 focus 时滚动到可视区；jsdom 无 visualViewport/scrollIntoView，防御跳过） */
+  /* 聚焦：光标闪烁开启 + 移动端键盘避让（jsdom 无 visualViewport/scrollIntoView，防御跳过） */
   document.addEventListener('focusin', function (e) {
     if (!App.spellMode) return;
-    var slot = e.target.closest && e.target.closest('.spell-slot');
-    if (!slot) return;
+    if (!e.target || e.target.id !== 'spellHiddenInput') return;
+    App._spellInputFocused = true;
+    App._renderSpellSlots();
     setTimeout(function () {
+      var slots = document.getElementById('spellSlots');
+      if (!slots) return;
       if (window.visualViewport) {
-        var offset = slot.getBoundingClientRect().bottom - window.visualViewport.height + 20;
+        var offset = slots.getBoundingClientRect().bottom - window.visualViewport.height + 20;
         if (offset > 0 && window.scrollBy) window.scrollBy({ top: offset, behavior: 'smooth' });
-      } else if (slot.scrollIntoView) {
-        slot.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else if (slots.scrollIntoView) {
+        slots.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }, 300);
+  });
+
+  /* 失焦：光标隐藏（对齐小程序 inputFocus=false） */
+  document.addEventListener('focusout', function (e) {
+    if (!e.target || e.target.id !== 'spellHiddenInput') return;
+    App._spellInputFocused = false;
+    App._renderSpellSlots();
   });
 
 })(FlashcardApp);

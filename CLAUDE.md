@@ -58,13 +58,25 @@ math/
 
 **判定反馈 3 项优化**：正确后字母保留槽位+绿色边框（修改字母即清除陈旧 ✅）；错误后答案 600ms 随清空一起消失（防照着拼写）；判定反馈移入卡片内部拼写格子正下方；测试 199→201；Playwright 端到端 12/12 通过
 
+## 最近更新（2026-08-21）— English-web 拼写单隐藏输入框方案 + tts 韧性
+
+**方案对齐小程序**：弃多 input 格子框，改下划线展示位 + 单隐藏输入框（键盘只弹一次、闪烁光标、错位红显+下划线答案行 2000ms 揭示、满词 150ms 自动判定）；纯函数移植 parseWordSlots/lettersOnly/rebuildSlotLetters/firstEmptySlotIndex；tts 失败 600ms 重试一次 + 播放序号防旧重试打断
+
+**附带修复**：getOverdueDays 统一 UTC（修复本地 00:00-08:00 窗口今日到期误判逾期）；测试 201→219；Playwright 端到端 24/24 + tts 5/5 通过
+
 ## 最近更新（2026-08-20）— English-mini-app 拼写模式槽位输入 + 纯练习
 
-**槽位式输入**：SpellInput 删除下方输入框，改为上方按字母数渲染单字符输入槽（逐格输入自动跳槽、输满自动判定、点任意槽修改、撇号/连字符固定展示、判定剥除非字母归一化 dont 判对）；parseWordSlots/lettersOnly 纯函数替代 buildSpellBlindMask
+**槽位式输入**：SpellInput 删除下方输入框，改为上方下划线 `_ _ _` 展示位 + 单隐藏输入框（真机验证多 input 逐槽焦点切换键盘往复，弃用格子框）——键盘只弹一次、事件值全量重建、追加输入+退格撤回、输满自动判定、撇号/连字符固定展示、判定剥除非字母归一化 dont 判对；parseWordSlots/lettersOnly/rebuildSlotLetters 纯函数
 
-**纯练习化（对齐 English-web）**：✅ 音标+朗读、字母保留槽位；❌ 正确答案仅展示 600ms 后自动清空盲拼重试（防照着拼写）；不推进队列/不改遗忘曲线/不写日志；spell:result 事件链路与结果区按钮全删除；修复 visible watch immediate 首屏自动发音
+**纯练习化（对齐 English-web）**：✅ 音标+朗读、字母保留槽位；❌ 上方错位红显指错、下方下划线样式展示完整正确答案（无光标），2000ms 后自动清空盲拼重试（防照着拼写）；不推进队列/不改遗忘曲线/不写日志；spell:result 事件链路与结果区按钮全删除；修复 visible watch immediate 首屏自动发音
 
-**测试**：268→270
+**发音韧性**：tts 播放失败自动重试一次（有道 dictvoice 偶发 503 限流）+ study 页 speak 补 .catch
+
+**退格撤回修复**：单输入框退格天然撤回（值变短重建）、中文 commit 不误删；rebuildSlotLetters 纯函数（替代 applySlotInput）
+
+**光标提示**：当前输入位下划线上方闪烁竖线（仅光标闪动，firstEmptySlotIndex 纯函数）
+
+**测试**：279
 
 ## 最近更新（2026-08-19）— English-web 学习算法全量对齐 v2.8
 

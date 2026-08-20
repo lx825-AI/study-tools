@@ -402,6 +402,7 @@ var FlashcardApp = window.FlashcardApp || {};
     /* 停止正在播放的 TTS 和 Audio */
     if (window.speechSynthesis) window.speechSynthesis.cancel();
     if (App._audioEl) { App._audioEl.pause(); App._audioEl.currentTime = 0; }
+    App._audioPlaySeq++; /* 旧播放挂起的重试不再复活旧 src（对齐小程序 _playSeq） */
     App._updateAccentUI();
     App.showToast('发音切换为: ' + (App.ttsAccent === 'en-US' ? '美式 🇺🇸' : '英式 🇬🇧'), 'info', 1500);
   };
@@ -426,17 +427,31 @@ var FlashcardApp = window.FlashcardApp || {};
     return App._audioEl;
   };
 
-  /* 通过有道词典在线语音 API 播放单词发音 */
+  /* 播放序号：新播放使旧请求的重试失效（对齐小程序 tts.js _playSeq） */
+  App._audioPlaySeq = 0;
+
+  /* 通过有道词典在线语音 API 播放单词发音（失败自动重试一次，有道 dictvoice 偶发 503 限流） */
   App._speakViaAudio = function (text) {
+    App._playAudioAttempt(text, 1, ++App._audioPlaySeq);
+  };
+
+  App._playAudioAttempt = function (text, attempt, seq) {
+    if (seq !== App._audioPlaySeq) return; /* 期间已有新播放：静默放弃 */
     var word = encodeURIComponent(text.trim());
     var type = App.ttsAccent === 'en-US' ? '0' : '1';
     var url = 'https://dict.youdao.com/dictvoice?audio=' + word + '&type=' + type;
     var audio = App._getAudioEl();
+    var fail = function () { /* play().catch 与 onerror 共用失败路径 */
+      if (seq !== App._audioPlaySeq) return;
+      if (attempt < 2) {
+        setTimeout(function () { App._playAudioAttempt(text, attempt + 1, seq); }, 600);
+      } else {
+        App.showToast('朗读需要网络连接，请检查网络后重试', 'warn', 2000);
+      }
+    };
+    audio.onerror = fail;
     audio.src = url;
-    audio.play().catch(function (err) {
-      console.warn('Audio TTS fallback failed:', err.message);
-      App.showToast('朗读需要网络连接，请检查网络后重试', 'warn', 2000);
-    });
+    audio.play().catch(fail);
   };
 
   /* 朗读功能：优先 speechSynthesis，不可用时 Audio 兜底 */

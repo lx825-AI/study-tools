@@ -244,48 +244,48 @@
   font-weight: 700;
 }
 
-/* 槽位式盲拼输入（卡片正面逐格输入字母，输满自动判定） */
+/* 拼写模式：下划线展示位 + 单隐藏输入框（键盘只弹一次，对齐小程序最新方案） */
+#cardFrontText { position: relative; }  /* 隐藏输入框定位锚点 */
+
 .spell-slots {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  max-width: 100%;
+  text-align: center;
   padding: 6px 0 10px;
 }
-.spell-slot {
-  width: 38px;
-  height: 46px;
-  box-sizing: border-box;
-  -webkit-appearance: none;
-  appearance: none;
-  font-size: 22px;
+.slot-group {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0;
+}
+.slot-char {
+  position: relative;
+  width: 30px;
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  border-bottom: 2px solid var(--border);
+  color: var(--text-primary);
+  font-size: 20px;
   font-weight: 700;
   font-family: var(--font-word);
-  text-align: center;
-  color: var(--text-primary);
-  background: var(--surface);
-  border: 2px solid var(--border);
-  border-radius: var(--radius-sm);
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s;
 }
-.spell-slot:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-bg);
+.slot-char.slot-filled {
+  border-bottom-color: var(--primary);
+  opacity: 0.85;
 }
-.spell-slot:disabled {
-  opacity: 0.7;
+.slot-char.slot-cursor {
+  border-bottom-color: var(--primary);
 }
-.spell-slot-wrong {
-  border-color: var(--danger-text);
-  background: var(--danger-bg);
-  color: var(--danger-text);
-  animation: shake 0.4s ease;
-}
-.spell-slot-correct {
-  border-color: var(--success);
+.slot-char.slot-correct {
+  border-bottom-color: var(--success);
   color: var(--success);
+}
+.slot-char.slot-wrong-char {
+  color: var(--danger-text);
+  border-bottom-color: var(--danger-text);
+  animation: shake 0.4s ease;
 }
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
@@ -294,18 +294,53 @@
   60% { transform: translateX(-4px); }
   80% { transform: translateX(4px); }
 }
-.spell-slot-gap {
-  width: 14px;
+/* 光标竖线：位于下划线上方，仅自身闪烁（下划线保持静态） */
+.slot-caret {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 28px;
+  background: var(--primary);
+  border-radius: 1px;
+  animation: caret-blink 1s linear infinite;
 }
-.spell-slot-fixed {
+@keyframes caret-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+.slot-static {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 46px;
-  min-width: 18px;
-  font-size: 20px;
+  height: 40px;
+  min-width: 14px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--text-muted);
+}
+/* 正确答案行（错误揭示期）：与上方一致的下划线形态，无光标 */
+.answer-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+/* 隐藏输入框（键盘常驻；聚焦由槽位区点击/程序触发） */
+.spell-hidden-input {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2px;
+  height: 2px;
+  opacity: 0;
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  outline: none;
 }
 
 .spell-feedback {
@@ -334,15 +369,16 @@
 
 /* 移动端拼写模式 */
 @media (max-width: 480px) {
-  .spell-slot {
-    width: 32px;
-    height: 42px;
-    font-size: 19px;
+  .slot-char {
+    width: 26px;
+    height: 36px;
+    line-height: 36px;
+    font-size: 17px;
   }
-  .spell-slot-gap {
-    width: 10px;
+  .slot-caret {
+    height: 25px;
   }
-  .spell-slot-fixed {
-    height: 42px;
+  .slot-static {
+    height: 36px;
   }
 }

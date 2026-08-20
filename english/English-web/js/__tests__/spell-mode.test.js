@@ -1,6 +1,6 @@
 /**
- * spell-mode.test.js —— 拼写模式槽位式盲拼 + 纯练习
- * （槽位逐格输入、输满自动判定、错误高亮后清空重拼、不参与学习进度）
+ * spell-mode.test.js —— 拼写模式单隐藏输入框 + 下划线展示位 + 纯练习
+ * （对齐小程序 SpellInput 最新方案：键盘只弹一次、错位红显+答案行揭示 2000ms、光标闪烁）
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
@@ -17,79 +17,22 @@ function freshCard(overrides = {}) {
   }, overrides);
 }
 
-/* 向槽位输入字母并派发 input 事件（委托 handler 依赖 bubbles） */
-function typeSlot(slot, ch) {
-  slot.value = ch;
-  slot.dispatchEvent(new window.Event('input', { bubbles: true }));
+/* 单隐藏输入框：一次赋值 + 一次 input 事件（handler 全量重建） */
+function fillHidden(word) {
+  const hi = document.getElementById('spellHiddenInput');
+  hi.value = word;
+  hi.dispatchEvent(new window.Event('input', { bubbles: true }));
 }
 
-/* 逐槽填满单词（最后一槽触发自动判定） */
-function fillWord(slots, word) {
-  for (let i = 0; i < word.length; i++) {
-    typeSlot(slots[i], word[i]);
-  }
+function getChars() {
+  return document.querySelectorAll('#spellSlots .slot-char');
 }
 
-/* 槽位渲染：把 HTML 放进容器解析（jsdom 无独立 DOM 解析钩子） */
-function parseSlots(html) {
-  const host = document.createElement('div');
-  host.innerHTML = html;
-  document.body.appendChild(host);
-  return host;
+function getFeedback() {
+  return document.getElementById('spellFeedback');
 }
 
-describe('buildSpellSlotHtml 槽位生成', () => {
-  it("单字母 'a'：1 个槽、data-idx=0、无 gap/fixed", () => {
-    const host = parseSlots(App.buildSpellSlotHtml({ front: 'a' }));
-    const slots = host.querySelectorAll('input.spell-slot');
-    expect(slots.length).toBe(1);
-    expect(slots[0].getAttribute('data-idx')).toBe('0');
-    expect(host.querySelectorAll('.spell-slot-gap').length).toBe(0);
-    expect(host.querySelectorAll('.spell-slot-fixed').length).toBe(0);
-    host.remove();
-  });
-
-  it("'abandon'：7 个槽、data-idx 0-6、输入属性齐全", () => {
-    const host = parseSlots(App.buildSpellSlotHtml({ front: 'abandon' }));
-    const slots = host.querySelectorAll('input.spell-slot');
-    expect(slots.length).toBe(7);
-    [0, 1, 2, 3, 4, 5, 6].forEach((i) => expect(slots[i].getAttribute('data-idx')).toBe(String(i)));
-    expect(slots[0].getAttribute('maxlength')).toBe('1');
-    expect(slots[0].getAttribute('autocomplete')).toBe('off');
-    expect(slots[0].getAttribute('autocapitalize')).toBe('none');
-    expect(slots[0].getAttribute('autocorrect')).toBe('off');
-    expect(slots[0].getAttribute('spellcheck')).toBe('false');
-    host.remove();
-  });
-
-  it("'give up'：1 个 gap + 6 个槽、idx 连续 0-5（仅字母槽编号）", () => {
-    const host = parseSlots(App.buildSpellSlotHtml({ front: 'give up' }));
-    expect(host.querySelectorAll('.spell-slot-gap').length).toBe(1);
-    const slots = host.querySelectorAll('input.spell-slot');
-    expect(slots.length).toBe(6);
-    [0, 1, 2, 3, 4, 5].forEach((i) => expect(slots[i].getAttribute('data-idx')).toBe(String(i)));
-    host.remove();
-  });
-
-  it("'don\\'t'：4 个槽 + 撇号固定展示", () => {
-    const host = parseSlots(App.buildSpellSlotHtml({ front: "don't" }));
-    expect(host.querySelectorAll('input.spell-slot').length).toBe(4);
-    const fixed = host.querySelectorAll('.spell-slot-fixed');
-    expect(fixed.length).toBe(1);
-    expect(fixed[0].textContent).toBe("'");
-    host.remove();
-  });
-
-  it("'e-mail'：连字符固定展示；空卡返回空串", () => {
-    const host = parseSlots(App.buildSpellSlotHtml({ front: 'e-mail' }));
-    expect(host.querySelectorAll('input.spell-slot').length).toBe(5);
-    expect(host.querySelector('.spell-slot-fixed').textContent).toBe('-');
-    host.remove();
-    expect(App.buildSpellSlotHtml({})).toBe('');
-  });
-});
-
-describe('槽位交互（document 委托）', () => {
+describe('单隐藏输入框交互（对齐小程序 handleHiddenInput）', () => {
   beforeEach(() => {
     window.mountStudyDOM();
     App.speak = vi.fn();
@@ -100,6 +43,7 @@ describe('槽位交互（document 委托）', () => {
     vi.useRealTimers();
     if (App._speakTimer) { clearTimeout(App._speakTimer); App._speakTimer = null; }
     if (App._spellWrongTimer) { clearTimeout(App._spellWrongTimer); App._spellWrongTimer = null; }
+    if (App._spellSubmitTimer) { clearTimeout(App._spellSubmitTimer); App._spellSubmitTimer = null; }
     App.state.currentDeckId = null;
     App.state.decks = [];
     document.body.innerHTML = '';
@@ -124,39 +68,38 @@ describe('槽位交互（document 委托）', () => {
     return card;
   }
 
-  function getSlots() {
-    return document.querySelectorAll('.spell-slots .spell-slot');
-  }
-
-  it('输入字母后自动跳到下一槽', () => {
+  it('输入字母后下划线格显示字母', () => {
     setupStudy();
-    const slots = getSlots();
-    slots[0].focus();
-    typeSlot(slots[0], 'a');
-    expect(document.activeElement).toBe(slots[1]);
+    fillHidden('ab');
+    const chars = getChars();
+    expect(chars[0].textContent).toBe('a');
+    expect(chars[1].textContent).toBe('b');
+    expect(chars[2].textContent).toBe('_');
   });
 
-  it('输入过滤非字母且只保留末字符', () => {
+  it('中文/标点/数字被过滤（中文 commit 不误删）', () => {
     setupStudy();
-    const slots = getSlots();
-    typeSlot(slots[0], 'a2');
-    expect(slots[0].value).toBe('a');
-    typeSlot(slots[0], '12b');
-    expect(slots[0].value).toBe('b');
+    fillHidden('a你b。c');
+    const chars = getChars();
+    expect(chars[0].textContent).toBe('a');
+    expect(chars[1].textContent).toBe('b');
+    expect(chars[2].textContent).toBe('c');
+    expect(chars[3].textContent).toBe('_');
   });
 
-  it('末槽且全槽填满自动判定 ✅（字母保留槽位 + 绿色高亮，不清空重拼）', () => {
+  it('满词 150ms 后自动判定 ✅（字母保留 + 绿色下划线 + 不推进）', () => {
+    vi.useFakeTimers();
     const card = setupStudy();
-    const slots = getSlots();
-    fillWord(slots, 'abandon');
-    expect(document.getElementById('spellFeedback').textContent).toContain('✅');
+    fillHidden('abandon');
+    expect(getFeedback().textContent).toBe(''); /* 150ms 内未判定 */
+    vi.advanceTimersByTime(150);
+    expect(getFeedback().textContent).toContain('✅');
     expect(App.speak).toHaveBeenCalledWith('abandon');
-    /* 对齐小程序：正确后字母保留槽位、绿色边框、不清空 */
-    expect(slots[0].value).toBe('a');
-    expect(slots[6].value).toBe('n');
-    expect(slots[0].classList.contains('spell-slot-correct')).toBe(true);
-    expect(slots[6].classList.contains('spell-slot-correct')).toBe(true);
-    expect(slots[0].disabled).toBe(false);
+    /* 字母保留槽位 + 绿色下划线 */
+    const chars = getChars();
+    expect(chars[0].textContent).toBe('a');
+    expect(chars[0].classList.contains('slot-correct')).toBe(true);
+    expect(chars[6].classList.contains('slot-correct')).toBe(true);
     /* 纯练习：完全不推进 */
     expect(App.studyIndex).toBe(0);
     expect(App.studyQueue.length).toBe(1);
@@ -165,42 +108,54 @@ describe('槽位交互（document 委托）', () => {
     expect(card.ebbinghausStage).toBe(0);
   });
 
-  it('正确后修改字母：清除陈旧 ✅ 与绿色高亮，回到输入态', () => {
+  it('正确后退格改字母：回输入态 + 清除陈旧 ✅', () => {
+    vi.useFakeTimers();
     setupStudy();
-    const slots = getSlots();
-    fillWord(slots, 'abandon');
-    expect(slots[0].classList.contains('spell-slot-correct')).toBe(true);
+    fillHidden('abandon');
+    vi.advanceTimersByTime(150);
+    expect(getFeedback().textContent).toContain('✅');
 
-    typeSlot(slots[2], 'x');
-    expect(document.getElementById('spellFeedback').textContent).toBe('');
-    expect(slots[0].classList.contains('spell-slot-correct')).toBe(false);
-    expect(slots[3].classList.contains('spell-slot-correct')).toBe(false);
-    expect(slots[2].value).toBe('x');
+    fillHidden('abando'); /* 退格：值变短 */
+    expect(App._spellCheckState).toBe('idle');
+    expect(getFeedback().textContent).toBe('');
+    const chars = getChars();
+    expect(chars[6].classList.contains('slot-correct')).toBe(false);
   });
 
-  it('仅末槽有值时输入不触发判定（乱序填充防护）', () => {
+  it('正确后同值重复事件：不二次判定不重复朗读', () => {
+    vi.useFakeTimers();
     setupStudy();
-    const slots = getSlots();
-    typeSlot(slots[6], 'n');
-    expect(document.getElementById('spellFeedback').textContent).toBe('');
+    vi.advanceTimersByTime(400); /* 消化 300ms 自动播放，避免计入 speak 次数 */
+    fillHidden('abandon');
+    vi.advanceTimersByTime(150);
+    const speakCalls = App.speak.mock.calls.length;
+
+    fillHidden('abandon'); /* 同值重复 input（Android 偶发） */
+    vi.advanceTimersByTime(150);
+    expect(App.speak.mock.calls.length).toBe(speakCalls);
+    expect(App._spellCheckState).toBe('correct');
   });
 
-  it('空槽按 Backspace 回退上一槽并清空其值', () => {
+  it('揭示期（wrong）输入被忽略', () => {
+    vi.useFakeTimers();
     setupStudy();
-    const slots = getSlots();
-    typeSlot(slots[0], 'a');
-    slots[1].focus();
-    slots[1].dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Backspace', bubbles: true }));
-    expect(slots[0].value).toBe('');
-    expect(document.activeElement).toBe(slots[0]);
+    fillHidden('abanxxx');
+    vi.advanceTimersByTime(150);
+    expect(App._spellCheckState).toBe('wrong');
+
+    fillHidden('abandon');
+    expect(App._spellCheckState).toBe('wrong'); /* 仍揭示期 */
+    expect(App._spellLetters.join('')).toBe('abanxxx'); /* 字母未被覆盖 */
   });
 
-  it('非拼写模式下输入不触发判定', () => {
+  it('非拼写模式下输入忽略', () => {
     setupStudy();
     App.spellMode = false;
-    const slots = getSlots();
-    typeSlot(slots[6], 'n');
-    expect(document.getElementById('spellFeedback').textContent).toBe('');
+    fillHidden('abandon');
+    vi.useFakeTimers();
+    vi.advanceTimersByTime(150);
+    expect(App.speak).not.toHaveBeenCalled();
+    expect(getFeedback().textContent).toBe('');
   });
 });
 
@@ -215,6 +170,7 @@ describe('checkSpelling 语义（纯练习）', () => {
     vi.useRealTimers();
     if (App._speakTimer) { clearTimeout(App._speakTimer); App._speakTimer = null; }
     if (App._spellWrongTimer) { clearTimeout(App._spellWrongTimer); App._spellWrongTimer = null; }
+    if (App._spellSubmitTimer) { clearTimeout(App._spellSubmitTimer); App._spellSubmitTimer = null; }
     App.state.currentDeckId = null;
     App.state.decks = [];
     document.body.innerHTML = '';
@@ -239,44 +195,48 @@ describe('checkSpelling 语义（纯练习）', () => {
     return card;
   }
 
-  function getSlots() {
-    return document.querySelectorAll('.spell-slots .spell-slot');
-  }
-
-  it('拼写错误：❌ + 正确答案 + 槽位红框禁入，600ms 后清空重拼', () => {
+  it('拼写错误：❌ 不含答案 + 错位红显指错 + 答案行完整揭示 + 2000ms 后清空重试', () => {
     vi.useFakeTimers();
     const card = setupStudy();
     card.ebbinghausStage = 2;
-    card.wrongCount = 0;
-    const slots = getSlots();
-    fillWord(slots, 'abanxxx');
+    fillHidden('abanxxx');
+    vi.advanceTimersByTime(150);
 
-    const feedback = document.getElementById('spellFeedback');
-    expect(feedback.innerHTML).toContain('abandon');
-    expect(slots[0].classList.contains('spell-slot-wrong')).toBe(true);
-    expect(slots[0].disabled).toBe(true);
-    expect(slots[0].value).toBe('a'); /* 错误值暂留展示 */
-
-    vi.advanceTimersByTime(App.SPELL_WRONG_DELAY);
-    expect(slots[0].value).toBe('');
-    expect(slots[0].disabled).toBe(false);
-    expect(slots[0].classList.contains('spell-slot-wrong')).toBe(false);
-    /* 答案随清空一起消失（防照着拼写） */
-    expect(document.getElementById('spellFeedback').textContent).toBe('');
-    expect(document.activeElement).toBe(slots[0]);
-    /* 纯练习：不翻卡不推进不碰调度 */
+    /* feedback 不含答案文字（防照着拼写） */
+    expect(getFeedback().textContent).toBe('❌ 拼写错误');
+    expect(getFeedback().textContent).not.toContain('abandon');
+    /* 错位红显：前 4 位对位保持，后 3 位错位红 */
+    const chars = getChars();
+    expect(chars[0].classList.contains('slot-filled')).toBe(true);
+    expect(chars[4].classList.contains('slot-wrong-char')).toBe(true);
+    expect(chars[6].classList.contains('slot-wrong-char')).toBe(true);
+    /* 答案行完整展示正确词 */
+    const answerRow = document.querySelector('#spellSlots .answer-row');
+    expect(answerRow).not.toBeNull();
+    expect(answerRow.textContent.replace(/\s/g, '')).toBe('abandon');
+    /* 收键盘 */
+    expect(document.activeElement).not.toBe(document.getElementById('spellHiddenInput'));
+    /* 不翻卡不推进不碰调度 */
     expect(App.studyIndex).toBe(0);
     expect(App.studyFailed).toBe(0);
     expect(App.studyResults.length).toBe(0);
     expect(card.ebbinghausStage).toBe(2);
-    expect(card.wrongCount).toBe(0);
     expect(document.getElementById('flashcard').classList.contains('flipped')).toBe(false);
+
+    /* 2000ms 后清空盲拼重试 */
+    vi.advanceTimersByTime(App.SPELL_WRONG_DELAY);
+    expect(App._spellCheckState).toBe('idle');
+    expect(App._spellLetters.join('')).toBe('');
+    expect(getFeedback().textContent).toBe('');
+    expect(document.querySelector('#spellSlots .answer-row')).toBeNull();
+    expect(document.getElementById('spellHiddenInput').value).toBe('');
+    expect(document.activeElement).toBe(document.getElementById('spellHiddenInput'));
   });
 
   it('空输入直接返回，无反馈无朗读', () => {
     setupStudy();
     App.checkSpelling();
-    expect(document.getElementById('spellFeedback').textContent).toBe('');
+    expect(getFeedback().textContent).toBe('');
     expect(App.speak).not.toHaveBeenCalled();
   });
 
@@ -284,27 +244,29 @@ describe('checkSpelling 语义（纯练习）', () => {
     const card = setupStudy();
     App.spellMode = false;
     App.checkSpelling();
-    expect(document.getElementById('spellFeedback').textContent).toBe('');
+    expect(getFeedback().textContent).toBe('');
     expect(App.speak).not.toHaveBeenCalled();
     expect(card.ebbinghausStage).toBe(0);
   });
 
-  it("归一化：'don\\'t' 只填 4 字母槽 'dont' 判对（撇号为固定展示不可输入）", () => {
+  it("归一化：'don\\'t' 填 4 字母 'dont' 判对（撇号为固定展示不可输入）", () => {
+    vi.useFakeTimers();
     setupStudy("don't");
-    const slots = getSlots();
-    fillWord(slots, 'dont');
-    expect(document.getElementById('spellFeedback').textContent).toContain('✅');
+    fillHidden('dont');
+    vi.advanceTimersByTime(150);
+    expect(getFeedback().textContent).toContain('✅');
   });
 
-  it("'give up' 填 6 槽判对（词间 gap 不占槽）", () => {
+  it("'give up' 填 6 字母判对（词间分组不占字母）", () => {
+    vi.useFakeTimers();
     setupStudy('give up');
-    const slots = getSlots();
-    fillWord(slots, 'giveup');
-    expect(document.getElementById('spellFeedback').textContent).toContain('✅');
+    fillHidden('giveup');
+    vi.advanceTimersByTime(150);
+    expect(getFeedback().textContent).toContain('✅');
   });
 });
 
-describe('toggleSpellMode 槽位渲染', () => {
+describe('toggleSpellMode 与渲染', () => {
   beforeEach(() => {
     window.mountStudyDOM();
     App.speak = vi.fn();
@@ -315,6 +277,7 @@ describe('toggleSpellMode 槽位渲染', () => {
     vi.useRealTimers();
     if (App._speakTimer) { clearTimeout(App._speakTimer); App._speakTimer = null; }
     if (App._spellWrongTimer) { clearTimeout(App._spellWrongTimer); App._spellWrongTimer = null; }
+    if (App._spellSubmitTimer) { clearTimeout(App._spellSubmitTimer); App._spellSubmitTimer = null; }
     App.state.currentDeckId = null;
     App.state.decks = [];
     document.body.innerHTML = '';
@@ -338,7 +301,7 @@ describe('toggleSpellMode 槽位渲染', () => {
     return card;
   }
 
-  it('开启拼写模式：隐藏会了/不会、正面为槽位盲拼、聚焦首槽；退出后恢复', () => {
+  it('开启拼写模式：隐藏会了/不会、下划线格 + 隐藏输入框、聚焦输入框；退出后恢复', () => {
     setupStudy();
     App.toggleSpellMode();
 
@@ -346,29 +309,28 @@ describe('toggleSpellMode 槽位渲染', () => {
     expect(document.getElementById('btnFail').style.display).toBe('none');
     expect(document.getElementById('btnToggleSpell').classList.contains('spell-active')).toBe(true);
     const frontHtml = document.getElementById('cardFrontText').innerHTML;
-    expect(document.querySelectorAll('.spell-slots .spell-slot').length).toBe(7);
+    expect(getChars().length).toBe(7);
+    expect(frontHtml).toContain('id="spellHiddenInput"');
     expect(frontHtml).toContain('听发音拼写');
     expect(frontHtml).not.toContain('abandon');
     expect(frontHtml).not.toContain('phonetic');
     expect(document.querySelector('#flashcard .card-hint').textContent).toContain('听发音');
-    expect(document.activeElement).toBe(document.querySelector('.spell-slots .spell-slot'));
+    expect(document.activeElement).toBe(document.getElementById('spellHiddenInput'));
 
     App.toggleSpellMode();
     expect(document.getElementById('btnPass').style.display).toBe('');
     expect(document.getElementById('btnFail').style.display).toBe('');
-    expect(document.getElementById('btnToggleSpell').classList.contains('spell-active')).toBe(false);
     expect(document.getElementById('cardFrontText').innerHTML).toContain('abandon');
   });
 
-  it('判定反馈位于卡片内部拼写格子下方（section 内无 feedback）', () => {
+  it('判定反馈位于卡片内部拼写格子下方', () => {
     setupStudy();
     App.toggleSpellMode();
     const front = document.getElementById('cardFrontText');
     const fb = front.querySelector('#spellFeedback');
     expect(fb).not.toBeNull();
     expect(document.getElementById('spellModeSection').querySelector('#spellFeedback')).toBeNull();
-    /* 反馈紧挨拼写格子下方 */
-    expect(front.querySelector('.spell-slots').nextElementSibling).toBe(fb);
+    expect(front.querySelector('#spellSlots').nextElementSibling).toBe(fb);
   });
 
   it('回看态禁止切换拼写模式（与 checkSpelling 守卫一致）', () => {
@@ -376,5 +338,99 @@ describe('toggleSpellMode 槽位渲染', () => {
     App.isReviewing = true;
     App.toggleSpellMode();
     expect(App.spellMode).toBe(false);
+  });
+});
+
+describe('_renderSpellSlots 下划线渲染', () => {
+  beforeEach(() => {
+    window.mountStudyDOM();
+    App.speak = vi.fn();
+    sessionStorage.removeItem('flashcard-study-progress');
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    if (App._speakTimer) { clearTimeout(App._speakTimer); App._speakTimer = null; }
+    if (App._spellWrongTimer) { clearTimeout(App._spellWrongTimer); App._spellWrongTimer = null; }
+    if (App._spellSubmitTimer) { clearTimeout(App._spellSubmitTimer); App._spellSubmitTimer = null; }
+    App.state.currentDeckId = null;
+    App.state.decks = [];
+    document.body.innerHTML = '';
+  });
+
+  function setupStudy(front = 'abandon') {
+    const card = freshCard({ id: 'a', front, phonetic: '/əˈbændən/' });
+    App.state.decks = [{ id: 'd1', name: '测试', cards: [card] }];
+    App.state.currentDeckId = 'd1';
+    App.studyMode = 'new';
+    App.studyQueue = [card];
+    App.studyIndex = 0;
+    App.isReviewing = false;
+    App.isReviewMode = false;
+    App.spellMode = true;
+    App.renderStudyPanel();
+    return card;
+  }
+
+  it('空槽显示下划线占位', () => {
+    setupStudy();
+    const chars = getChars();
+    expect(chars.length).toBe(7);
+    expect(chars[0].textContent).toBe('_');
+    expect(chars[6].textContent).toBe('_');
+  });
+
+  it("don't：撇号 static 固定展示", () => {
+    setupStudy("don't");
+    const statics = document.querySelectorAll('#spellSlots .slot-static');
+    expect(statics.length).toBe(1);
+    expect(statics[0].textContent).toBe("'");
+    expect(getChars().length).toBe(4);
+  });
+
+  it('give up：两组下划线', () => {
+    setupStudy('give up');
+    expect(document.querySelectorAll('#spellSlots .slot-group').length).toBe(2);
+    expect(getChars().length).toBe(6);
+  });
+
+  it('聚焦时当前输入位显示闪烁光标，输入后右移', () => {
+    setupStudy();
+    App._spellInputFocused = true;
+    App._renderSpellSlots();
+    let carets = document.querySelectorAll('#spellSlots .slot-caret');
+    expect(carets.length).toBe(1);
+    expect(carets[0].parentElement.textContent).toBe('_');
+    expect(getChars()[0].classList.contains('slot-cursor')).toBe(true);
+
+    fillHidden('ab');
+    App._spellInputFocused = true;
+    App._renderSpellSlots();
+    carets = document.querySelectorAll('#spellSlots .slot-caret');
+    expect(carets.length).toBe(1);
+    expect(carets[0].parentElement.textContent).toBe('_'); /* 光标位于第 3 格（空） */
+    expect(getChars()[2].classList.contains('slot-cursor')).toBe(true);
+  });
+
+  it('满词与失焦时无光标', () => {
+    setupStudy();
+    fillHidden('abandon');
+    App._spellInputFocused = true;
+    App._renderSpellSlots();
+    expect(document.querySelectorAll('#spellSlots .slot-caret').length).toBe(0);
+
+    fillHidden('ab');
+    App._spellInputFocused = false;
+    App._renderSpellSlots();
+    expect(document.querySelectorAll('#spellSlots .slot-caret').length).toBe(0);
+  });
+
+  it('wrong 期答案行与错位红显类', () => {
+    setupStudy();
+    fillHidden('abanxxx');
+    App._spellCheckState = 'wrong';
+    App._renderSpellSlots();
+    expect(document.querySelector('#spellSlots .answer-row')).not.toBeNull();
+    expect(document.querySelectorAll('#spellSlots .slot-wrong-char').length).toBe(3);
   });
 });

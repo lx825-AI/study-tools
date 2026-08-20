@@ -61,13 +61,14 @@ var FlashcardApp = window.FlashcardApp || {};
     return card.ebbinghausNextReview < today;
   };
 
-  /** 获取逾期天数（用于排序优先级） */
+  /** 获取逾期天数（用于排序优先级；日期统一 UTC 解析，修复本地 00:00-08:00 窗口今日到期被误判逾期） */
   App.getOverdueDays = function (card) {
     if (!card.ebbinghausNextReview) return 0;
     var today = new Date();
-    var reviewDate = new Date(card.ebbinghausNextReview + 'T00:00:00');
+    today.setUTCHours(0, 0, 0, 0); /* UTC 日界 */
+    var reviewDate = new Date(card.ebbinghausNextReview + 'T00:00:00Z');
     if (isNaN(reviewDate.getTime())) return 0;
-    return Math.max(0, Math.floor((today - reviewDate) / (1000 * 60 * 60 * 24)));
+    return Math.max(0, Math.round((today - reviewDate) / (1000 * 60 * 60 * 24)));
   };
 
   /**

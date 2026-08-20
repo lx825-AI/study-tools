@@ -65,4 +65,44 @@ var FlashcardApp = window.FlashcardApp || {};
     return false;
   };
 
+  /* ========== 拼写槽位纯函数（对齐小程序 helpers.js） ========== */
+
+  /* 剥除非字母（撇号/连字符/空格/数字/标点全部去除） */
+  App.lettersOnly = function (str) {
+    return (str || '').replace(/[^a-zA-Z]/g, '');
+  };
+
+  /* 单词解析为字母槽 + 静态分隔符：空格→组间分隔，撇号/连字符→static 槽，字母→letter 槽（全局 letterIndex 跨组连续） */
+  App.parseWordSlots = function (word) {
+    var groups = [];
+    var letterCount = 0;
+    (word || '').split(/\s+/).forEach(function (part) {
+      if (!part) return;
+      groups.push(part.split('').map(function (ch) {
+        if (/[a-zA-Z]/.test(ch)) return { kind: 'letter', char: ch, letterIndex: letterCount++ };
+        return { kind: 'static', char: ch };
+      }));
+    });
+    return { groups: groups, letterCount: letterCount };
+  };
+
+  /* 从隐藏输入框的值重建槽位字母数组（过滤非字母、按序填充、截断到 letterCount）
+   * 单输入框方案：native 值为真值源，退格=值变短，末尾字母自动撤回 */
+  App.rebuildSlotLetters = function (value, letterCount) {
+    var chars = (value || '').replace(/[^a-zA-Z]/g, '').split('');
+    var letters = Array(letterCount).fill('');
+    for (var i = 0; i < Math.min(chars.length, letterCount); i++) {
+      letters[i] = chars[i];
+    }
+    return { letters: letters, filled: chars.length >= letterCount };
+  };
+
+  /* 第一个空槽索引（当前输入光标位）；全部填满返回 -1 */
+  App.firstEmptySlotIndex = function (letters) {
+    for (var i = 0; i < (letters || []).length; i++) {
+      if (!letters[i]) return i;
+    }
+    return -1;
+  };
+
 })(FlashcardApp);

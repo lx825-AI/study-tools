@@ -90,3 +90,115 @@ describe('fuzzyMatch', () => {
     expect(App.fuzzyMatch('ab', 'xyz')).toBe(false);
   });
 });
+
+describe('lettersOnly', () => {
+  it('剥除撇号/连字符/空格/数字/中文/标点', () => {
+    expect(App.lettersOnly("don't")).toBe('dont');
+    expect(App.lettersOnly('well-known')).toBe('wellknown');
+    expect(App.lettersOnly('give up')).toBe('giveup');
+    expect(App.lettersOnly('a你b1c!')).toBe('abc');
+    expect(App.lettersOnly('')).toBe('');
+    expect(App.lettersOnly(null)).toBe('');
+    expect(App.lettersOnly(undefined)).toBe('');
+  });
+});
+
+describe('parseWordSlots', () => {
+  it('单词：连续 letterIndex', () => {
+    const { groups, letterCount } = App.parseWordSlots('abandon');
+    expect(letterCount).toBe(7);
+    expect(groups.length).toBe(1);
+    expect(groups[0].map((s) => s.letterIndex)).toEqual([0, 1, 2, 3, 4, 5, 6]);
+    expect(groups[0].every((s) => s.kind === 'letter')).toBe(true);
+  });
+
+  it("撇号 → static 槽（don't）", () => {
+    const { groups, letterCount } = App.parseWordSlots("don't");
+    expect(letterCount).toBe(4);
+    expect(groups[0].find((s) => s.kind === 'static').char).toBe("'");
+    expect(groups[0].filter((s) => s.kind === 'letter').length).toBe(4);
+  });
+
+  it('连字符 → static 槽（well-known）', () => {
+    const { groups, letterCount } = App.parseWordSlots('well-known');
+    expect(letterCount).toBe(9);
+    expect(groups[0].filter((s) => s.kind === 'static').map((s) => s.char)).toEqual(['-']);
+  });
+
+  it('词组：空格分组，letterIndex 跨组连续', () => {
+    const { groups, letterCount } = App.parseWordSlots('give up');
+    expect(letterCount).toBe(6);
+    expect(groups.length).toBe(2);
+    expect(groups[0].map((s) => s.letterIndex)).toEqual([0, 1, 2, 3]);
+    expect(groups[1].map((s) => s.letterIndex)).toEqual([4, 5]);
+  });
+
+  it('连续空格容错', () => {
+    const { groups, letterCount } = App.parseWordSlots('a  b');
+    expect(groups.length).toBe(2);
+    expect(letterCount).toBe(2);
+  });
+
+  it('空值返回空结构', () => {
+    const { groups, letterCount } = App.parseWordSlots('');
+    expect(groups).toEqual([]);
+    expect(letterCount).toBe(0);
+    expect(App.parseWordSlots(null).letterCount).toBe(0);
+  });
+});
+
+describe('rebuildSlotLetters', () => {
+  it('空值：全空数组', () => {
+    expect(App.rebuildSlotLetters('', 3)).toEqual({ letters: ['', '', ''], filled: false });
+  });
+
+  it('部分填充', () => {
+    const r = App.rebuildSlotLetters('ab', 4);
+    expect(r.letters).toEqual(['a', 'b', '', '']);
+    expect(r.filled).toBe(false);
+  });
+
+  it('满词：filled = true', () => {
+    const r = App.rebuildSlotLetters('abcd', 4);
+    expect(r.letters).toEqual(['a', 'b', 'c', 'd']);
+    expect(r.filled).toBe(true);
+  });
+
+  it('超长截断到 letterCount', () => {
+    const r = App.rebuildSlotLetters('abcdef', 4);
+    expect(r.letters).toEqual(['a', 'b', 'c', 'd']);
+    expect(r.filled).toBe(true);
+  });
+
+  it('中文/标点/数字被过滤（中文 commit 不误删）', () => {
+    const r = App.rebuildSlotLetters('a你b。c', 3);
+    expect(r.letters).toEqual(['a', 'b', 'c']);
+  });
+
+  it('退格撤回：值变短重建', () => {
+    const full = App.rebuildSlotLetters('abcd', 4);
+    expect(full.filled).toBe(true);
+    const afterBackspace = App.rebuildSlotLetters('abc', 4);
+    expect(afterBackspace.letters).toEqual(['a', 'b', 'c', '']);
+    expect(afterBackspace.filled).toBe(false);
+  });
+
+  it('大小写保留', () => {
+    const r = App.rebuildSlotLetters('AbC', 3);
+    expect(r.letters).toEqual(['A', 'b', 'C']);
+  });
+});
+
+describe('firstEmptySlotIndex', () => {
+  it('全空 → 0', () => {
+    expect(App.firstEmptySlotIndex(['', '', ''])).toBe(0);
+  });
+
+  it('首个空位索引', () => {
+    expect(App.firstEmptySlotIndex(['a', 'b', '', 'd'])).toBe(2);
+  });
+
+  it('全满 → -1', () => {
+    expect(App.firstEmptySlotIndex(['a', 'b', 'c'])).toBe(-1);
+  });
+});
