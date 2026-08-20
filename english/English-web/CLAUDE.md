@@ -8,7 +8,9 @@ SPA 英语词汇闪卡应用，使用艾宾浩斯遗忘曲线算法（v2.8 起�
 - **🔁 今日复习**：到期词按紧急度综合评分排序（逾期 10/20/35/50 + 阶段 5/10/15 + EF 5/10/15 + wrongCount 0/5/10），软上限 50
 - **📋 错题强化**：集中攻克所有牌组中 EF≤1.8 且已学过的难词
 - **⚡ 快速浏览**：队列仅 stage<5（新词→到期→逾期降序→阶段升序，截断到每日目标）；答对仅 stage 0→1（经 applyEbbinghaus：EF+0.1、reps+1、写一条历史；stage>0 答对原样保留）；答错 wrongCount++/wrongDates/_consecutiveFails++
-- **⌨️ 拼写验证**：学习中内嵌拼写模式，看释义输入英文，自动判断正误
+- **⌨️ 拼写模式（纯练习）**：学习中内嵌；**盲拼**（正面仅 🔒 占位 + 🔊 发音提示，词形/音标/难度/计数点全隐藏，点卡片不翻转防泄漏背面释义）；对/错均停留当前词（✅/❌ 反馈、可重拼/重试），**不推进队列、不改遗忘曲线、不写学习日志**；拼写期间隐藏会了/不会按钮，退出后恢复作答
+- **🔊 自动发音**：每次换卡 300ms 后自动朗读当前词（对齐小程序 speakCurrentCard）；仅学习面板可见时播放（防后台 renderAll 误发声）；`_speakTimer` 防重复渲染叠加播放
+- **作答按钮**：会了/不会直接作答推进（无"未翻转先翻卡"守卫），翻转仅由点击卡片触发
 
 ## 学习算法（v2.8 单轨）
 
@@ -54,6 +56,16 @@ scripts/
 ## 词书系统
 
 10 套词书与小程序（English-mini-app）同源：`scripts/gen-wordbooks.js` 读取 `English-mini-app/wordbooks-cloud/` 的 10 个乱序 JSON（与小程序默认导入一致）生成紧凑单行 JS（约 8MB）。前 5 本替换旧词书（沿用旧 key/旧 name，已导入用户按 name 去重），后 5 本为新增。学习队列固定按 EF 升序排列（难的在前）。SW 仅预缓存 2 本最常用（高中+四级），其余按需 runtime cache。BOOK_CONFIG 与 import.js 的 BUILTIN_WORDBOOKS 需同步维护。
+
+## 最近更新（2026-08-20）— 学习交互 4 项修复（对齐小程序）
+
+**自动播放发音**：renderStudyPanel 末尾换卡 300ms 后自动朗读当前词（对齐小程序 speakCurrentCard）；仅 `#panelStudy.visible` 时播放（renderAll 后台渲染不发声）；`_speakTimer` 每次先清后设防叠加
+
+**会了/不会直答**：删除 answerStudy「未翻转先翻卡并 return」守卫——按钮点击直接作答推进；翻转仅由点击卡片触发（对齐小程序 markAnswer）
+
+**拼写纯练习 + 盲拼**（有意偏离小程序：按用户要求拼写不参与进度）：checkSpelling 重写为对/错均停留当前词（✅/❌ 反馈、输入清空可重拼/重试），不调 answerStudy → 零队列推进/零调度改写/零日志污染；盲拼正面仅 🔒 占位 + 发音提示（词形/音标/难度/计数点/阶段徽章全隐藏）；拼写模式禁止翻卡（app.js 守卫改按 spellMode 拦截，防泄漏背面释义）；拼写期间隐藏会了/不会按钮；toggleSpellMode 薄壳化（UI 集中于 renderStudyPanel 重建）；spellAnswered 字段及 8 处引用全删除；4 个 start 入口加 spellMode 防御重置
+
+**测试**：175→187（自动播放 4、会了/不会直答 2、拼写纯练习 4、盲拼/toggle 2；setup.js 新增 window.mountStudyDOM 共享 DOM 桩）；Playwright 端到端 23/23 通过
 
 ## 最近更新（2026-08-19）— v2.8 学习算法全量对齐小程序
 

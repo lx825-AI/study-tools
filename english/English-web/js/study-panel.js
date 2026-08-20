@@ -9,8 +9,7 @@ var FlashcardApp = window.FlashcardApp || {};
   App.studyPassed = 0;
   App.studyFailed = 0;
   App.studyStartTime = null;
-  App.spellMode = false;              /* 拼写模式开关 */
-  App.spellAnswered = false;          /* 当前卡片是否已拼写作答 */
+  App.spellMode = false;              /* 拼写模式开关（纯练习，不参与学习进度） */
 
   /* 学习模式: 'new' | 'review' | 'failed' | 'quick' */
   App.studyMode = 'review';
@@ -133,6 +132,7 @@ var FlashcardApp = window.FlashcardApp || {};
     App.studyPassed = 0;
     App.studyFailed = 0;
     App.isFlipped = false;
+    App.spellMode = false;
     App.studyStartTime = Date.now();
     App.studyCompletedWords = 0;
     App.studyInitialQueueLength = App.studyQueue.length;
@@ -164,6 +164,7 @@ var FlashcardApp = window.FlashcardApp || {};
     App.studyPassed = 0;
     App.studyFailed = 0;
     App.isFlipped = false;
+    App.spellMode = false;
     App.studyStartTime = Date.now();
     App.studyCompletedWords = 0;
     App.studyInitialQueueLength = App.studyQueue.length;
@@ -193,6 +194,7 @@ var FlashcardApp = window.FlashcardApp || {};
     App.studyPassed = 0;
     App.studyFailed = 0;
     App.isFlipped = false;
+    App.spellMode = false;
     App.studyStartTime = Date.now();
     App.studyCompletedWords = 0;
     App.studyInitialQueueLength = App.studyQueue.length;
@@ -218,7 +220,6 @@ var FlashcardApp = window.FlashcardApp || {};
     App.studyFailed = 0;
     App.isFlipped = false;
     App.spellMode = false;
-    App.spellAnswered = false;
     App.isReviewMode = false;
     App.reviewSourceDeckId = null;
     App.studyCompletedWords = 0;
@@ -271,7 +272,6 @@ var FlashcardApp = window.FlashcardApp || {};
       App.isReviewing = true;
     }
     App.isFlipped = false;
-    App.spellAnswered = false;
     App.renderStudyPanel();
   };
 
@@ -496,24 +496,31 @@ var FlashcardApp = window.FlashcardApp || {};
     if (cardScene) cardScene.style.display = '';
     if (studyActions) studyActions.style.display = '';
 
-    /* 显示拼写模式区域 */
+    /* 拼写模式区域 + 拼写 UI（随每次渲染重建：输入区/作答按钮显隐、切换按钮文案） */
     var spellSection = document.getElementById('spellModeSection');
     if (spellSection) spellSection.style.display = 'block';
     /* 重置拼写状态 */
     App._resetSpellState();
-    /* 如果拼写模式关闭，隐藏输入区域 */
-    if (!App.spellMode) {
-      var spellInputArea = document.getElementById('spellInputArea');
-      if (spellInputArea) spellInputArea.style.display = 'none';
-      var toggleBtn = document.getElementById('btnToggleSpell');
+    var spellInputArea = document.getElementById('spellInputArea');
+    var toggleBtn = document.getElementById('btnToggleSpell');
+    var failBtnEl = document.getElementById('btnFail');
+    var passBtnEl = document.getElementById('btnPass');
+    if (App.spellMode) {
+      if (toggleBtn) { toggleBtn.textContent = '🔤 退出拼写'; toggleBtn.classList.add('spell-active'); }
+      if (spellInputArea) spellInputArea.style.display = 'block';
+      /* 拼写为纯练习：隐藏作答按钮，退出拼写模式后恢复 */
+      if (failBtnEl) failBtnEl.style.display = 'none';
+      if (passBtnEl) passBtnEl.style.display = 'none';
+    } else {
       if (toggleBtn) { toggleBtn.textContent = '⌨️ 拼写模式'; toggleBtn.classList.remove('spell-active'); }
+      if (spellInputArea) spellInputArea.style.display = 'none';
+      if (failBtnEl) failBtnEl.style.display = '';
+      if (passBtnEl) passBtnEl.style.display = '';
     }
 
     /* 深度模式：「上一个」按钮可见 + 回看状态禁用作答按钮 */
     var prevBtn = document.getElementById('btnPrevCard');
     if (prevBtn) prevBtn.style.display = (App.studyMode === 'new') ? '' : 'none';
-    var passBtnEl = document.getElementById('btnPass');
-    var failBtnEl = document.getElementById('btnFail');
     if (App.studyMode === 'new' && App.isReviewing) {
       if (passBtnEl) passBtnEl.disabled = true;
       if (failBtnEl) failBtnEl.disabled = true;
@@ -554,20 +561,29 @@ var FlashcardApp = window.FlashcardApp || {};
         ((App.studyIndex / App.studyQueue.length) * 100) + '%';
     }
 
-    /* 正面 */
-    var frontHtml = App.escHtml(App.getCardFront(card));
-    if (card.phonetic) {
-      frontHtml += ' <span class="card-front-phonetic">' + App.escHtml(card.phonetic) + '</span>';
-    }
-    /* 深度模式计数点 ●●○（剩余出现次数，对齐小程序） */
-    if (App.studyMode === 'new' && !App.isReviewMode) {
-      var dotsRemaining = 3 - (card._sessionAppearances || 0);
-      var dotsHtml = '';
-      for (var di = 0; di < 3; di++) dotsHtml += di < dotsRemaining ? '●' : '○';
-      frontHtml += ' <span class="eb-dots" title="剩余出现次数">' + dotsHtml + '</span>';
+    /* 正面（拼写模式为盲拼：仅 🔒 占位 + 发音提示，不显示词形/音标/释义） */
+    var frontHtml;
+    var frontHint = document.querySelector('#flashcard .card-front .card-hint');
+    if (App.spellMode) {
+      frontHtml = '<div class="spell-blind-placeholder">🔒 盲拼中</div>' +
+        '<div class="spell-blind-sub">听发音拼写</div>';
+      if (frontHint) frontHint.textContent = '🔊 听发音，在下方输入拼写';
+    } else {
+      frontHtml = App.escHtml(App.getCardFront(card));
+      if (card.phonetic) {
+        frontHtml += ' <span class="card-front-phonetic">' + App.escHtml(card.phonetic) + '</span>';
+      }
+      /* 深度模式计数点 ●●○（剩余出现次数，对齐小程序） */
+      if (App.studyMode === 'new' && !App.isReviewMode) {
+        var dotsRemaining = 3 - (card._sessionAppearances || 0);
+        var dotsHtml = '';
+        for (var di = 0; di < 3; di++) dotsHtml += di < dotsRemaining ? '●' : '○';
+        frontHtml += ' <span class="eb-dots" title="剩余出现次数">' + dotsHtml + '</span>';
+      }
+      if (frontHint) frontHint.textContent = '👆 点击卡片翻转查看答案';
     }
 
-    /* 难度 + 艾宾浩斯阶段 */
+    /* 难度 + 艾宾浩斯阶段（盲拼时不渲染，防泄漏阶段信息） */
     var sourceDeck = deck;
     if (App.isReviewMode && card._deckId) {
       sourceDeck = App.getDeck(card._deckId);
@@ -576,22 +592,24 @@ var FlashcardApp = window.FlashcardApp || {};
     var ef = deckCard ? deckCard.easeFactor : card.easeFactor;
 
     var diffHtml = '';
-    if (typeof ef === 'number') {
-      var level = ef >= 2.8 ? 3 : ef >= 2.0 ? 2 : 1;
-      var levelText = ef >= 2.8 ? '已掌握' : ef >= 2.0 ? '学习中' : '较难';
-      var levelColor = ef >= 2.8 ? 'var(--success)' : ef >= 2.0 ? 'var(--warning)' : 'var(--danger-text)';
-      var dots = '';
-      for (var d = 0; d < 3; d++) dots += d < level ? '●' : '○';
-      diffHtml = '<div class="card-diff-badge" style="color:' + levelColor + ';border-color:' + levelColor + ';">' +
-        dots + ' ' + levelText + '</div>';
-    }
+    if (!App.spellMode) {
+      if (typeof ef === 'number') {
+        var level = ef >= 2.8 ? 3 : ef >= 2.0 ? 2 : 1;
+        var levelText = ef >= 2.8 ? '已掌握' : ef >= 2.0 ? '学习中' : '较难';
+        var levelColor = ef >= 2.8 ? 'var(--success)' : ef >= 2.0 ? 'var(--warning)' : 'var(--danger-text)';
+        var dots = '';
+        for (var d = 0; d < 3; d++) dots += d < level ? '●' : '○';
+        diffHtml = '<div class="card-diff-badge" style="color:' + levelColor + ';border-color:' + levelColor + ';">' +
+          dots + ' ' + levelText + '</div>';
+      }
 
-    /* 艾宾浩斯阶段标签 */
-    var ebStage = deckCard ? deckCard.ebbinghausStage : card.ebbinghausStage;
-    if (typeof ebStage === 'number' && ebStage > 0 && ebStage < App.EB_MASTERED_STAGE) {
-      diffHtml += '<div class="eb-stage-badge">🧠 ' + App.EB_STAGES[ebStage].label + '</div>';
-    } else if (ebStage >= App.EB_MASTERED_STAGE) {
-      diffHtml += '<div class="eb-stage-badge eb-mastered">✅ 已掌握</div>';
+      /* 艾宾浩斯阶段标签 */
+      var ebStage = deckCard ? deckCard.ebbinghausStage : card.ebbinghausStage;
+      if (typeof ebStage === 'number' && ebStage > 0 && ebStage < App.EB_MASTERED_STAGE) {
+        diffHtml += '<div class="eb-stage-badge">🧠 ' + App.EB_STAGES[ebStage].label + '</div>';
+      } else if (ebStage >= App.EB_MASTERED_STAGE) {
+        diffHtml += '<div class="eb-stage-badge eb-mastered">✅ 已掌握</div>';
+      }
     }
 
     document.getElementById('cardFrontText').innerHTML = frontHtml + diffHtml;
@@ -667,6 +685,18 @@ var FlashcardApp = window.FlashcardApp || {};
     el.classList.remove('flipped');
     el.style.removeProperty('transform');
     App.isFlipped = false;
+
+    /* 自动播放当前词发音（对齐小程序 speakCurrentCard：换卡 300ms 后自动朗读；仅学习面板可见时播） */
+    var studyPanelEl = document.getElementById('panelStudy');
+    if (!studyPanelEl || !studyPanelEl.classList.contains('visible')) return;
+    if (App._speakTimer) { clearTimeout(App._speakTimer); App._speakTimer = null; }
+    App._speakTimer = setTimeout(function () {
+      App._speakTimer = null;
+      var currentCard = App.studyQueue[App.studyIndex];
+      if (currentCard && typeof App.speak === 'function') {
+        App.speak(App.getCardFront(currentCard));
+      }
+    }, 300);
   };
 
   /** 渲染模式引导界面 */
@@ -807,12 +837,7 @@ var FlashcardApp = window.FlashcardApp || {};
   /* ========== 作答 ========== */
   App.answerStudy = function (passed) {
     if (App.isReviewing) return; /* 回看状态禁止作答（对齐小程序 markAnswer 首行守卫） */
-
-    if (!App.isFlipped) {
-      document.getElementById('flashcard').classList.add('flipped');
-      App.isFlipped = true;
-      return;
-    }
+    /* 会了/不会直接作答推进；翻转仅由点击卡片触发（对齐小程序） */
 
     var card = App.studyQueue[App.studyIndex];
     var deck = App.isReviewMode && card._deckId ? App.getDeck(card._deckId) : App.getCurrentDeck();
@@ -915,40 +940,18 @@ var FlashcardApp = window.FlashcardApp || {};
 
   App.toggleSpellMode = function () {
     App.spellMode = !App.spellMode;
-    App.spellAnswered = false;
-
-    var toggleBtn = document.getElementById('btnToggleSpell');
-    var inputArea = document.getElementById('spellInputArea');
-    var spellInput = document.getElementById('spellInput');
-    var spellFeedback = document.getElementById('spellFeedback');
-    var failBtn = document.getElementById('btnFail');
-    var passBtn = document.getElementById('btnPass');
-
+    /* UI 全权交给 renderStudyPanel 重建（盲拼占位/按钮显隐/切换文案），并触发一次自动播放（对齐小程序进拼写页播一次） */
+    App.renderStudyPanel();
     if (App.spellMode) {
-      if (toggleBtn) toggleBtn.textContent = '🔤 退出拼写';
-      if (toggleBtn) toggleBtn.classList.add('spell-active');
-      if (inputArea) inputArea.style.display = 'block';
-      if (spellInput) { spellInput.value = ''; spellInput.focus(); }
-      if (spellFeedback) { spellFeedback.textContent = ''; spellFeedback.className = 'spell-feedback'; }
-      /* 拼写模式下调整按钮文本 */
-      if (failBtn) failBtn.textContent = '✗ 跳过';
-      if (passBtn) passBtn.style.display = 'none'; /* 拼写正确自动通过 */
-    } else {
-      if (toggleBtn) toggleBtn.textContent = '⌨️ 拼写模式';
-      if (toggleBtn) toggleBtn.classList.remove('spell-active');
-      if (inputArea) inputArea.style.display = 'none';
-      if (spellInput) spellInput.value = '';
-      if (spellFeedback) { spellFeedback.textContent = ''; spellFeedback.className = 'spell-feedback'; }
-      if (failBtn) failBtn.textContent = '✗ 不会';
-      if (passBtn) passBtn.style.display = '';
+      var spellInput = document.getElementById('spellInput');
+      if (spellInput) spellInput.focus();
     }
   };
 
-  /** 拼写检查 */
+  /** 拼写检查（纯练习：不翻卡、不推进队列、不写学习日志；对/错均停留当前词，可重拼/重试） */
   App.checkSpelling = function () {
     if (App.isReviewing) return; /* 回看状态禁止拼写作答（与 answerStudy 守卫一致） */
     if (!App.spellMode) return;
-    if (App.spellAnswered) return;
     if (App.studyQueue.length === 0 || App.studyIndex >= App.studyQueue.length) return;
 
     var input = document.getElementById('spellInput');
@@ -960,57 +963,25 @@ var FlashcardApp = window.FlashcardApp || {};
     var correctAnswer = (card.front || card.word || '').replace(/\s+/g, '').toLowerCase();
     var normalized = userInput.replace(/\s+/g, '').toLowerCase();
 
-    App.spellAnswered = true;
-    input.disabled = true;
-
     if (normalized === correctAnswer) {
-      /* 拼写正确 → 自动通过 */
+      /* 正确：✅ + 朗读，停留当前词 */
       feedback.textContent = '✅ 拼写正确！' + (card.phonetic ? ' ' + card.phonetic : '');
       feedback.className = 'spell-feedback spell-correct';
       input.className = 'spell-input-correct';
-
-      /* 朗读单词 */
-      App.speak(card.front || card.word);
-
-      /* 短暂延迟后自动进入下一张 */
-      setTimeout(function () {
-        App.spellAnswered = false;
-        input.disabled = false;
-        input.className = '';
-        input.value = '';
-        feedback.textContent = '';
-        feedback.className = 'spell-feedback';
-
-        /* 先翻卡展示答案，然后标记通过 */
-        document.getElementById('flashcard').classList.add('flipped');
-        App.isFlipped = true;
-        App.answerStudy(true);
-      }, 1000);
+      if (typeof App.speak === 'function') App.speak(card.front || card.word);
     } else {
-      /* 拼写错误 */
-      var correctWord = App.escHtml(card.front || card.word);
-      feedback.innerHTML = '❌ 正确答案：<strong>' + correctWord + '</strong>';
+      /* 错误：❌ + 正确答案，可重试 */
+      feedback.innerHTML = '❌ 正确答案：<strong>' + App.escHtml(card.front || card.word) + '</strong>';
       feedback.className = 'spell-feedback spell-wrong';
       input.className = 'spell-input-wrong';
-
-      /* 自动翻卡显示答案 */
-      document.getElementById('flashcard').classList.add('flipped');
-      App.isFlipped = true;
-
-      /* 显示 pass/fail 按钮让用户手动判断 */
-      var passBtn = document.getElementById('btnPass');
-      var failBtn = document.getElementById('btnFail');
-      if (passBtn) passBtn.style.display = '';
-      if (failBtn) failBtn.textContent = '✗ 不会';
-
-      /* 保持输入框禁用，用户需通过按钮作答 */
-      input.disabled = true;
     }
+    /* 始终清空输入并保持可编辑，允许重拼/重试 */
+    input.value = '';
+    input.disabled = false;
   };
 
   /** 重置拼写状态（切换卡片时调用） */
   App._resetSpellState = function () {
-    App.spellAnswered = false;
     var input = document.getElementById('spellInput');
     var feedback = document.getElementById('spellFeedback');
     if (input) { input.value = ''; input.disabled = false; input.className = ''; }

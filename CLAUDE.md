@@ -42,6 +42,16 @@ math/
 
 **测试**：220→262（card-form +24、滚轮纯函数 +18）
 
+## 最近更新（2026-08-20）— English-web 学习交互 4 项修复
+
+**自动播放发音**：换卡 300ms 后自动朗读当前词（对齐小程序 speakCurrentCard）；`#panelStudy.visible` 门控防后台发声；`_speakTimer` 防叠加
+
+**会了/不会直答**：删除 answerStudy 翻转守卫，按钮直接作答推进，翻转仅由点卡片触发
+
+**拼写纯练习 + 盲拼**：拼写对/错均停留当前词可重拼/重试，不推进队列/不改遗忘曲线/不写日志；盲拼仅 🔒 占位 + 🔊 发音提示；拼写模式禁翻卡、隐藏作答按钮；toggleSpellMode 薄壳化 + renderStudyPanel 集中拼写 UI；spellAnswered 字段全删除
+
+**测试**：175→187；Playwright 端到端 23/23 通过
+
 ## 最近更新（2026-08-19）— English-web 学习算法全量对齐 v2.8
 
 **单轨化**：删除 SM-2 双轨（applySM2/nextReview/interval），applyEbbinghaus 重写为小程序等价实现——智能回退、逾期惩罚不叠加、EF 自适应间隔、逾期答对降级门控、防御性补齐（NaN/夹紧/历史截断）

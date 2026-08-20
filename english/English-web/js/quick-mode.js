@@ -27,6 +27,7 @@ var FlashcardApp = window.FlashcardApp || {};
     App.studyPassed = 0;
     App.studyFailed = 0;
     App.isFlipped = false;
+    App.spellMode = false;
     App.studyStartTime = Date.now();
     App.studyCompletedWords = 0;
     App.studyInitialQueueLength = App.studyQueue.length;

@@ -124,10 +124,10 @@ var FlashcardApp = window.FlashcardApp || {};
       App.renderAll();
     });
 
-    /* 翻卡（拼写已作答时不翻转，由拼写模式控制） */
+    /* 翻卡（拼写模式禁止翻卡，防盲拼泄漏背面释义；翻转仅由点击卡片触发） */
     document.getElementById('flashcard').addEventListener('click', function () {
       if (App.studyQueue.length === 0 || App.studyIndex >= App.studyQueue.length) return;
-      if (App.spellMode && App.spellAnswered) return;
+      if (App.spellMode) return;
       document.getElementById('flashcard').classList.toggle('flipped');
       App.isFlipped = !App.isFlipped;
     });

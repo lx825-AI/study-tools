@@ -42,3 +42,46 @@ beforeEach(() => {
   window.FlashcardApp.state = window.FlashcardApp.state || {};
   window.FlashcardApp.state.decks = window.FlashcardApp.state.decks || [];
 });
+
+/**
+ * 共享 DOM 桩：学习面板完整结构
+ * （renderStudyPanel/answerStudy/checkSpelling/toggleSpellMode 所需的全部 DOM 元素）
+ */
+window.mountStudyDOM = function () {
+  document.body.innerHTML =
+    '<div id="panelStudy" class="panel visible">' +
+      '<div id="studyNoDeck" style="display:none"></div>' +
+      '<div id="studyContent" style="display:none">' +
+        '<div class="study-header"><button id="btnBackToMode"></button></div>' +
+        '<div class="card-scene">' +
+          '<div class="flashcard" id="flashcard">' +
+            '<div class="card-face card-front">' +
+              '<div class="card-text" id="cardFrontText"></div>' +
+              '<div class="card-hint"></div>' +
+            '</div>' +
+            '<div class="card-face card-back"><div class="card-text" id="cardBackText"></div></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="study-actions"></div>' +
+        '<div class="spell-mode-section" id="spellModeSection" style="display:none">' +
+          '<button id="btnToggleSpell"></button>' +
+          '<div id="spellInputArea" style="display:none">' +
+            '<input id="spellInput"><div id="spellFeedback"></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div id="studyComplete" style="display:none">' +
+        '<div id="completeTitle"></div>' +
+        '<div id="completeStats"></div>' +
+        '<button id="btnRestart"></button>' +
+      '</div>' +
+      '<div id="studyEmpty" style="display:none"></div>' +
+    '</div>' +
+    '<button id="btnFail"></button>' +
+    '<button id="btnPass"></button>' +
+    '<button id="btnPrevCard"></button>' +
+    '<div id="studyModeSelect"></div>' +
+    '<div id="studyDeckName"></div>' +
+    '<div id="studyProgress"></div>' +
+    '<div id="progressFill"></div>';
+};

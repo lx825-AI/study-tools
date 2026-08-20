@@ -314,6 +314,20 @@
   font-weight: 600;
 }
 
+/* 盲拼占位（拼写模式下隐藏词形，仅发音提示） */
+.spell-blind-placeholder {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+.spell-blind-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  opacity: 0.75;
+  margin-top: 6px;
+}
+
 /* 移动端拼写模式 */
 @media (max-width: 480px) {
   .spell-input-row input {
