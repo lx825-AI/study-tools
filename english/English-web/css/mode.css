@@ -244,50 +244,43 @@
   font-weight: 700;
 }
 
-.spell-input-area {
-  animation: spellSlideIn 0.25s ease;
-}
-@keyframes spellSlideIn {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.spell-hint {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-bottom: 6px;
-  text-align: center;
-}
-.spell-input-row {
+/* 槽位式盲拼输入（卡片正面逐格输入字母，输满自动判定） */
+.spell-slots {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 8px;
+  max-width: 100%;
+  padding: 6px 0 10px;
 }
-.spell-input-row input {
-  flex: 1;
-  padding: 10px 14px;
-  border: 2px solid var(--border);
-  border-radius: var(--radius);
-  font-size: 16px;
+.spell-slot {
+  width: 38px;
+  height: 46px;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+  font-size: 22px;
+  font-weight: 700;
   font-family: var(--font-word);
-  background: var(--surface);
+  text-align: center;
   color: var(--text-primary);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
   outline: none;
-  transition: border-color 0.2s;
-  letter-spacing: 1px;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-.spell-input-row input:focus {
+.spell-slot:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px var(--primary-bg);
 }
-.spell-input-row input.spell-input-correct {
-  border-color: var(--success);
-  background: var(--success-bg);
-  color: var(--success);
-  font-weight: 700;
+.spell-slot:disabled {
+  opacity: 0.7;
 }
-.spell-input-row input.spell-input-wrong {
+.spell-slot-wrong {
   border-color: var(--danger-text);
   background: var(--danger-bg);
+  color: var(--danger-text);
   animation: shake 0.4s ease;
 }
 @keyframes shake {
@@ -296,6 +289,19 @@
   40% { transform: translateX(6px); }
   60% { transform: translateX(-4px); }
   80% { transform: translateX(4px); }
+}
+.spell-slot-gap {
+  width: 14px;
+}
+.spell-slot-fixed {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 46px;
+  min-width: 18px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-muted);
 }
 
 .spell-feedback {
@@ -314,32 +320,25 @@
   font-weight: 600;
 }
 
-/* 盲拼占位（拼写模式下隐藏词形，仅发音提示） */
-.spell-blind-placeholder {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--text-muted);
-  letter-spacing: 1px;
-}
 .spell-blind-sub {
   font-size: 13px;
   color: var(--text-muted);
   opacity: 0.75;
   margin-top: 6px;
+  text-align: center;
 }
 
 /* 移动端拼写模式 */
 @media (max-width: 480px) {
-  .spell-input-row input {
-    font-size: 17px;
-    padding: 12px 14px;
+  .spell-slot {
+    width: 32px;
+    height: 42px;
+    font-size: 19px;
   }
-  .spell-input-row {
-    flex-direction: column;
-    gap: 6px;
+  .spell-slot-gap {
+    width: 10px;
   }
-  .spell-input-row .btn {
-    width: 100%;
-    min-height: 44px;
+  .spell-slot-fixed {
+    height: 42px;
   }
 }

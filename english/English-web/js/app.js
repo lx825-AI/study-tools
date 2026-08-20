@@ -141,35 +141,9 @@ var FlashcardApp = window.FlashcardApp || {};
       else { App.startStudy(); }
     });
 
-    /* 拼写模式 */
+    /* 拼写模式（槽位输入事件委托在 study-panel.js IIFE 顶层，输满自动判定） */
     document.getElementById('btnToggleSpell').addEventListener('click', function () {
       App.toggleSpellMode();
-    });
-    document.getElementById('btnSpellCheck').addEventListener('click', function () {
-      App.checkSpelling();
-    });
-    document.getElementById('spellInput').addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        App.checkSpelling();
-      }
-    });
-
-    /* 拼写模式键盘避让（移动端） */
-    document.getElementById('spellInput').addEventListener('focus', function () {
-      var input = this;
-      setTimeout(function () {
-        if (window.visualViewport) {
-          var viewportHeight = window.visualViewport.height;
-          var inputBottom = input.getBoundingClientRect().bottom;
-          var offset = inputBottom - viewportHeight + 20;
-          if (offset > 0) {
-            window.scrollBy({ top: offset, behavior: 'smooth' });
-          }
-        } else {
-          input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }, 300);
     });
 
     /* 返回模式选择 */

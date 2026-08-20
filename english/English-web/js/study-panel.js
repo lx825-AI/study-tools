@@ -496,24 +496,21 @@ var FlashcardApp = window.FlashcardApp || {};
     if (cardScene) cardScene.style.display = '';
     if (studyActions) studyActions.style.display = '';
 
-    /* 拼写模式区域 + 拼写 UI（随每次渲染重建：输入区/作答按钮显隐、切换按钮文案） */
+    /* 拼写模式区域 + 拼写 UI（随每次渲染重建：作答按钮显隐、切换按钮文案；槽位在正面动态渲染） */
     var spellSection = document.getElementById('spellModeSection');
     if (spellSection) spellSection.style.display = 'block';
     /* 重置拼写状态 */
     App._resetSpellState();
-    var spellInputArea = document.getElementById('spellInputArea');
     var toggleBtn = document.getElementById('btnToggleSpell');
     var failBtnEl = document.getElementById('btnFail');
     var passBtnEl = document.getElementById('btnPass');
     if (App.spellMode) {
       if (toggleBtn) { toggleBtn.textContent = '🔤 退出拼写'; toggleBtn.classList.add('spell-active'); }
-      if (spellInputArea) spellInputArea.style.display = 'block';
       /* 拼写为纯练习：隐藏作答按钮，退出拼写模式后恢复 */
       if (failBtnEl) failBtnEl.style.display = 'none';
       if (passBtnEl) passBtnEl.style.display = 'none';
     } else {
       if (toggleBtn) { toggleBtn.textContent = '⌨️ 拼写模式'; toggleBtn.classList.remove('spell-active'); }
-      if (spellInputArea) spellInputArea.style.display = 'none';
       if (failBtnEl) failBtnEl.style.display = '';
       if (passBtnEl) passBtnEl.style.display = '';
     }
@@ -561,13 +558,13 @@ var FlashcardApp = window.FlashcardApp || {};
         ((App.studyIndex / App.studyQueue.length) * 100) + '%';
     }
 
-    /* 正面（拼写模式为盲拼：下划线对应单词字母数 + 发音提示，不显示词形/音标/释义） */
+    /* 正面（拼写模式为盲拼槽位：逐格输入字母，不显示词形/音标/释义） */
     var frontHtml;
     var frontHint = document.querySelector('#flashcard .card-front .card-hint');
     if (App.spellMode) {
-      frontHtml = '<div class="spell-blind-placeholder">' + App.buildSpellBlindMask(card) + '</div>' +
+      frontHtml = '<div class="spell-slots">' + App.buildSpellSlotHtml(card) + '</div>' +
         '<div class="spell-blind-sub">听发音拼写</div>';
-      if (frontHint) frontHint.textContent = '🔊 听发音，在下方输入拼写';
+      if (frontHint) frontHint.textContent = '🔊 听发音，在卡片上拼写';
     } else {
       frontHtml = App.escHtml(App.getCardFront(card));
       if (card.phonetic) {
@@ -939,23 +936,55 @@ var FlashcardApp = window.FlashcardApp || {};
   /* ========== 拼写模式 ========== */
 
   App.toggleSpellMode = function () {
+    if (App.isReviewing) return; /* 回看态禁拼写（与 checkSpelling 守卫一致） */
     App.spellMode = !App.spellMode;
-    /* UI 全权交给 renderStudyPanel 重建（盲拼占位/按钮显隐/切换文案），并触发一次自动播放（对齐小程序进拼写页播一次） */
+    /* UI 全权交给 renderStudyPanel 重建（盲拼槽位/按钮显隐/切换文案），并触发一次自动播放（对齐小程序进拼写页播一次） */
     App.renderStudyPanel();
     if (App.spellMode) {
-      var spellInput = document.getElementById('spellInput');
-      if (spellInput) spellInput.focus();
+      var firstSlot = document.querySelector('.spell-slots .spell-slot');
+      if (firstSlot) firstSlot.focus();
     }
   };
 
-  /** 盲拼下划线遮罩：每个字母一个下划线（带间隔），按空白分组，连字符/撇号原样保留 */
-  App.buildSpellBlindMask = function (card) {
+  /** 槽位化盲拼：字母→单字符输入框（仅字母槽连续编号），空白→间隔，其余字符→固定展示 */
+  App.buildSpellSlotHtml = function (card) {
     var word = card.front || card.word || '';
-    return word.split(/\s+/).map(function (group) {
-      return group.split('').map(function (ch) {
-        return /[a-zA-Z]/.test(ch) ? '_' : ch;
-      }).join(' ');
-    }).join('  ');
+    var html = '';
+    var idx = 0;
+    word.split(/\s+/).forEach(function (group, gi) {
+      if (gi > 0) html += '<span class="spell-slot-gap"></span>';
+      group.split('').forEach(function (ch) {
+        if (/[a-zA-Z]/.test(ch)) {
+          html += '<input class="spell-slot" type="text" maxlength="1" autocomplete="off"' +
+            ' autocapitalize="none" autocorrect="off" spellcheck="false"' +
+            ' data-idx="' + idx + '" aria-label="第 ' + (idx + 1) + ' 个字母">';
+          idx++;
+        } else {
+          html += '<span class="spell-slot-fixed">' + App.escHtml(ch) + '</span>';
+        }
+      });
+    });
+    return html;
+  };
+
+  /* 错误高亮时长（毫秒），测试用常量 */
+  App.SPELL_WRONG_DELAY = 600;
+
+  /** 读取全部槽位拼接值（DOM 序 == data-idx 序） */
+  App.readSpellSlots = function () {
+    var slots = document.querySelectorAll('.spell-slots .spell-slot');
+    var out = '';
+    for (var i = 0; i < slots.length; i++) out += slots[i].value;
+    return out;
+  };
+
+  /** 清空槽位值/解除禁用/移除错误高亮类 */
+  App._clearSpellSlots = function (slots) {
+    for (var i = 0; i < slots.length; i++) {
+      slots[i].value = '';
+      slots[i].disabled = false;
+      slots[i].classList.remove('spell-slot-wrong');
+    }
   };
 
   /** 拼写检查（纯练习：不翻卡、不推进队列、不写学习日志；对/错均停留当前词，可重拼/重试） */
@@ -964,38 +993,95 @@ var FlashcardApp = window.FlashcardApp || {};
     if (!App.spellMode) return;
     if (App.studyQueue.length === 0 || App.studyIndex >= App.studyQueue.length) return;
 
-    var input = document.getElementById('spellInput');
     var feedback = document.getElementById('spellFeedback');
-    var userInput = (input.value || '').trim();
+    var userInput = App.readSpellSlots().trim();
     if (!userInput) return;
 
+    if (App._spellWrongTimer) { clearTimeout(App._spellWrongTimer); App._spellWrongTimer = null; }
+    var slots = document.querySelectorAll('.spell-slots .spell-slot');
     var card = App.studyQueue[App.studyIndex];
-    var correctAnswer = (card.front || card.word || '').replace(/\s+/g, '').toLowerCase();
-    var normalized = userInput.replace(/\s+/g, '').toLowerCase();
+    /* 两侧统一剥除非字母：撇号/连字符是槽位中的固定展示，不可输入 */
+    var correctAnswer = (card.front || card.word || '').toLowerCase().replace(/[^a-z]/g, '');
+    var normalized = userInput.toLowerCase();
 
     if (normalized === correctAnswer) {
-      /* 正确：✅ + 朗读，停留当前词 */
+      /* 正确：✅ + 朗读 + 清空槽位可重拼，停留当前词 */
       feedback.textContent = '✅ 拼写正确！' + (card.phonetic ? ' ' + card.phonetic : '');
       feedback.className = 'spell-feedback spell-correct';
-      input.className = 'spell-input-correct';
+      App._clearSpellSlots(slots);
       if (typeof App.speak === 'function') App.speak(card.front || card.word);
+      var firstCorrect = document.querySelector('.spell-slots .spell-slot');
+      if (firstCorrect) firstCorrect.focus();
     } else {
-      /* 错误：❌ + 正确答案，可重试 */
+      /* 错误：❌ + 正确答案 + 槽位短暂红色高亮（禁入），600ms 后清空重拼 */
       feedback.innerHTML = '❌ 正确答案：<strong>' + App.escHtml(card.front || card.word) + '</strong>';
       feedback.className = 'spell-feedback spell-wrong';
-      input.className = 'spell-input-wrong';
+      for (var i = 0; i < slots.length; i++) {
+        slots[i].disabled = true;
+        slots[i].classList.add('spell-slot-wrong');
+      }
+      App._spellWrongTimer = setTimeout(function () {
+        App._spellWrongTimer = null;
+        var freshSlots = document.querySelectorAll('.spell-slots .spell-slot');
+        App._clearSpellSlots(freshSlots);
+        var firstWrong = document.querySelector('.spell-slots .spell-slot');
+        if (firstWrong) firstWrong.focus();
+      }, App.SPELL_WRONG_DELAY);
     }
-    /* 始终清空输入并保持可编辑，允许重拼/重试 */
-    input.value = '';
-    input.disabled = false;
   };
 
-  /** 重置拼写状态（切换卡片时调用） */
+  /** 重置拼写状态（切换卡片/开关拼写时调用；槽位随后由 innerHTML 重建，此处为防御性清理） */
   App._resetSpellState = function () {
-    var input = document.getElementById('spellInput');
+    if (App._spellWrongTimer) { clearTimeout(App._spellWrongTimer); App._spellWrongTimer = null; }
     var feedback = document.getElementById('spellFeedback');
-    if (input) { input.value = ''; input.disabled = false; input.className = ''; }
     if (feedback) { feedback.textContent = ''; feedback.className = 'spell-feedback'; }
+    var slots = document.querySelectorAll('.spell-slots .spell-slot');
+    App._clearSpellSlots(slots);
   };
+
+  /* ========== 槽位输入事件委托 ==========
+   * 槽位由 renderStudyPanel 每次重建 innerHTML，故在 document 上委托
+   * （绑定在 IIFE 顶层而非 app.js init：测试环境不加载 app.js，此处加载时 document 已存在） */
+
+  /* 输入：值过滤（仅字母、取末字符）→ 自动跳格 → 末槽且全满才自动判定 */
+  document.addEventListener('input', function (e) {
+    if (!App.spellMode) return;
+    var slot = e.target.closest && e.target.closest('.spell-slot');
+    if (!slot) return;
+    var v = (slot.value || '').replace(/[^a-zA-Z]/g, '');
+    slot.value = v ? v.slice(-1) : '';
+    if (!v) return;
+    var slots = document.querySelectorAll('.spell-slots .spell-slot');
+    var i = [].indexOf.call(slots, slot);
+    if (i < slots.length - 1) { slots[i + 1].focus(); return; }
+    /* 末格：全部槽位填满才自动判定（防乱序填充误判） */
+    for (var j = 0; j < slots.length; j++) { if (!slots[j].value) return; }
+    App.checkSpelling();
+  });
+
+  /* Backspace：空槽回退上一格并清空其值（有字符时交给浏览器默认删除） */
+  document.addEventListener('keydown', function (e) {
+    if (!App.spellMode) return;
+    var slot = e.target.closest && e.target.closest('.spell-slot');
+    if (!slot || e.key !== 'Backspace' || slot.value) return;
+    var slots = document.querySelectorAll('.spell-slots .spell-slot');
+    var i = [].indexOf.call(slots, slot);
+    if (i > 0) { e.preventDefault(); slots[i - 1].value = ''; slots[i - 1].focus(); }
+  });
+
+  /* 移动端键盘避让（槽位 focus 时滚动到可视区；jsdom 无 visualViewport/scrollIntoView，防御跳过） */
+  document.addEventListener('focusin', function (e) {
+    if (!App.spellMode) return;
+    var slot = e.target.closest && e.target.closest('.spell-slot');
+    if (!slot) return;
+    setTimeout(function () {
+      if (window.visualViewport) {
+        var offset = slot.getBoundingClientRect().bottom - window.visualViewport.height + 20;
+        if (offset > 0 && window.scrollBy) window.scrollBy({ top: offset, behavior: 'smooth' });
+      } else if (slot.scrollIntoView) {
+        slot.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 300);
+  });
 
 })(FlashcardApp);

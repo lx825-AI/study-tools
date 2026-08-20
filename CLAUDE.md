@@ -54,6 +54,14 @@ math/
 
 **追加打磨**：盲拼提示改下划线遮罩（按单词字母数显示带间隔下划线，buildSpellBlindMask 纯函数）；回看态会了/不会按钮灰暗处理（disabled + opacity 0.35，对齐小程序 dimmed）；测试 187→192
 
+**槽位式输入改造**：删除下方独立输入框+确认按钮，卡片正面下划线处逐格输入字母（buildSpellSlotHtml 槽位生成、输满自动判定、错误红框 600ms 清空重拼、撇号/连字符固定展示归一化判定）；测试 192→199；Playwright 端到端 15/15 通过
+
+## 最近更新（2026-08-20）— English-mini-app 拼写模式盲拼下划线
+
+**拼写页中文提示删除**：SpellInput 删除「根据释义拼写单词」+ 中文释义提示块，改为按单词字母数显示带间隔下划线（对齐 English-web 盲拼）；definition prop/ref/URL 参数孤立链路全删除；新增 buildSpellBlindMask 纯函数
+
+**测试**：262→268（helpers +6）
+
 ## 最近更新（2026-08-19）— English-web 学习算法全量对齐 v2.8
 
 **单轨化**：删除 SM-2 双轨（applySM2/nextReview/interval），applyEbbinghaus 重写为小程序等价实现——智能回退、逾期惩罚不叠加、EF 自适应间隔、逾期答对降级门控、防御性补齐（NaN/夹紧/历史截断）
