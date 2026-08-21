@@ -58,6 +58,9 @@ var FlashcardApp = window.FlashcardApp || {};
 
     var key = (App.studyMode === 'quick') ? App.QUICK_LOG_KEY : App.LEARNING_LOG_KEY;
     var log = (key === App.QUICK_LOG_KEY) ? App.loadQuickLog() : App.loadLearningLog();
+    /* 早退条目不覆盖当日已完成会话（切 tab 弃置会话不再回退当日统计）；
+       当日只有早退条目时仍覆盖为最新早退，完成条目覆盖语义不变 */
+    if (!entry.completedGoal && log[today] && log[today].completedGoal === true) return;
     log[today] = entry; /* 覆盖当日条目（对齐小程序 logs[today] = progressData） */
     try { localStorage.setItem(key, JSON.stringify(log)); } catch (e) { /* 忽略存储错误 */ }
   };

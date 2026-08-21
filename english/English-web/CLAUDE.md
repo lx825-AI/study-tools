@@ -25,7 +25,7 @@ SPA 英语词汇闪卡应用，使用艾宾浩斯遗忘曲线算法（v2.8 起�
 ## 项目结构
 
 ```
-index.html          -- SPA 入口（6 个 tab：牌组/学习/预览/卡片/统计/错词本）
+index.html          -- SPA 入口（5 个 tab：牌组/学习/预览/卡片/统计）
 js/
   app.js            -- init()、语音朗读、词书全量预加载、待复习 toast、PWA 安装横幅、离线提示
   state.js          -- 全局状态、getDeck/getCurrentDeck
@@ -38,7 +38,7 @@ js/
   deck-panel.js     -- 牌组 CRUD（学习/编辑/删除）
   quick-mode.js     -- 快速浏览模式（startQuickMode/applyQuickResult/loadQuickLog）
   study-panel.js    -- 多模式学习 + 拼写模式（⌨️ 内嵌）+ 艾宾浩斯作答（单轨）+ 进度持久化
-  wrong-words.js    -- 错词本面板（collectFailedCards 复用、批量练习、EF 重置移出）
+  wrong-words.js    -- 错词列表模块：学习模式引导页「错题强化」折叠区（collectFailedCards 复用、单卡移出）
   preview-panel.js  -- 表格预览（200+ 卡片虚拟滚动）、搜索、高亮
   cards-panel.js    -- 卡片列表（100+ 虚拟滚动）、批量选择与删除
   import.js         -- 内置词书注册表（10 本）、script 动态加载、词书来源声明、导入弹窗两级分类（级别×大纲/核心，对齐小程序）
@@ -75,6 +75,16 @@ scripts/
 
 **判定反馈 3 项优化（2026-08-20，对齐小程序 SpellInput 纯练习化）**：正确后不清空重拼——字母保留槽位+绿色边框（spell-slot-correct），修改字母即回输入态清除陈旧 ✅（input 委托检测 spell-correct 态）；错误后答案不常驻——600ms 清空回调同时清空 feedback 文字（防照着拼写）；判定反馈从卡片下方移入卡片内部拼写格子正下方（盲拼分支动态渲染 #spellFeedback，index.html/setup.js 桩同步删除）；测试 199→201；Playwright 端到端 12/12 通过
 
+## 最近更新（2026-08-21）— 学习模式重选 + 错词本并入模式引导页
+
+**切走重选学习模式**：switchTab 切离学习 tab 时调 returnToModeSelect 弃置当前会话（早退日志 completedGoal=false、清内存状态、删 sessionStorage 快照），切回学习 tab 重新显示「选择学习模式」引导；学习 tab 内重复点击/「开始学习」/牌组「学习」按钮不受影响（目标 tab 即 study 不清理）；完成面板新增「↩ 返回模式选择」按钮（顺带修复完成态无返回入口）；页面刷新后的快照恢复（TTL 2h）保留不动
+
+**错词本并入引导页**：删除顶部/底部导航「错词本」tab 与独立面板 #panelWrong（5 个 tab），错词本独有功能（错词列表 + 单卡移出）并入学习模式引导页「错题强化」卡片下方的折叠区（默认收起、展开浏览、移出后原位刷新保持展开态）；错题强化卡片计数改动态（N 个待强化/暂无错词）；wrong-words.js 重写为错词列表模块（renderModeFailedSectionHtml/bindModeFailedSection/refreshModeFailedSection，删死代码 getWeekWrongCount）；批量练习按钮废弃（与点击错题强化卡片等价）
+
+**审查修复（2026-08-21）**：早退条目不覆盖当日已完成会话（finalizeStudyLog 加守卫——切 tab 弃置会话不再回退当日统计/目标/热力图）；SW 缓存 v8→v9（已装 PWA 用户可获新版）；完成面板按钮顺序稳定（exitBtn2 insertBefore backBtn）；折叠区 toggle min-height 44px 触控目标；switchTab 未知 tab 不触发会话清理；删除 app.js btnRestart 双重绑定（修「再学一组新词」实际启动复习的既有 bug——onclick 由完成面板渲染统一接管）
+
+**测试**：219→235（study-tab 切离弃置 +8、wrong-words 折叠区 +6、study-panel 返回按钮 +3、stats 覆盖守卫 +2、其余回归）
+
 ## 最近更新（2026-08-21）— 拼写单隐藏输入框方案 + tts 韧性（对齐小程序最新方案）
 
 **方案级调整**：弃用多 input 格子框（移动端键盘反复弹跳），改为**下划线展示位（纯 view）+ 单隐藏输入框**——键盘只弹一次；`_renderSpellSlots` 局部渲染（隐藏框在 #spellSlots 容器外，重渲染不丢焦点）；隐藏框 native 值为真值源、全量重建字母（退格天然撤回、中文 commit 不误删）；满词 150ms 防抖自动判定；点槽位区聚焦（揭示期禁弹键盘）；当前输入位闪烁竖线光标（满词/失焦/判定期隐藏）
@@ -109,7 +119,7 @@ scripts/
 
 **删除 Web 独有功能（19 项）**：智能混合模式（restore 旧会话归一化为 review）、运行时排序切换（队列固定 EF 升序）、全局搜索、键盘快捷键、移动端手势（滑动/长按/上滑朗读）、彩带、牌组导出、外部词书导入（文件/URL/粘贴）、系统通知提醒、备份提醒+数据备份区、云同步（SyncProvider 半成品死代码）、小程序引导条、卡片批量粘贴导入、演示数据、学习头部错题复习按钮、每日一句换一句按钮、新词数设置输入框、预览隐藏释义开关、错词 CSV 导出；LOCAL_KEYS 死数组清理
 
-**保留**：PWA 离线/安装、拼写模式、预览搜索、卡片批量删除、统计面板、分享、错词本练习/移出、快速模式、内置词书导入、待复习 toast
+**保留**：PWA 离线/安装、拼写模式、预览搜索、卡片批量删除、统计面板、分享、错题强化练习/移出（2026-08-21 起并入学习模式引导页）、快速模式、内置词书导入、待复习 toast
 
 **测试**：115→114（删除 nextQuote 用例 + wrong-words CSV 断言）
 

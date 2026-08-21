@@ -60,6 +60,9 @@ var FlashcardApp = window.FlashcardApp || {};
 
   /* Tab 切换 */
   App.switchTab = function (tab) {
+    /* 当前可见面板在移除 visible 前暂存 */
+    var activePanel = document.querySelector('.panel.visible');
+
     /* 顶部导航 */
     document.querySelectorAll('.top-nav button').forEach(function (b) { b.classList.remove('active'); });
     var topBtn = document.querySelector('.top-nav button[data-tab="' + tab + '"]');
@@ -71,8 +74,13 @@ var FlashcardApp = window.FlashcardApp || {};
     if (bottomBtn) bottomBtn.classList.add('active');
 
     document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('visible'); });
-    let panelMap = { decks: 'panelDecks', study: 'panelStudy', preview: 'panelPreview', cards: 'panelCards', stats: 'panelStats', wrong: 'panelWrong' };
+    let panelMap = { decks: 'panelDecks', study: 'panelStudy', preview: 'panelPreview', cards: 'panelCards', stats: 'panelStats' };
     let panelId = panelMap[tab];
+    /* 切离学习 tab = 放弃当前学习会话（含 sessionStorage 快照），重新进入时回到模式选择；
+       tab 无效时不清理，防「弃会话 + 白屏」叠加 */
+    if (panelId && activePanel && activePanel.id === 'panelStudy' && tab !== 'study') {
+      App.returnToModeSelect();
+    }
     if (panelId) document.getElementById(panelId).classList.add('visible');
 
     if (tab === 'study') {
@@ -81,7 +89,6 @@ var FlashcardApp = window.FlashcardApp || {};
     if (tab === 'preview') App.renderPreviewPanel();
     if (tab === 'cards') App.renderCardsPanel();
     if (tab === 'stats') App.renderStatsPanel();
-    if (tab === 'wrong') App.renderWrongWordsPanel();
   };
 
   /* 更新导航标签上的待复习角标 */
@@ -130,7 +137,6 @@ var FlashcardApp = window.FlashcardApp || {};
     App.renderStudyPanel();
     App.renderPreviewPanel();
     if (App.renderStatsPanel) App.renderStatsPanel();
-    if (App.renderWrongWordsPanel) App.renderWrongWordsPanel();
     App.updateNavBadges();
   };
 

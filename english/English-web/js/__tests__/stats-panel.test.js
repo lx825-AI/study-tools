@@ -98,6 +98,37 @@ describe('finalizeStudyLog', () => {
     expect(log[today].completedGoal).toBe(false);
   });
 
+  it('早退条目不覆盖当日已完成会话（切 tab 弃置不倒退统计）', () => {
+    /* 上午完成会话 */
+    setupStudy('new', [{ cardId: 'a', word: 'a', passed: true }]);
+    App.finalizeStudyLog();
+    /* 下午新会话早退 */
+    setupStudy('new', [{ cardId: 'b', word: 'b', passed: true }]);
+    App.studyCompletedWords = 1; /* 1/10 早退 */
+    App.studyInitialQueueLength = 10;
+    App.finalizeStudyLog();
+    const log = App.loadLearningLog();
+    const today = new Date().toISOString().slice(0, 10);
+    expect(log[today].completedGoal).toBe(true); /* 不被早退覆盖 */
+    expect(log[today].cardsStudied).toBe(1);
+  });
+
+  it('当日只有早退条目时再次早退仍覆盖为最新', () => {
+    setupStudy('new', [{ cardId: 'a', word: 'a', passed: true }]);
+    App.studyCompletedWords = 2;
+    App.studyInitialQueueLength = 10;
+    App.finalizeStudyLog();
+    App.studyResults = [
+      { cardId: 'b', word: 'b', passed: false },
+      { cardId: 'c', word: 'c', passed: false },
+    ];
+    App.finalizeStudyLog();
+    const log = App.loadLearningLog();
+    const today = new Date().toISOString().slice(0, 10);
+    expect(log[today].completedGoal).toBe(false);
+    expect(log[today].cardsStudied).toBe(2);
+  });
+
   it('零作答不写日志', () => {
     setupStudy('review', []);
     App.finalizeStudyLog();

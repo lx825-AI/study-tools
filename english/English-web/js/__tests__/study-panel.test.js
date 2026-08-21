@@ -267,3 +267,58 @@ describe('会了/不会直接作答推进（不翻转，对齐小程序 markAnsw
     expect(document.getElementById('flashcard').classList.contains('flipped')).toBe(false);
   });
 });
+
+describe('完成面板返回模式选择入口', () => {
+  beforeEach(() => {
+    window.mountStudyDOM();
+    sessionStorage.removeItem('flashcard-study-progress');
+    App.state.decks = [{ id: 'd1', name: '测试', cards: [freshCard({ id: 'a' })] }];
+    App.state.currentDeckId = 'd1';
+    App.studyMode = 'new';
+    App.studyQueue = [];
+    App.studyIndex = 0;
+    App.studyCompletedWords = 1;
+    App.studyInitialQueueLength = 1;
+    App.studyPassed = 1;
+    App.studyFailed = 0;
+    App.studyStartTime = Date.now() - 60000;
+    App.isReviewMode = false;
+    App.studyResults = [{ cardId: 'a', word: 'a', passed: true }];
+  });
+
+  afterEach(() => {
+    App.state.currentDeckId = null;
+    App.state.decks = [];
+    document.body.innerHTML = '';
+  });
+
+  it('完成面板渲染后存在「↩ 返回模式选择」按钮', () => {
+    App.renderStudyPanel();
+    expect(document.getElementById('btnBackToModeSelect')).not.toBeNull();
+    expect(document.getElementById('studyComplete').style.display).toBe('block');
+  });
+
+  it('点击返回按钮回到「选择学习模式」引导', () => {
+    App.renderStudyPanel();
+    document.getElementById('btnBackToModeSelect').click();
+
+    expect(App.studyQueue.length).toBe(0);
+    const guide = document.getElementById('studyModeGuide');
+    expect(guide).not.toBeNull();
+    expect(guide.innerHTML).toContain('选择学习模式');
+  });
+
+  it('review 分支按钮顺序稳定：再来一轮 → 退出复习 → 返回模式选择', () => {
+    /* 先普通分支完成（backBtn 先创建），再切 review 分支（exitBtn2 后创建）模拟顺序抖动场景 */
+    App.renderStudyPanel();
+    expect(document.getElementById('btnBackToModeSelect')).not.toBeNull();
+
+    App.studyMode = 'failed';
+    App.isReviewMode = true;
+    App.studyQueue = [];
+    App.renderStudyPanel();
+
+    const ids = Array.from(document.querySelectorAll('#studyComplete button')).map(function (b) { return b.id; });
+    expect(ids).toEqual(['btnRestart', 'btnExitReview', 'btnBackToModeSelect']);
+  });
+});

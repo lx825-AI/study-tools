@@ -444,6 +444,7 @@ var FlashcardApp = window.FlashcardApp || {};
       var restartBtn = document.getElementById('btnRestart');
       var reviewFailedBtn = document.getElementById('btnReviewRound');
       var exitBtn2 = document.getElementById('btnExitReview');
+      var backBtn = document.getElementById('btnBackToModeSelect');
 
       if (App.isReviewMode) {
         restartBtn.textContent = '🔄 再复习一轮';
@@ -454,7 +455,8 @@ var FlashcardApp = window.FlashcardApp || {};
           exitBtn2.className = 'btn btn-outline';
           exitBtn2.textContent = '↩ 退出复习';
           exitBtn2.onclick = function () { App.exitReviewMode(); };
-          restartBtn.parentNode.appendChild(exitBtn2);
+          /* 插到「返回模式选择」之前，保证顺序稳定（backBtn 未创建时等价 appendChild） */
+          restartBtn.parentNode.insertBefore(exitBtn2, backBtn);
         }
         exitBtn2.style.display = '';
         if (reviewFailedBtn) reviewFailedBtn.style.display = 'none';
@@ -490,6 +492,18 @@ var FlashcardApp = window.FlashcardApp || {};
           if (reviewFailedBtn) reviewFailedBtn.style.display = 'none';
         }
       }
+
+      /* 完成面板返回模式选择入口（两条分支均显示） */
+      if (!backBtn) {
+        backBtn = document.createElement('button');
+        backBtn.id = 'btnBackToModeSelect';
+        backBtn.className = 'btn btn-outline';
+        backBtn.style.marginTop = '8px';
+        backBtn.textContent = '↩ 返回模式选择';
+        backBtn.onclick = function () { App.returnToModeSelect(); };
+        restartBtn.parentNode.appendChild(backBtn);
+      }
+      backBtn.style.display = '';
       return;
     }
 
@@ -727,6 +741,7 @@ var FlashcardApp = window.FlashcardApp || {};
     var reviewCount = ebStats.dueToday;
     var masteredCount = ebStats.mastered;
     var overdueCount = ebStats.overdue;
+    var failedCards = App.collectFailedCards();
 
     var guideHtml =
       '<div class="mode-guide">' +
@@ -767,7 +782,9 @@ var FlashcardApp = window.FlashcardApp || {};
             '<div class="mode-card-body">' +
               '<div class="mode-card-title">错题强化</div>' +
               '<div class="mode-card-desc">集中攻克所有牌组中 EF≤1.8 的难词</div>' +
-              '<div class="mode-card-count">跨牌组收集</div>' +
+              '<div class="mode-card-count ' + (failedCards.length === 0 ? 'count-empty' : '') + '">' +
+                (failedCards.length > 0 ? failedCards.length + ' 个待强化' : '暂无错词') +
+              '</div>' +
             '</div>' +
             '<div class="mode-card-arrow">→</div>' +
           '</div>' +
@@ -784,6 +801,9 @@ var FlashcardApp = window.FlashcardApp || {};
           '</div>' +
 
         '</div>' +
+
+        /* 待强化错词折叠区（错词列表 + 单卡移出，默认收起） */
+        (App.renderModeFailedSectionHtml ? App.renderModeFailedSectionHtml() : '') +
 
         /* 学习概览 */
         '<div class="mode-overview">' +
@@ -850,6 +870,9 @@ var FlashcardApp = window.FlashcardApp || {};
       App.studyMode = 'quick';
       App.startQuickMode();
     });
+
+    /* 错词折叠区事件委托（展开/收起 + 移出） */
+    if (App.bindModeFailedSection) App.bindModeFailedSection();
   };
 
   /* ========== 作答 ========== */

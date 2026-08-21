@@ -6,7 +6,7 @@
 
 - **翻卡学习** — SM-2 + 艾宾浩斯遗忘曲线双算法，四种学习模式（新词/复习/错题/快速浏览）
 - **快速浏览模式** — 线性过词快速刷词，进度独立记录（`flashcard-quick-log`），不污染深度复习的艾宾浩斯历史
-- **错词本** — 独立 tab 集中管理所有牌组中 EF≤1.8 的难词，支持批量练习、移出
+- **错题强化** — 学习模式选择页集中攻克 EF≤1.8 难词，附错词列表浏览与单卡移出
 - **拼写模式** — 学习中内嵌拼写验证，看释义输入英文，自动判断正误
 - **TTS 发音** — 单词朗读，支持英式/美式口音一键切换
 - **每日一句** — 牌组页顶部英文名言（含中文释义），同日同句
@@ -33,7 +33,7 @@ npm install            # 安装构建工具
 npm run gen:wordbooks  # 从小程序词书 JSON 生成 10 套词书（数据源: ../English-mini-app/wordbooks-cloud/）
 npm run build          # 构建到 dist/
 npm run dev            # 本地预览 (需要 npx serve)
-npm test               # vitest 测试（114 用例）
+npm test               # vitest 测试（229 用例）
 ```
 
 ## 词书
@@ -62,7 +62,7 @@ A spaced-repetition English vocabulary learning tool with 10 built-in wordbooks 
 
 - SM-2 + Ebbinghaus dual-algorithm spaced repetition with four study modes (new/review/failed/quick)
 - Quick browse mode with independent progress tracking
-- Wrong-words tab for EF≤1.8 cards: batch practice, remove
+- Failed-words reinforcement in study-mode selection with browse & remove list
 - TTS pronunciation with British/American accent switching
 - Daily English quote with Chinese translation
 - One-tap achievement sharing (Web Share API)

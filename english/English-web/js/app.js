@@ -136,10 +136,8 @@ var FlashcardApp = window.FlashcardApp || {};
     document.getElementById('btnFail').addEventListener('click', function () { App.answerStudy(false); });
     document.getElementById('btnPass').addEventListener('click', function () { App.answerStudy(true); });
     document.getElementById('btnPrevCard').addEventListener('click', function () { App.goPrevCard(); });
-    document.getElementById('btnRestart').addEventListener('click', function () {
-      if (App.isReviewMode) { App.startFailedReview(); }
-      else { App.startStudy(); }
-    });
+    /* btnRestart 的点击由 study-panel.js 完成面板渲染时按当前模式设置 onclick（防双重触发：
+       旧绑定会先执行 startStudy 改写 studyMode，导致「再学一组新词」实际启动复习） */
 
     /* 拼写模式（槽位输入事件委托在 study-panel.js IIFE 顶层，输满自动判定） */
     document.getElementById('btnToggleSpell').addEventListener('click', function () {

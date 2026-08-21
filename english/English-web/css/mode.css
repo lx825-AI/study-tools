@@ -143,6 +143,44 @@
 .overview-mastered { color: var(--success); }
 .overview-progress { color: var(--text-primary); }
 
+/* 待强化错词折叠区（错题强化卡片下方） */
+.mode-failed-section {
+  margin: -4px 0 20px;
+}
+.mode-failed-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px; /* 触控最小目标 */
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+.mode-failed-toggle:hover {
+  border-color: var(--primary);
+}
+.mode-failed-arrow {
+  margin-left: auto;
+  transition: transform 0.2s;
+  color: var(--text-muted);
+}
+.mode-failed-section.open .mode-failed-arrow {
+  transform: rotate(90deg);
+}
+/* 列表较长时限高滚动，避免撑爆引导页 */
+.mode-failed-section .failed-words-list {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
 /* 新词数量设置 */
 .mode-setting {
   display: flex;
