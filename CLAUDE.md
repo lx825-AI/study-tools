@@ -18,7 +18,7 @@ math/
 | 项目 | 构建 | 测试 |
 |------|------|------|
 | English-web | `npm run build` | `npm test` |
-| English-mini-app | `npm run build:mp-weixin` | 220 用例（Vitest） |
+| English-mini-app | `npm run build:mp-weixin` | 294 用例（Vitest） |
 | Math-web | `npm run build` | `npm test` |
 | math-mini-app | `npm run build:mp-weixin` | 45 用例 |
 
@@ -31,6 +31,24 @@ math/
 - English-mini-app: 微信小程序（appid 已配置，待审核）
 - math-mini-app: 微信小程序（appid 待配置）
 - GitHub Pages + Actions 自动部署
+
+## 最近更新（2026-08-21）— English-mini-app 学习模式入口重构
+
+**学习新词恒为深度模式**：删除首页 ModeSwitch 切换组件，「学习新词」固定深度；**快速浏览独立入口**：DeckCard 底部新增「📖 学习 | ⚡ 快速」操作行（对齐 English-web 模式卡并列做法）；per-deck learnMode 旧数据全链路删除（含预览页模式徽章、deprecated 全局 key）；错词本练习补写 deep 分流（修存量残留 quick bug）
+
+**审查修复（同日 5 项）**：跨词书会话恢复丢进度（快照加 deckId + shouldRestoreSession 守卫）；chip 长按误触删除菜单（@longpress.stop）；快速日志并入统计页与数据备份（stats 合并 quick_logs + data-io 导出导入补 quick 数据）；complete 页 studyAgain 回写模式 key；测试 280→286
+
+**操作行精简（同日）**：词书卡删除「学习」入口，只保留通栏「⚡ 快速浏览」+ 常驻说明小字「线性过词 · 不修改学习进度 · 适合碎片时间」（深度学习从首页进入）；decks 页 startDeckStudy 删除
+
+**首页双 📢 修复（同日）**：删除首页管理员 📢 按钮（管理入口统一到「我的」页公告管理），消除与公告 FAB 的右上角双喇叭重叠
+
+**默认英式 + 卡片切换按钮（同日，对齐 web）**：发音默认 'us'→'uk'（6 处写入/回退点 + login 云函数）；StudyCard 正面拆出 🇬🇧/🇺🇸 切换按钮（写全局偏好 + 停旧播放 + toast，不立即重读）；新增 toggleAccentPreference 独立导出；测试 286→288
+
+**审查修复（同日 4 项）**：stopSpeak 补 _playSeq++（修切换口音后旧口音 600ms 重试复播）；mine 页 onShow 刷新设置（修显示陈旧）；tts/组件默认参数统一 uk；测试意图修正
+
+**stop audio fail 修复（同日）**：tts 对无 src 的新音频实例跳过 stop()（修 wxapplib「operateAudio:fail:stop audio fail」异步报错）；测试 288→291
+
+**stop audio fail 修复 II（次日）**：stop 守卫升级为播放态 `_isPlaying`（修自然结束复用/失败重试路径的残留报错）；测试 291→294
 
 ## 最近更新（2026-08-16）— English-mini-app v2.5
 
