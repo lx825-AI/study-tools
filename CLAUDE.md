@@ -72,6 +72,8 @@ math/
 
 **发音韧性**：tts 播放失败自动重试一次（有道 dictvoice 偶发 503 限流）+ study 页 speak 补 .catch
 
+**流畅度优化**：tts 音频上下文单例复用、自动发音错峰 800ms、输入热路径跳过无效 setData、槽位样式预计算
+
 **退格撤回修复**：单输入框退格天然撤回（值变短重建）、中文 commit 不误删；rebuildSlotLetters 纯函数（替代 applySlotInput）
 
 **光标提示**：当前输入位下划线上方闪烁竖线（仅光标闪动，firstEmptySlotIndex 纯函数）
