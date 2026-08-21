@@ -22,6 +22,8 @@ const files = [
   'study-panel.js',
   'wrong-words.js',
   'import.js',
+  'stats-aggregate.js',
+  'stats-curve.js',
   'stats-panel.js',
 ];
 
@@ -34,6 +36,11 @@ files.forEach(f => {
   const wrapped = '(function(App) {\n' + iife + '\n})(window.FlashcardApp);';
   (0, eval)(wrapped);
 });
+
+// jsdom 无 canvas 实现：mock getContext 返回 null，静默走绘制守卫（消除 "Not implemented" 噪音）
+if (typeof HTMLCanvasElement !== 'undefined' && HTMLCanvasElement.prototype.getContext) {
+  HTMLCanvasElement.prototype.getContext = function () { return null; };
+}
 
 // 每个测试初始状态
 beforeEach(() => {

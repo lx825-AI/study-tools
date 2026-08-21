@@ -46,7 +46,13 @@ var FlashcardApp = window.FlashcardApp || {};
     { text: 'A year from now you may wish you had started today.', zh: '一年后，你可能会希望今天就开始了。', author: 'Karen Lamb' }
   ];
 
-  /** 获取今日名言（每日随机固定，同日同句） */
+  /* 当前展示索引与切换防抖（对齐小程序 daily-quote.js currentIndex/isQuoteSwitching） */
+  var _quoteIndex = 0;
+  var _quoteSwitching = false;
+  var _quoteTimer1 = null; /* 150ms 后换文本 */
+  var _quoteTimer2 = null; /* 再 150ms 后恢复动画态 */
+
+  /** 获取今日名言（每日随机固定，同日同句）；同步展示索引供顺序切换 */
   App.pickTodayQuote = function () {
     var today = new Date().toISOString().slice(0, 10);
     var storedDate = null;
@@ -63,18 +69,54 @@ var FlashcardApp = window.FlashcardApp || {};
       } catch (e) { /* 忽略存储错误 */ }
     }
 
+    _quoteIndex = index;
     return App.QUOTES[index];
   };
 
-  /** 渲染每日一句（对齐小程序：当日固定一句） */
+  /** 顺序循环取下一句（不写 storage，仅会话内切换，对齐小程序 getNextQuote） */
+  App.getNextQuote = function () {
+    _quoteIndex = (_quoteIndex + 1) % App.QUOTES.length;
+    return App.QUOTES[_quoteIndex];
+  };
+
+  /** 单条名言 HTML */
+  function _quoteHtml(quote) {
+    return '<div class="quote-text">“' + App.escHtml(quote.text) + '”</div>' +
+      '<div class="quote-zh">' + App.escHtml(quote.zh) + '</div>' +
+      '<div class="quote-author">— ' + App.escHtml(quote.author) + '</div>';
+  }
+
+  /** 渲染每日一句（对齐小程序：当日固定一句 + 整卡点击顺序切换） */
   App.renderDailyQuote = function () {
     var el = document.getElementById('dailyQuoteCard');
     if (!el) return;
     var quote = App.pickTodayQuote();
     if (!quote) return;
-    el.innerHTML =
-      '<div class="quote-text">“' + App.escHtml(quote.text) + '”</div>' +
-      '<div class="quote-zh">' + App.escHtml(quote.zh) + '</div>' +
-      '<div class="quote-author">— ' + App.escHtml(quote.author) + '</div>';
+    /* 重建时重置切换态并清掉进行中的切换定时器（对齐小程序 onShow 回到当日句，
+       防动画中重建后旧回调仍改写文本） */
+    _quoteSwitching = false;
+    if (_quoteTimer1) { clearTimeout(_quoteTimer1); _quoteTimer1 = null; }
+    if (_quoteTimer2) { clearTimeout(_quoteTimer2); _quoteTimer2 = null; }
+    el.classList.remove('quote-switching');
+    el.innerHTML = _quoteHtml(quote);
+    el.onclick = App.switchQuote; /* 属性绑定：innerHTML 重建不累积监听 */
+  };
+
+  /** 点击切换下一句：150ms 淡出动画换文本，150ms 恢复（对齐小程序 switchQuote） */
+  App.switchQuote = function () {
+    if (_quoteSwitching) return; /* 切换中忽略重复点击 */
+    var el = document.getElementById('dailyQuoteCard');
+    if (!el) return;
+    _quoteSwitching = true;
+    el.classList.add('quote-switching');
+    _quoteTimer1 = setTimeout(function () {
+      _quoteTimer1 = null;
+      el.innerHTML = _quoteHtml(App.getNextQuote());
+      _quoteTimer2 = setTimeout(function () {
+        _quoteTimer2 = null;
+        el.classList.remove('quote-switching');
+        _quoteSwitching = false;
+      }, 150);
+    }, 150);
   };
 })(FlashcardApp);

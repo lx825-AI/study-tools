@@ -1,4 +1,4 @@
-/* stats-panel.js —— 学习统计面板 */
+/* stats-panel.js —— 学习统计面板（重设计：对齐小程序 stats.vue + 保留 Web 特有模块） */
 var FlashcardApp = window.FlashcardApp || {};
 (function (App) {
   'use strict';
@@ -78,148 +78,183 @@ var FlashcardApp = window.FlashcardApp || {};
     return streak;
   };
 
-  /* 渲染统计面板 */
-  App.renderStatsPanel = function () {
-    let panel = document.getElementById('panelStats');
-    if (!panel) return;
+  /* ===== 日历翻月状态（会话内粘住；year=0 哨兵 = 首次渲染取当月）与渲染上下文 ===== */
+  var _calState = { year: 0, month: 0 };
+  var _calContext = { studiedMap: {}, todayStr: '' };
 
-    let log = App.loadLearningLog();
-    let now = new Date();
-    let todayKey = now.toISOString().slice(0, 10);
-    let todayData = log[todayKey] || { correct: 0, wrong: 0 };
-    let tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    let tomorrowKey = tomorrow.toISOString().slice(0, 10);
+  /* ===== HTML 构建器 ===== */
 
-    /* 总词汇量/已掌握（口径对齐小程序：ebbinghausStage≥7） */
-    let allCards = [];
-    App.state.decks.forEach(function (d) { allCards = allCards.concat(d.cards); });
-    let totalCards = allCards.length;
-    let masteredCount = allCards.filter(function (c) {
-      App.initEbbinghaus(c);
-      return (c.ebbinghausStage || 0) >= App.EB_MASTERED_STAGE;
-    }).length;
+  function _htmlEmpty() {
+    return '<div class="stats-empty">' +
+      '<div class="stats-empty-icon">📊</div>' +
+      '<div class="stats-empty-title">还没有学习数据</div>' +
+      '<div class="stats-empty-desc">开始学习后，这里会展示你的学习统计</div>' +
+      '<button id="btnStatsGoStudy" class="stats-empty-btn">开始学习 →</button>' +
+    '</div>';
+  }
 
-    /* SM-2 + 艾宾浩斯 统计 */
-    /* 艾宾浩斯阶段分布 */
-    var ebDistribution = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 };
-    var dueToday = 0, dueTomorrow = 0;
-    allCards.forEach(function (c) {
-      App.initEbbinghaus(c);
-      var stage = c.ebbinghausStage || 0;
-      if (ebDistribution[stage] !== undefined) ebDistribution[stage]++;
-      if (App.isDueToday(c)) dueToday++;
-      if (c.ebbinghausNextReview === tomorrowKey) dueTomorrow++;
-    });
-    var totalEB = allCards.length;
-    var reviewedCount = totalEB - (ebDistribution[0] || 0);
+  function _htmlStreakCard(streak) {
+    return '<div class="streak-card">' +
+      '<span class="streak-label">连续打卡</span>' +
+      '<span class="streak-count">🔥 ' + streak + ' 天</span>' +
+    '</div>';
+  }
 
-    /* 连续打卡 */
-    let streak = App.calcStreak(log);
-
-    /* 每日目标 */
-    let dailyGoal = parseInt(localStorage.getItem('flashcard-daily-goal') || '10', 10);
-    if (!isFinite(dailyGoal) || dailyGoal <= 0) dailyGoal = 10; /* 默认 10（对齐小程序）+ 损坏值兜底 */
-    let todayTotal = todayData.correct + todayData.wrong;
-    let goalPercent = Math.min(100, Math.round(todayTotal / dailyGoal * 100));
-
-    /* 本周统计 */
-    let weekStats = [];
-    for (let i = 6; i >= 0; i--) {
-      let d = new Date(now);
-      d.setDate(d.getDate() - i);
-      let key = d.toISOString().slice(0, 10);
-      let dayData = log[key] || { correct: 0, wrong: 0 };
-      weekStats.push({ label: d.getDate() + '日', correct: dayData.correct, wrong: dayData.wrong, total: dayData.correct + dayData.wrong });
-    }
-    let maxTotal = Math.max.apply(null, weekStats.map(function (s) { return s.total; }).concat([1]));
-
-    panel.innerHTML =
-      '<div class="stats-grid">' +
-        '<div class="stat-card">' +
-          '<div class="stat-value">' + totalCards + '</div>' +
-          '<div class="stat-label">总词汇量</div>' +
+  function _htmlReportCard(series) {
+    return '<div class="report-card">' +
+      '<div class="report-header">' +
+        '<span class="report-title">📊 本周学习报告</span>' +
+        '<span class="report-trend' + (series.trendDown ? ' down' : '') + '">' + series.weekTrend + '</span>' +
+      '</div>' +
+      '<div class="report-grid">' +
+        '<div class="report-item">' +
+          '<span class="report-value">' + series.weekWords + '</span>' +
+          '<span class="report-label">学习单词</span>' +
+          '<span class="report-sub">' + App.escHtml(series.weekSubText) + '</span>' +
         '</div>' +
-        '<div class="stat-card">' +
-          '<div class="stat-value">' + masteredCount + '</div>' +
-          '<div class="stat-label">已掌握 (艾宾浩斯)</div>' +
+        '<div class="report-item">' +
+          '<span class="report-value accent">' + series.weekDays + '/7</span>' +
+          '<span class="report-label">学习天数</span>' +
+          '<span class="report-sub">' + App.escHtml(series.weekDayText) + '</span>' +
         '</div>' +
-        '<div class="stat-card">' +
-          '<div class="stat-value">' + todayTotal + '</div>' +
-          '<div class="stat-label">今日已学</div>' +
-        '</div>' +
-        '<div class="stat-card">' +
-          '<div class="stat-value">' + streak + ' 天</div>' +
-          '<div class="stat-label">连续打卡</div>' +
+        '<div class="report-item">' +
+          '<span class="report-value success">' + series.weekAccuracy + '%</span>' +
+          '<span class="report-label">正确率</span>' +
+          '<span class="report-sub">' + App.escHtml(series.weekAccuracyText) + '</span>' +
         '</div>' +
       '</div>' +
-
-      /* 艾宾浩斯阶段分布 */
-      '<div class="section-title" style="margin-top:24px;">🧠 艾宾浩斯遗忘曲线</div>' +
-      '<div class="eb-distribution">' +
-        App.EB_STAGES.map(function (s) {
-          var count = ebDistribution[s.stage] || 0;
-          var pct = totalEB > 0 ? Math.round(count / totalEB * 100) : 0;
-          var isNew = s.stage === 0;
-          var isMastered = s.stage >= App.EB_MASTERED_STAGE;
-          return '<div class="eb-dist-item' + (isMastered ? ' eb-mastered' : isNew ? '' : '') + '">' +
-            '<div class="eb-dist-count">' + count + '</div>' +
-            '<div class="eb-dist-bar-wrap"><div class="eb-dist-bar" style="width:' + pct + '%"></div></div>' +
-            '<div class="eb-dist-label">' + s.label + '</div>' +
+      '<div class="week-chart">' +
+        series.bars.map(function (b) {
+          return '<div class="week-bar-col">' +
+            '<div class="week-bar" style="height:' + b.heightPx + 'px"></div>' +
+            '<span class="week-bar-label">' + b.label + '</span>' +
           '</div>';
         }).join('') +
       '</div>' +
+    '</div>';
+  }
+
+  function _htmlOverviewGrid(totalCards, masteredCount, dueToday, dueTomorrow) {
+    return '<div class="stats-grid">' +
+      '<div class="stat-card">' +
+        '<div class="stat-value">' + totalCards + '</div>' +
+        '<div class="stat-label">总词汇量</div>' +
+      '</div>' +
+      '<div class="stat-card">' +
+        '<div class="stat-value">' + masteredCount + '</div>' +
+        '<div class="stat-label">已掌握</div>' +
+      '</div>' +
+      '<div class="stat-card">' +
+        '<div class="stat-value" style="color:' + (dueToday > 0 ? 'var(--danger-text)' : 'var(--success)') + '">' + dueToday + '</div>' +
+        '<div class="stat-label">今日待复习</div>' +
+      '</div>' +
+      '<div class="stat-card">' +
+        '<div class="stat-value">' + dueTomorrow + '</div>' +
+        '<div class="stat-label">明日待复习</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  /** 打卡日历 HTML（数据来自 _calState/_calContext；翻月时局部重建以保住热力图滚动位） */
+  function _htmlCalendar() {
+    var cal = App.buildCalendarData(_calState.year, _calState.month, _calContext.studiedMap, _calContext.todayStr);
+    var cellsHtml = cal.cells.map(function (c) {
+      if (c.empty) return '<span class="calendar-day is-empty"></span>';
+      var cls = 'calendar-day' +
+        (c.isToday ? ' is-today' : '') +
+        (c.studied ? ' is-studied' : '');
+      return '<span class="' + cls + '">' + c.day + '</span>';
+    }).join('');
+    return '<div id="statsCalendarWrap">' +
+      '<div class="calendar-card">' +
+        '<div class="calendar-header">' +
+          '<button class="calendar-nav" id="calPrev" aria-label="上一月">‹</button>' +
+          '<span class="calendar-title">' + cal.title + '</span>' +
+          '<button class="calendar-nav" id="calNext" aria-label="下一月">›</button>' +
+        '</div>' +
+        '<div class="calendar-weekdays">' +
+          App.WEEKDAY_LABELS.map(function (w) { return '<span class="weekday">' + w + '</span>'; }).join('') +
+        '</div>' +
+        '<div class="calendar-grid">' + cellsHtml + '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function _htmlHeatmapCard(weeks) {
+    var colsHtml = weeks.map(function (col) {
+      return '<div class="heatmap-col">' +
+        col.map(function (c) {
+          /* 未来日期格淡显且无 tooltip（对齐小程序 isFuture 区分） */
+          var futureCls = c.isFuture ? ' is-future' : '';
+          var title = c.isFuture ? '' : ' title="' + c.date + ': ' + c.count + ' 次学习"';
+          return '<div class="heatmap-cell heat12-l' + c.level + futureCls + '"' + title + '></div>';
+        }).join('') +
+      '</div>';
+    }).join('');
+    var legendCells = [0, 1, 2, 3, 4].map(function (l) {
+      return '<span class="legend-cell heat12-l' + l + '"></span>';
+    }).join('');
+    return '<div class="heatmap-card">' +
+      '<div class="heatmap-header">' +
+        '<span class="heatmap-title">学习热力图（近 12 周）</span>' +
+        '<div class="heatmap-legend"><span class="legend-label">少</span>' + legendCells + '<span class="legend-label">多</span></div>' +
+      '</div>' +
+      '<div class="heatmap-grid">' +
+        '<div class="week-labels">' +
+          App.WEEKDAY_LABELS.map(function (w) { return '<span class="day-label">' + w + '</span>'; }).join('') +
+        '</div>' +
+        '<div class="heatmap-scroll"><div class="heatmap-columns">' + colsHtml + '</div></div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function _htmlEbDistribution(distItems) {
+    return '<div class="stats-section">' +
+      '<div class="section-title">🧠 艾宾浩斯阶段分布</div>' +
+      '<div class="eb-distribution">' +
+        distItems.map(function (d) {
+          return '<div class="eb-dist-row">' +
+            '<span class="eb-dist-stage">' + d.label + '</span>' +
+            '<span class="eb-dist-track"><span class="eb-dist-fill" style="width:' + d.percent + '%;background:' + d.color + '"></span></span>' +
+            '<span class="eb-dist-count">' + d.count + '</span>' +
+          '</div>';
+        }).join('') +
+      '</div>' +
+    '</div>';
+  }
+
+  function _htmlFailedWords(weekWrong, failedCards) {
+    var topFailed = failedCards
+      .slice()
+      .sort(function (a, b) { return (a.card.easeFactor || 2.5) - (b.card.easeFactor || 2.5); })
+      .slice(0, 5)
+      .map(function (f) {
+        return '<div class="failed-word-item">' +
+          '<span class="failed-word">' + App.escHtml(f.card.word || f.card.front) + '</span>' +
+          '<span class="failed-ef">EF: ' + ((f.card.easeFactor || 2.5).toFixed(1)) + '</span>' +
+          '<span class="failed-deck">' + App.escHtml(f.deckName) + '</span>' +
+        '</div>';
+      }).join('');
+    return '<div class="stats-section">' +
+      '<div class="section-title">📋 错题统计</div>' +
       '<div class="stats-grid">' +
         '<div class="stat-card">' +
-          '<div class="stat-value" style="color:' + (dueToday > 0 ? 'var(--danger-text)' : 'var(--success)') + '">' + dueToday + '</div>' +
-          '<div class="stat-label">今日待复习</div>' +
+          '<div class="stat-value" style="color:' + (failedCards.length > 0 ? 'var(--danger-text)' : 'var(--success)') + '">' + failedCards.length + '</div>' +
+          '<div class="stat-label">待强化词汇</div>' +
         '</div>' +
         '<div class="stat-card">' +
-          '<div class="stat-value">' + dueTomorrow + '</div>' +
-          '<div class="stat-label">明日待复习</div>' +
-        '</div>' +
-        '<div class="stat-card">' +
-          '<div class="stat-value">' + reviewedCount + '</div>' +
-          '<div class="stat-label">复习进行中</div>' +
-        '</div>' +
-        '<div class="stat-card">' +
-          '<div class="stat-value" style="font-size:20px;">' + (dueToday > 0 ? '📖 去复习' : dueToday === 0 && totalCards > 0 ? '✅ 已清空' : '📝 去添加') + '</div>' +
-          '<div class="stat-label">状态</div>' +
+          '<div class="stat-value">' + weekWrong + '</div>' +
+          '<div class="stat-label">本周错题数</div>' +
         '</div>' +
       '</div>' +
+      (topFailed ? '<div class="section-title" style="margin-top:16px;font-size:12px;">📌 最需强化的词</div>' +
+      '<div class="failed-words-list">' + topFailed + '</div>' : '') +
+    '</div>';
+  }
 
-      /* 错题统计 */
-      (function () {
-        var failedCards = App.collectFailedCards ? App.collectFailedCards() : [];
-        var weekWrong = 0;
-        weekStats.forEach(function (s) { weekWrong += s.wrong; });
-        var topFailed = failedCards
-          .sort(function (a, b) { return (a.card.easeFactor || 2.5) - (b.card.easeFactor || 2.5); })
-          .slice(0, 5)
-          .map(function (f) {
-            return '<div class="failed-word-item">' +
-              '<span class="failed-word">' + App.escHtml(f.card.word || f.card.front) + '</span>' +
-              '<span class="failed-ef">EF: ' + ((f.card.easeFactor || 2.5).toFixed(1)) + '</span>' +
-              '<span class="failed-deck">' + App.escHtml(f.deckName) + '</span>' +
-            '</div>';
-          }).join('');
-        return '<div class="section-title" style="margin-top:24px;">📋 错题统计</div>' +
-        '<div class="stats-grid">' +
-          '<div class="stat-card">' +
-            '<div class="stat-value" style="color:' + (failedCards.length > 0 ? 'var(--danger-text)' : 'var(--success)') + '">' + failedCards.length + '</div>' +
-            '<div class="stat-label">待强化词汇</div>' +
-          '</div>' +
-          '<div class="stat-card">' +
-            '<div class="stat-value">' + weekWrong + '</div>' +
-            '<div class="stat-label">本周错题数</div>' +
-          '</div>' +
-        '</div>' +
-        (topFailed ? '<div class="section-title" style="margin-top:16px;font-size:12px;">📌 最需强化的词</div>' +
-        '<div class="failed-words-list">' + topFailed + '</div>' : '');
-      })() +
-
-      /* 每日目标 */
-      '<div class="section-title" style="margin-top:24px;">🎯 每日目标</div>' +
+  function _htmlDailyGoal(dailyGoal, todayTotal, goalPercent) {
+    return '<div class="stats-section">' +
+      '<div class="section-title">🎯 每日目标</div>' +
       '<div class="daily-goal">' +
         '<div class="daily-goal-settings">' +
           '<span>每日目标:</span>' +
@@ -235,64 +270,140 @@ var FlashcardApp = window.FlashcardApp || {};
           (goalPercent >= 100 ? ' 🎉 目标达成！' : '') +
         '</div>' +
       '</div>' +
+    '</div>';
+  }
 
-      /* 周柱状图 */
-      '<div class="section-title" style="margin-top:24px;">📊 本周学习量</div>' +
-      '<div class="week-chart">' +
-        weekStats.map(function (s) {
-          let height = maxTotal > 0 ? Math.max(4, Math.round((s.total / maxTotal) * 100)) : 0;
-          return '<div class="week-bar-col">' +
-            '<div class="week-bar" style="height:' + height + 'px"></div>' +
-            '<div class="week-bar-label">' + s.label + '</div>' +
-            '<div class="week-bar-num">' + s.total + '</div>' +
-          '</div>';
-        }).join('') +
-      '</div>' +
-
-      /* 热力图 */
-      '<div class="section-title" style="margin-top:24px;">📅 最近 30 天</div>' +
-      '<div class="heatmap">' + App._renderHeatmap(log) + '</div>' +
-
-      /* 分享 */
-      '<div class="section-title" style="margin-top:24px;">📣 分享</div>' +
+  function _htmlShare() {
+    return '<div class="stats-section">' +
+      '<div class="section-title">📣 分享</div>' +
       '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
         '<button id="btnShareAchievement" class="btn btn-outline btn-sm">🏆 分享学习成果</button>' +
-      '</div>';
+      '</div>' +
+    '</div>';
+  }
 
-    /* 绑定分享学习成果按钮 */
-    let btnShare = document.getElementById('btnShareAchievement');
-    if (btnShare) {
-      btnShare.addEventListener('click', App.shareAchievement);
-    }
+  /* ===== 事件绑定 ===== */
 
-    /* 绑定每日目标保存事件（innerHTML 同步赋值后 DOM 已可用） */
-      let goalInput = document.getElementById('dailyGoalInput');
-      let saveBtn = document.getElementById('btnSaveGoal');
-      if (goalInput && saveBtn) {
-        saveBtn.addEventListener('click', function () {
-          let v = parseInt(goalInput.value, 10);
-          if (v >= 5 && v <= 200) {
-            localStorage.setItem('flashcard-daily-goal', v);
-            App.renderStatsPanel();
-          }
-        });
-      }
+  /** 翻月（-1 上一月 / +1 下一月）后局部重建日历卡 */
+  function _changeMonth(delta) {
+    _calState.month += delta;
+    if (_calState.month > 11) { _calState.month = 0; _calState.year++; }
+    if (_calState.month < 0) { _calState.month = 11; _calState.year--; }
+    App._renderCalendarCard();
+  }
+
+  /** 只重建日历卡 DOM（翻月不重建整页，保热力图滚动位置） */
+  App._renderCalendarCard = function () {
+    var wrap = document.getElementById('statsCalendarWrap');
+    if (!wrap) return;
+    wrap.innerHTML = _htmlCalendar();
+    var prevBtn = document.getElementById('calPrev');
+    var nextBtn = document.getElementById('calNext');
+    if (prevBtn) prevBtn.addEventListener('click', function () { _changeMonth(-1); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { _changeMonth(1); });
   };
 
-  App._renderHeatmap = function (log) {
-    let cells = '';
-    let now = new Date();
-    for (let i = 29; i >= 0; i--) {
-      let d = new Date(now);
-      d.setDate(d.getDate() - i);
-      let key = d.toISOString().slice(0, 10);
-      let dayData = log[key] || { correct: 0, wrong: 0 };
-      let total = dayData.correct + dayData.wrong;
-      let level = total === 0 ? 0 : total < 10 ? 1 : total < 30 ? 2 : total < 60 ? 3 : 4;
-      let title = key + ': ' + total + ' 次学习';
-      cells += '<div class="heat-cell heat-level-' + level + '" title="' + title + '"></div>';
-    }
-    return cells;
-  };
+  function bindStatsEvents() {
+    var btnShare = document.getElementById('btnShareAchievement');
+    if (btnShare) btnShare.addEventListener('click', App.shareAchievement);
 
+    var goalInput = document.getElementById('dailyGoalInput');
+    var saveBtn = document.getElementById('btnSaveGoal');
+    if (goalInput && saveBtn) {
+      saveBtn.addEventListener('click', function () {
+        var v = parseInt(goalInput.value, 10);
+        if (v >= 5 && v <= 200) {
+          localStorage.setItem('flashcard-daily-goal', v);
+          App.renderStatsPanel();
+        }
+      });
+    }
+
+    var goStudyBtn = document.getElementById('btnStatsGoStudy');
+    if (goStudyBtn) goStudyBtn.addEventListener('click', function () { App.switchTab('study'); });
+
+    var prevBtn = document.getElementById('calPrev');
+    var nextBtn = document.getElementById('calNext');
+    if (prevBtn) prevBtn.addEventListener('click', function () { _changeMonth(-1); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { _changeMonth(1); });
+  }
+
+  /* ===== 主渲染 ===== */
+  App.renderStatsPanel = function () {
+    var panel = document.getElementById('panelStats');
+    if (!panel) return;
+
+    var now = new Date();
+    var todayKey = now.toISOString().slice(0, 10);
+    var tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    var tomorrowKey = tomorrow.toISOString().slice(0, 10);
+
+    /* 合并快速/深度日志（对齐小程序统计口径：quick 学习计入统计） */
+    var mergedLog = App.mergeLogs(App.loadQuickLog(), App.loadLearningLog());
+
+    /* 全量卡片聚合（现有口径：initEbbinghaus 归一 + 到期检测） */
+    var allCards = [];
+    App.state.decks.forEach(function (d) { allCards = allCards.concat(d.cards); });
+    allCards.forEach(function (c) { App.initEbbinghaus(c); });
+    var totalCards = allCards.length;
+
+    var dueToday = 0, dueTomorrow = 0;
+    allCards.forEach(function (c) {
+      if (App.isDueToday(c)) dueToday++;
+      if (c.ebbinghausNextReview === tomorrowKey) dueTomorrow++;
+    });
+    var distItems = App.stageDistribution(allCards);
+    var masteredCount = distItems[7].count;
+
+    /* 空状态：无卡片且无任何学习日志 */
+    var logEntries = Object.keys(mergedLog);
+    if (totalCards === 0 && logEntries.length === 0) {
+      _calState = { year: 0, month: 0 }; /* 复位翻月状态：数据重新出现时日历回当月 */
+      panel.innerHTML = _htmlEmpty();
+      bindStatsEvents();
+      return;
+    }
+
+    /* 打卡/周报/曲线数据 */
+    var streak = App.calcStreak(mergedLog);
+    var weekSeries = App.buildWeekSeries(mergedLog, now);
+    var heatmapWeeks = App.buildHeatmapWeeks(mergedLog, now);
+    var curveEntries = Object.values(mergedLog);
+
+    /* 每日目标 */
+    var dailyGoal = parseInt(localStorage.getItem('flashcard-daily-goal') || '10', 10);
+    if (!isFinite(dailyGoal) || dailyGoal <= 0) dailyGoal = 10; /* 默认 10（对齐小程序）+ 损坏值兜底 */
+    var todayData = mergedLog[todayKey] || { correct: 0, wrong: 0 };
+    var todayTotal = todayData.correct + todayData.wrong;
+    var goalPercent = Math.min(100, Math.round(todayTotal / dailyGoal * 100));
+
+    /* 日历上下文（studiedMap + 今日；翻月状态首次渲染取当月） */
+    if (_calState.year === 0) {
+      _calState.year = now.getFullYear();
+      _calState.month = now.getMonth();
+    }
+    var studiedMap = {};
+    logEntries.forEach(function (k) {
+      if ((mergedLog[k].cardsStudied || 0) > 0) studiedMap[k] = true;
+    });
+    _calContext = { studiedMap: studiedMap, todayStr: todayKey };
+
+    var failedCards = App.collectFailedCards ? App.collectFailedCards() : [];
+
+    panel.innerHTML =
+      _htmlStreakCard(streak) +
+      _htmlReportCard(weekSeries) +
+      _htmlOverviewGrid(totalCards, masteredCount, dueToday, dueTomorrow) +
+      _htmlCalendar() +
+      _htmlHeatmapCard(heatmapWeeks) +
+      App.renderCurveSectionHtml(curveEntries) +
+      _htmlEbDistribution(distItems) +
+      _htmlFailedWords(weekSeries.weekWrong, failedCards) +
+      _htmlDailyGoal(dailyGoal, todayTotal, goalPercent) +
+      _htmlShare();
+
+    bindStatsEvents();
+    App.drawStatsCurve();
+  };
 })(FlashcardApp);

@@ -1,0 +1,221 @@
+/* stats-charts.css —— 统计页图表模块（打卡日历 / 12 周热力图 / 遗忘曲线，对齐小程序） */
+
+/* ========== 打卡日历（对齐小程序 calendar-card） ========== */
+.calendar-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.calendar-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.calendar-nav {
+  width: 32px;
+  min-width: 44px; /* 触控最小目标 */
+  height: 32px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 18px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.calendar-nav:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 4px;
+}
+.weekday {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 4px 0;
+}
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.calendar-day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-primary);
+}
+.calendar-day.is-studied {
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-weight: 600;
+}
+.calendar-day.is-today {
+  border: 1px solid var(--primary);
+}
+.calendar-day.is-empty {
+  color: transparent;
+}
+
+/* ========== 12 周热力图（对齐小程序 HeatmapChart，横向滚动 + 5 档色阶） ========== */
+.heatmap-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.heatmap-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.heatmap-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.heatmap-legend {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.legend-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin: 0 2px;
+}
+.legend-cell {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+.heatmap-grid {
+  display: flex;
+  gap: 8px;
+}
+.week-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.day-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.heatmap-scroll {
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.heatmap-columns {
+  display: flex;
+  gap: 2px;
+}
+.heatmap-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.heatmap-cell {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.heatmap-cell.is-future {
+  opacity: 0.25;
+}
+/* 亮色主题 5 档色阶 */
+.heat12-l0 { background: var(--border); }
+.heat12-l1 { background: #c7d2fe; }
+.heat12-l2 { background: #a5b4fc; }
+.heat12-l3 { background: #4f46e5; }
+.heat12-l4 { background: #7c3aed; }
+/* 暗色主题 5 档色阶（与小程序一致） */
+[data-theme="dark"] .heat12-l0 { background: #1e293b; }
+[data-theme="dark"] .heat12-l1 { background: #1e3a5f; }
+[data-theme="dark"] .heat12-l2 { background: #1e4a8f; }
+[data-theme="dark"] .heat12-l3 { background: #4f46e5; }
+[data-theme="dark"] .heat12-l4 { background: #7c3aed; }
+
+/* ========== 遗忘曲线（对齐小程序 ForgettingCurve） ========== */
+.curve-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.curve-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+.curve-card canvas {
+  display: block;
+  margin: 0 auto;
+  border-radius: var(--radius-sm);
+  max-width: 100%;
+}
+.curve-legend {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend-line {
+  display: inline-block;
+  width: 20px;
+  height: 0;
+  border-top: 2px solid #818cf8;
+}
+.legend-line.theoretical {
+  border-top: 2px dashed #94a3b8;
+}
+.legend-line.actual {
+  border-top: 2px solid var(--primary);
+}
+.curve-note {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--success);
+}

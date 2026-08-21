@@ -136,6 +136,115 @@ describe('finalizeStudyLog', () => {
   });
 });
 
+describe('calcStreak', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('仅今天有记录为 1', () => {
+    vi.setSystemTime(new Date(2026, 7, 21, 12));
+    expect(App.calcStreak({ '2026-08-21': { cardsStudied: 1 } })).toBe(1);
+  });
+
+  it('连续 2 天为 2', () => {
+    vi.setSystemTime(new Date(2026, 7, 21, 12));
+    const log = { '2026-08-21': { cardsStudied: 1 }, '2026-08-20': { cardsStudied: 1 } };
+    expect(App.calcStreak(log)).toBe(2);
+  });
+
+  it('中间断档从今天重计', () => {
+    vi.setSystemTime(new Date(2026, 7, 21, 12));
+    const log = {
+      '2026-08-21': { cardsStudied: 1 },
+      '2026-08-20': { cardsStudied: 1 },
+      '2026-08-18': { cardsStudied: 1 }, /* 19 缺 → 断档 */
+    };
+    expect(App.calcStreak(log)).toBe(2);
+  });
+});
+
+describe('renderStatsPanel DOM 层（重设计 11 模块）', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="panelStats"></div>';
+    localStorage.clear();
+    sessionStorage.clear();
+    vi.setSystemTime(new Date(2026, 7, 15, 12)); /* 2026-08-15 本地（UTC 同一天） */
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    document.body.innerHTML = '';
+    App.state.decks = [];
+    App.state.currentDeckId = null;
+  });
+
+  function seedStudyData() {
+    App.state.decks = [{
+      id: 'd1', name: '四级',
+      cards: [
+        { id: 'c1', front: 'abandon', easeFactor: 2.5, repetitions: 1, ebbinghausStage: 1, ebbinghausNextReview: '2026-08-15' },
+        { id: 'c2', front: 'book', easeFactor: 1.5, repetitions: 3, ebbinghausStage: 2 },
+      ],
+    }];
+    App.state.currentDeckId = 'd1';
+    localStorage.setItem(App.LEARNING_LOG_KEY, JSON.stringify({
+      '2026-08-15': { date: '2026-08-15', cardsStudied: 10, correct: 8, wrong: 2, duration: 300, completedGoal: true },
+    }));
+    localStorage.setItem(App.QUICK_LOG_KEY, JSON.stringify({
+      '2026-08-14': { date: '2026-08-14', cardsStudied: 5, correct: 4, wrong: 1, duration: 120, completedGoal: true },
+    }));
+  }
+
+  it('空数据时渲染空状态，点「开始学习」跳学习 tab', () => {
+    const spy = vi.spyOn(App, 'switchTab').mockImplementation(function () {});
+    App.renderStatsPanel();
+    const panel = document.getElementById('panelStats');
+    expect(panel.innerHTML).toContain('还没有学习数据');
+    expect(panel.querySelector('#btnStatsGoStudy')).not.toBeNull();
+    panel.querySelector('#btnStatsGoStudy').click();
+    expect(spy).toHaveBeenCalledWith('study');
+    spy.mockRestore();
+  });
+
+  it('有数据时 11 模块容器齐全且 quick 日志计入打卡（合并口径）', () => {
+    seedStudyData();
+    App.renderStatsPanel();
+    const panel = document.getElementById('panelStats');
+    /* 连续打卡：今天 deep + 昨天 quick = 2 天 */
+    expect(panel.querySelector('.streak-card .streak-count').textContent).toBe('🔥 2 天');
+    expect(panel.querySelector('.report-card')).not.toBeNull();
+    expect(panel.querySelectorAll('.report-item').length).toBe(3);
+    expect(panel.querySelectorAll('.week-bar').length).toBe(7);
+    expect(panel.querySelector('.calendar-card')).not.toBeNull();
+    expect(panel.querySelector('.calendar-title').textContent).toBe('2026年 8月');
+    expect(panel.querySelector('.heatmap-card')).not.toBeNull();
+    const cellCount = panel.querySelectorAll('.heatmap-cell').length;
+    expect(cellCount).toBeGreaterThanOrEqual(7 * 12);
+    expect(panel.querySelector('.curve-card canvas')).not.toBeNull();
+    expect(panel.querySelectorAll('.eb-dist-row').length).toBe(8);
+    expect(panel.querySelector('.daily-goal')).not.toBeNull();
+    expect(panel.querySelector('#btnShareAchievement')).not.toBeNull();
+    /* 总览：2 卡 + 今日待复习 1（nextReview=今天） */
+    expect(panel.querySelectorAll('.stats-grid').length).toBeGreaterThanOrEqual(2);
+    expect(panel.innerHTML).toContain('待强化词汇');
+  });
+
+  it('jsdom 无 canvas 实现时渲染不抛异常（守卫回归）', () => {
+    seedStudyData();
+    expect(function () { App.renderStatsPanel(); }).not.toThrow();
+  });
+
+  it('日历翻月：下一月 → 2026年 9月，再上月两次 → 2026年 7月', () => {
+    seedStudyData();
+    App.renderStatsPanel();
+    document.getElementById('calNext').click();
+    expect(document.querySelector('.calendar-title').textContent).toBe('2026年 9月');
+    document.getElementById('calPrev').click();
+    document.getElementById('calPrev').click();
+    expect(document.querySelector('.calendar-title').textContent).toBe('2026年 7月');
+  });
+});
+
 describe('returnToModeSelect 早退守卫（B7）', () => {
   beforeEach(() => {
     localStorage.removeItem(App.LEARNING_LOG_KEY);

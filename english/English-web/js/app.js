@@ -192,6 +192,8 @@ var FlashcardApp = window.FlashcardApp || {};
       else html.removeAttribute('data-theme');
       localStorage.setItem('flashcard-theme', next || 'light');
       document.getElementById('themeToggle').textContent = next ? '☀️' : '🌙';
+      /* 统计页遗忘曲线 canvas 需按新主题重绘 */
+      if (App.refreshStatsCharts) App.refreshStatsCharts();
     });
 
     /* 口音切换按钮 */

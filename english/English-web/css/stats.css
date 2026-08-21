@@ -1,175 +1,223 @@
-/* stats.css —— 统计面板 */
+/* stats.css —— 统计面板（重设计：对齐小程序 stats.vue + 保留 Web 特有模块） */
+
+/* ========== 基础卡片网格 ========== */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
 .stat-card {
   background: var(--surface);
-  border-radius: var(--radius-md);
-  padding: 20px 16px;
-  text-align: center;
-  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 16px;
 }
 .stat-value {
   font-size: 28px;
   font-weight: 700;
-  color: var(--primary);
+  color: var(--text-primary);
   line-height: 1.2;
 }
 .stat-label {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-muted);
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
-/* 周统计柱状图 */
+/* 小节容器（模块间统一间距，替代旧内联 margin） */
+.stats-section {
+  margin-top: 24px;
+}
+
+/* ========== 空状态（对齐小程序 stats-empty） ========== */
+.stats-empty {
+  text-align: center;
+  padding: 48px 24px;
+}
+.stats-empty-icon {
+  font-size: 48px;
+}
+.stats-empty-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-top: 12px;
+}
+.stats-empty-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+.stats-empty-btn {
+  margin-top: 20px;
+  padding: 10px 28px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.3);
+  transition: all 0.2s;
+}
+.stats-empty-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+}
+
+/* ========== 连续打卡卡（对齐小程序 streak-card） ========== */
+.streak-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.streak-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.streak-count {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--warning);
+}
+
+/* ========== 本周学习报告（对齐小程序 report-card） ========== */
+.report-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.report-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.report-trend {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--success);
+  background: var(--success-bg);
+  padding: 2px 10px;
+  border-radius: 999px;
+}
+.report-trend.down {
+  color: var(--warning);
+}
+.report-grid {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+  margin-bottom: 14px;
+}
+.report-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.report-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+.report-value.accent { color: var(--primary); }
+.report-value.success { color: var(--success); }
+.report-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.report-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  opacity: 0.85;
+}
+
+/* ========== 周柱状图（柱高 clamp(4, count/100*60)px，对齐小程序 weekBars） ========== */
 .week-chart {
   display: flex;
-  gap: 8px;
   align-items: flex-end;
-  justify-content: center;
-  height: 120px;
-  padding: 0 4px;
-  margin-top: 12px;
+  gap: 4px;
+  height: 80px;
 }
 .week-bar-col {
   flex: 1;
-  max-width: 48px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-end;
   gap: 4px;
+  height: 100%;
 }
 .week-bar {
-  width: 100%;
-  max-width: 36px;
-  background: var(--primary);
+  width: 28px;
+  max-width: 80%;
   border-radius: 4px 4px 0 0;
-  min-height: 4px;
-  transition: height 0.4s ease;
+  background: var(--primary);
+  transition: height 0.3s;
 }
 .week-bar-label {
   font-size: 11px;
   color: var(--text-muted);
 }
-.week-bar-num {
-  font-size: 11px;
-  color: var(--text-secondary);
-  font-weight: 600;
-}
 
-/* 热力图 */
-.heatmap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 3px;
-  justify-content: center;
-  margin-top: 8px;
-}
-.heat-cell {
-  width: 14px;
-  height: 14px;
-  border-radius: 2px;
-  background: var(--border);
-}
-.heat-cell.heat-level-0 { background: var(--border); }
-.heat-cell.heat-level-1 { background: #bbf7d0; }
-.heat-cell.heat-level-2 { background: #86efac; }
-.heat-cell.heat-level-3 { background: #4ade80; }
-.heat-cell.heat-level-4 { background: #16a34a; }
-[data-theme="dark"] .heat-cell.heat-level-1 { background: #14532d; }
-[data-theme="dark"] .heat-cell.heat-level-2 { background: #166534; }
-[data-theme="dark"] .heat-cell.heat-level-3 { background: #15803d; }
-[data-theme="dark"] .heat-cell.heat-level-4 { background: #16a34a; }
-
-/* 每日目标 */
-.daily-goal { margin-bottom: 16px; }
-.daily-goal-settings {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  margin-top: 8px;
-}
-.daily-goal-settings input {
-  width: 60px;
-  padding: 4px 8px;
-  border: 2px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  text-align: center;
-  background: var(--surface);
-  color: var(--text-primary);
-}
-.daily-goal-progress {
-  width: 100%;
-  height: 10px;
-  background: var(--border);
-  border-radius: 5px;
-  overflow: hidden;
-  margin-top: 8px;
-}
-.daily-goal-fill {
-  height: 100%;
-  background: var(--primary);
-  border-radius: 5px;
-  transition: width 0.4s;
-}
-
-/* 艾宾浩斯阶段分布 */
+/* ========== 艾宾浩斯阶段分布（8 色横条，对齐小程序 dist-bar-row） ========== */
 .eb-distribution {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 8px;
-  padding: 14px 16px;
   background: var(--surface);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-xs);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 16px;
 }
-.eb-dist-item {
+.eb-dist-row {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 4px 0;
 }
-.eb-dist-count {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--primary);
-  width: 32px;
+.eb-dist-stage {
+  width: 48px;
   text-align: right;
+  font-size: 12px;
+  color: var(--text-secondary);
   flex-shrink: 0;
 }
-.eb-dist-item.eb-mastered .eb-dist-count {
-  color: var(--success);
-}
-.eb-dist-bar-wrap {
+.eb-dist-track {
   flex: 1;
   height: 8px;
-  background: var(--border-light);
+  background: var(--surface-secondary);
   border-radius: 4px;
   overflow: hidden;
 }
-.eb-dist-bar {
+.eb-dist-fill {
+  display: block;
   height: 100%;
-  background: var(--primary);
   border-radius: 4px;
-  transition: width 0.5s ease;
-  min-width: 2px;
+  transition: width 0.3s;
 }
-.eb-dist-item.eb-mastered .eb-dist-bar {
-  background: var(--success);
-}
-.eb-dist-label {
-  font-size: 11px;
-  color: var(--text-muted);
-  width: 56px;
+.eb-dist-count {
+  width: 32px;
+  text-align: right;
+  font-size: 12px;
+  color: var(--text-primary);
   flex-shrink: 0;
 }
 
-/* 错题统计 */
+/* ========== 错题统计（保留，与学习模式折叠区共用） ========== */
 .failed-words-list {
   background: var(--surface);
   border-radius: var(--radius-md);
@@ -202,7 +250,50 @@
   margin-left: auto;
 }
 
-/* 移动端统计面板 */
+/* ========== 每日目标（保留） ========== */
+.daily-goal {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+.daily-goal-settings {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+.daily-goal-settings input[type="number"] {
+  width: 60px;
+  padding: 6px 8px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  text-align: center;
+  background: var(--surface);
+  color: var(--text-primary);
+  font-family: inherit;
+}
+.daily-goal-settings input[type="number"]:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+.daily-goal-progress {
+  height: 10px;
+  background: var(--surface-secondary);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.daily-goal-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 999px;
+  transition: width 0.3s;
+}
+
+/* ========== 移动端 ========== */
 @media (max-width: 480px) {
   .stats-grid {
     grid-template-columns: 1fr;
@@ -214,51 +305,17 @@
   .stat-value {
     font-size: 24px;
   }
-
-  .week-chart {
-    height: 80px;
-    gap: 4px;
-    padding: 0 2px;
-  }
-  .week-bar-col {
-    max-width: 40px;
-    gap: 2px;
+  .report-value {
+    font-size: 24px;
   }
   .week-bar {
-    max-width: 28px;
+    width: 20px;
   }
-  .week-bar-label {
-    font-size: 10px;
+  .stats-section {
+    margin-top: 18px;
   }
-  .week-bar-num {
-    font-size: 10px;
-  }
-
-  .heatmap {
-    gap: 2px;
-  }
-  .heat-cell {
-    width: 12px;
-    height: 12px;
-    border-radius: 2px;
-  }
-
-  .eb-distribution {
-    padding: 10px 12px;
+  .streak-card {
+    flex-wrap: wrap;
     gap: 4px;
-  }
-
-  .failed-words-list {
-    padding: 10px 12px;
-  }
-  .failed-word-item {
-    flex-wrap: wrap;
-    gap: 6px;
-    padding: 8px 0;
-  }
-
-  .daily-goal-settings {
-    flex-wrap: wrap;
-    gap: 6px;
   }
 }

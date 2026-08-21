@@ -86,6 +86,8 @@ var FlashcardApp = window.FlashcardApp || {};
     if (tab === 'study') {
       App.renderStudyPanel();
     }
+    /* 回到牌组 tab 时刷新每日一句（对齐小程序 onShow：会话内切换重置回当日句） */
+    if (tab === 'decks' && App.renderDailyQuote) App.renderDailyQuote();
     if (tab === 'preview') App.renderPreviewPanel();
     if (tab === 'cards') App.renderCardsPanel();
     if (tab === 'stats') App.renderStatsPanel();
