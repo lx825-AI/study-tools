@@ -18,7 +18,7 @@ math/
 | 项目 | 构建 | 测试 |
 |------|------|------|
 | English-web | `npm run build` | `npm test` |
-| English-mini-app | `npm run build:mp-weixin` | 294 用例（Vitest） |
+| English-mini-app | `npm run build:mp-weixin` | 304 用例（Vitest） |
 | Math-web | `npm run build` | `npm test` |
 | math-mini-app | `npm run build:mp-weixin` | 45 用例 |
 
@@ -49,6 +49,14 @@ math/
 **stop audio fail 修复（同日）**：tts 对无 src 的新音频实例跳过 stop()（修 wxapplib「operateAudio:fail:stop audio fail」异步报错）；测试 288→291
 
 **stop audio fail 修复 II（次日）**：stop 守卫升级为播放态 `_isPlaying`（修自然结束复用/失败重试路径的残留报错）；测试 291→294
+
+## 最近更新（2026-08-22）— English-mini-app 拼写入口改右滑手势
+
+删除「✏️ 拼写」按钮，改为卡片右滑进入拼写（深度/快速/复习全模式生效）；新增 isSwipeRight 纯函数判定手势（60px 阈值 + 横向为主）；卡片常驻提示「点击翻转 · 右滑进入拼写」；测试 294→298
+
+**拼写页左滑退出（同日）**：spell 页左滑手势退出（isSwipeLeft 镜像复用 isSwipeRight），底部常驻提示「← 左滑退出拼写」；测试 298→302
+
+**拼写模式性能优化（同日）**：打字去每键 value 回写（受控 input 原生往返是卡顿主因）+ 聚焦延后 350ms 错峰入场转场 + 退出先收键盘再导航 + pauseSpeak 软暂停复用音频实例 + 光标 v-show；测试 302→304
 
 ## 最近更新（2026-08-16）— English-mini-app v2.5
 
