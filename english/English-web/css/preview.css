@@ -163,6 +163,37 @@
   margin-bottom: 12px;
   flex-wrap: wrap;
 }
+
+/* 阶段分类 pill（对齐小程序 preview filter-tabs：胶囊 + 数量内联） */
+.cards-filter {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.filter-pill {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+.filter-pill:hover {
+  border-color: var(--primary);
+}
+.filter-pill:active {
+  opacity: 0.7;
+}
+.filter-pill.active {
+  background: var(--primary-bg);
+  border-color: var(--primary);
+  color: var(--primary);
+  font-weight: 600;
+}
 .batch-actions {
   display: flex;
   gap: 6px;

@@ -112,4 +112,23 @@ var FlashcardApp = window.FlashcardApp || {};
     return goal;
   };
 
+  /* 卡片阶段分类（对齐小程序 preview filterTabs 口径：新词 stage0/无、学习中 1-6、已掌握 ≥7） */
+  App.cardStageCategory = function (card) {
+    var stage = card.ebbinghausStage;
+    if (!stage || stage === 0) return 'new';
+    if (stage >= App.EB_MASTERED_STAGE) return 'mastered';
+    return 'learning';
+  };
+
+  /* 按分类筛选卡片，保留 deck.cards 原下标（删除/批量删除依赖 data-index 原下标） */
+  App.filterCardsByStage = function (cards, filter) {
+    var out = [];
+    cards.forEach(function (c, i) {
+      if (filter === 'all' || App.cardStageCategory(c) === filter) {
+        out.push({ card: c, index: i });
+      }
+    });
+    return out;
+  };
+
 })(FlashcardApp);

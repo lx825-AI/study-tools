@@ -1,15 +1,21 @@
-/* cards-panel.js —— 卡片编辑（虚拟滚动优化） */
+/* cards-panel.js —— 卡片编辑（虚拟滚动优化 + 阶段分类筛选） */
 var FlashcardApp = window.FlashcardApp || {};
 (function (App) {
   'use strict';
 
   App.cardsBatchMode = false;
+  /* 阶段分类筛选（会话内保持；'all' | 'new' | 'learning' | 'mastered'） */
+  App._cardFilter = 'all';
+  /* 当前筛选后的 {card, index} 列表（虚拟滚动基于它；index 为 deck.cards 原下标） */
+  App._cardListFiltered = [];
   /* 虚拟滚动状态 */
   App._cardListScrollTop = 0;
   App._cardListRendered = [];
 
   var ITEM_HEIGHT = 74;   /* 每张卡片项高度（px） */
   var BUFFER = 8;         /* 上下缓冲区项数 */
+
+  var FILTER_LABELS = { all: '全部', new: '新词', learning: '学习中', mastered: '已掌握' };
 
   App.renderCardsPanel = function () {
     var deck = App.getCurrentDeck();
@@ -27,6 +33,32 @@ var FlashcardApp = window.FlashcardApp || {};
     content.style.display = 'block';
     countTitle.textContent = '卡片列表 (' + deck.cards.length + ' 张)';
 
+    /* 阶段归一（新添加卡无 stage 字段）+ 一次循环算 4 分类计数 */
+    deck.cards.forEach(function (c) { App.initEbbinghaus(c); });
+    var counts = { all: deck.cards.length, new: 0, learning: 0, mastered: 0 };
+    deck.cards.forEach(function (c) { counts[App.cardStageCategory(c)]++; });
+
+    /* 分类 pill 行（对齐小程序 preview filter-tabs：分类名 (数量)） */
+    var filterEl = document.getElementById('cardsFilter');
+    if (filterEl) {
+      filterEl.innerHTML = ['all', 'new', 'learning', 'mastered'].map(function (key) {
+        return '<button class="filter-pill' + (App._cardFilter === key ? ' active' : '') + '" data-filter="' + key + '">' +
+          FILTER_LABELS[key] + ' (' + counts[key] + ')' +
+        '</button>';
+      }).join('');
+      filterEl.querySelectorAll('.filter-pill').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          App._cardFilter = btn.dataset.filter;
+          App._cardListScrollTop = 0;
+          App._cardListRendered = [];
+          App.renderCardsPanel();
+        });
+      });
+    }
+
+    /* 筛选（保留原下标） */
+    App._cardListFiltered = App.filterCardsByStage(deck.cards, App._cardFilter);
+
     /* 批量模式按钮状态 */
     var btnBatchMode = document.getElementById('btnBatchMode');
     var batchActions = document.getElementById('batchActions');
@@ -42,25 +74,32 @@ var FlashcardApp = window.FlashcardApp || {};
       list.style.overflowY = 'visible';
       return;
     }
+    if (App._cardListFiltered.length === 0) {
+      list.innerHTML = '<div class="empty-state"><p>该分类暂无单词</p></div>';
+      list.style.overflowY = 'visible';
+      return;
+    }
 
     /* 少量卡片直接渲染（避免虚拟滚动开销） */
-    if (deck.cards.length <= 100) {
+    if (App._cardListFiltered.length <= 100) {
       list.style.overflowY = 'visible';
       list.style.height = '';
-      list.innerHTML = deck.cards.map(renderCardItem).join('');
+      list.innerHTML = App._cardListFiltered.map(function (f) {
+        return renderCardItem(f.card, f.index);
+      }).join('');
       list.scrollTop = 0;
       return;
     }
 
-    /* 大量卡片：虚拟滚动 */
+    /* 大量卡片：虚拟滚动（基于筛选后列表，data-index 仍为原下标） */
     list.style.overflowY = 'auto';
-    var listHeight = Math.min(deck.cards.length * ITEM_HEIGHT, window.innerHeight * 0.7);
+    var listHeight = Math.min(App._cardListFiltered.length * ITEM_HEIGHT, window.innerHeight * 0.7);
     list.style.height = listHeight + 'px';
     list.scrollTop = App._cardListScrollTop || 0;
     App._cardListRendered = [];   /* 重置，确保首次渲染不被跳过 */
 
     /* 设置总高度占位 */
-    list.innerHTML = '<div style="height:' + (deck.cards.length * ITEM_HEIGHT) + 'px;position:relative;" id="cardListInner">' +
+    list.innerHTML = '<div style="height:' + (App._cardListFiltered.length * ITEM_HEIGHT) + 'px;position:relative;" id="cardListInner">' +
       '<div id="cardListWindow" style="position:absolute;left:0;right:0;top:0;"></div></div>';
 
     /* 延迟到浏览器重排后渲染，确保 clientHeight 已生效（面板从隐藏切换时高度为 0） */
@@ -101,10 +140,9 @@ var FlashcardApp = window.FlashcardApp || {};
     '</div>';
   }
 
-  /* 虚拟滚动：仅渲染可见范围内的卡片 */
+  /* 虚拟滚动：仅渲染可见范围内的卡片（基于筛选后列表，data-index 为原下标） */
   App._renderVisibleCards = function () {
-    var deck = App.getCurrentDeck();
-    if (!deck || deck.cards.length <= 100) return;
+    if (App._cardListFiltered.length <= 100) return;
 
     var list = document.getElementById('cardList');
     var windowEl = document.getElementById('cardListWindow');
@@ -114,7 +152,7 @@ var FlashcardApp = window.FlashcardApp || {};
     /* 面板刚从隐藏切换时 clientHeight 可能为 0，用显式设置的高度兜底 */
     var viewHeight = list.clientHeight || parseInt(list.style.height) || 400;
     var firstVisible = Math.max(0, Math.floor(scrollTop / ITEM_HEIGHT) - BUFFER);
-    var lastVisible = Math.min(deck.cards.length, Math.ceil((scrollTop + viewHeight) / ITEM_HEIGHT) + BUFFER);
+    var lastVisible = Math.min(App._cardListFiltered.length, Math.ceil((scrollTop + viewHeight) / ITEM_HEIGHT) + BUFFER);
 
     /* 如果可见范围没变，跳过 */
     if (App._cardListRendered[0] === firstVisible && App._cardListRendered[1] === lastVisible) return;
@@ -124,7 +162,8 @@ var FlashcardApp = window.FlashcardApp || {};
     var topOffset = firstVisible * ITEM_HEIGHT;
     var html = '';
     for (var i = firstVisible; i < lastVisible; i++) {
-      html += renderCardItem(deck.cards[i], i);
+      var f = App._cardListFiltered[i];
+      html += renderCardItem(f.card, f.index);
     }
     windowEl.style.top = topOffset + 'px';
     windowEl.innerHTML = html;

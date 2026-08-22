@@ -202,3 +202,33 @@ describe('firstEmptySlotIndex', () => {
     expect(App.firstEmptySlotIndex(['a', 'b', 'c'])).toBe(-1);
   });
 });
+
+describe('cardStageCategory / filterCardsByStage', () => {
+  it('三分类边界：0/undefined→new、1/6→learning、7+→mastered', () => {
+    expect(App.cardStageCategory({ ebbinghausStage: 0 })).toBe('new');
+    expect(App.cardStageCategory({})).toBe('new');
+    expect(App.cardStageCategory({ ebbinghausStage: 1 })).toBe('learning');
+    expect(App.cardStageCategory({ ebbinghausStage: 6 })).toBe('learning');
+    expect(App.cardStageCategory({ ebbinghausStage: 7 })).toBe('mastered');
+    expect(App.cardStageCategory({ ebbinghausStage: 10 })).toBe('mastered');
+  });
+
+  it("filterCardsByStage 'all' 保序且含原下标", () => {
+    const cards = [{ id: 'a' }, { id: 'b' }, { id: 'c' }];
+    const out = App.filterCardsByStage(cards, 'all');
+    expect(out.map(f => f.card.id)).toEqual(['a', 'b', 'c']);
+    expect(out.map(f => f.index)).toEqual([0, 1, 2]);
+  });
+
+  it("filterCardsByStage 'new' 仅新词且 index 为原下标", () => {
+    const cards = [
+      { id: 'a', ebbinghausStage: 0 },
+      { id: 'b', ebbinghausStage: 3 },
+      { id: 'c' }, /* 无 stage = 新词 */
+      { id: 'd', ebbinghausStage: 7 },
+    ];
+    const out = App.filterCardsByStage(cards, 'new');
+    expect(out.map(f => f.card.id)).toEqual(['a', 'c']);
+    expect(out.map(f => f.index)).toEqual([0, 2]);
+  });
+});

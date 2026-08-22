@@ -77,6 +77,12 @@ scripts/
 
 **判定反馈 3 项优化（2026-08-20，对齐小程序 SpellInput 纯练习化）**：正确后不清空重拼——字母保留槽位+绿色边框（spell-slot-correct），修改字母即回输入态清除陈旧 ✅（input 委托检测 spell-correct 态）；错误后答案不常驻——600ms 清空回调同时清空 feedback 文字（防照着拼写）；判定反馈从卡片下方移入卡片内部拼写格子正下方（盲拼分支动态渲染 #spellFeedback，index.html/setup.js 桩同步删除）；测试 199→201；Playwright 端到端 12/12 通过
 
+## 最近更新（2026-08-22）— 卡片界面单词分类筛选（对齐小程序 preview filter-tabs）
+
+**四分类 pill**：卡片面板新增「全部/新词/学习中/已掌握」胶囊筛选（`分类名 (数量)` 内联计数、选中淡主色底+主色描边；对齐小程序 preview.vue 口径：新词 stage0/无、学习中 1-6、已掌握 ≥7）；筛选状态 `App._cardFilter` 会话内保持（切走再回不重置，避免预览搜索丢状态的已知问题）；虚拟滚动/删除基于保留 deck.cards 原下标的 `{card,index}` 对（data-index 原下标，删除/批量删除零错位）；分类空态「该分类暂无单词」；新增 utils.js `cardStageCategory`/`filterCardsByStage` 纯函数
+
+**测试**：276→284（utils 分类 +3、cards-panel 筛选 +5；setup.js 新增 mountCardsDOM 桩 + cards-panel.js 加载）
+
 ## 最近更新（2026-08-22）— 删除统计界面分享功能
 
 **分享模块删除**：统计页「📣 分享」模块与按钮删除（对齐小程序统计页无分享）；`App.shareAchievement`（唯一调用者即该按钮）成死代码一并删除；README 功能清单与 v2.7「保留」清单同步清理；测试 276→275

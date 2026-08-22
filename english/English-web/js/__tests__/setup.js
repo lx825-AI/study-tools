@@ -25,6 +25,7 @@ const files = [
   'stats-aggregate.js',
   'stats-curve.js',
   'stats-panel.js',
+  'cards-panel.js',
 ];
 
 files.forEach(f => {
@@ -49,6 +50,27 @@ beforeEach(() => {
   window.FlashcardApp.state = window.FlashcardApp.state || {};
   window.FlashcardApp.state.decks = window.FlashcardApp.state.decks || [];
 });
+
+/**
+ * 共享 DOM 桩：卡片面板完整结构
+ * （renderCardsPanel 所需的全部 DOM 元素）
+ */
+window.mountCardsDOM = function () {
+  document.body.innerHTML =
+    '<div id="cardsNoDeck" style="display:none"></div>' +
+    '<div id="cardsContent">' +
+      '<div class="section-title" id="cardsCountTitle">卡片列表</div>' +
+      '<div class="cards-filter" id="cardsFilter"></div>' +
+      '<div class="cards-toolbar" id="cardsToolbar">' +
+        '<button id="btnBatchMode"></button>' +
+        '<div class="batch-actions" id="batchActions" style="display:none"></div>' +
+      '</div>' +
+      '<div class="card-list" id="cardList"></div>' +
+      '<input id="cardFrontInput">' +
+      '<input id="cardBackInput">' +
+      '<button id="btnAddCard"></button>' +
+    '</div>';
+};
 
 /**
  * 共享 DOM 桩：学习面板完整结构
