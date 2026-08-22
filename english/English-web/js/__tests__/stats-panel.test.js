@@ -226,7 +226,6 @@ describe('renderStatsPanel DOM 层（重设计 11 模块）', () => {
     expect(cellCount).toBeGreaterThanOrEqual(7 * 26);
     expect(panel.querySelector('.curve-card canvas')).not.toBeNull();
     expect(panel.querySelectorAll('.eb-dist-row').length).toBe(8);
-    expect(panel.querySelector('.daily-goal')).not.toBeNull();
     expect(panel.querySelector('#btnShareAchievement')).not.toBeNull();
     /* 总览：2 卡 + 今日待复习 1（nextReview=今天） */
     expect(panel.querySelectorAll('.stats-grid').length).toBeGreaterThanOrEqual(2);

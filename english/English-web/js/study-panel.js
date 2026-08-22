@@ -743,6 +743,14 @@ var FlashcardApp = window.FlashcardApp || {};
     var overdueCount = ebStats.overdue;
     var failedCards = App.collectFailedCards();
 
+    /* 每日目标（设置入口从统计页移入学习模式选择） */
+    var dailyGoal = App.getDailyGoal();
+    var mergedLog = App.mergeLogs(App.loadQuickLog(), App.loadLearningLog());
+    var todayKey = new Date().toISOString().slice(0, 10);
+    var todayData = mergedLog[todayKey] || { correct: 0, wrong: 0 };
+    var todayTotal = todayData.correct + todayData.wrong;
+    var goalPercent = Math.min(100, Math.round(todayTotal / dailyGoal * 100));
+
     var guideHtml =
       '<div class="mode-guide">' +
         '<h3 class="mode-guide-title">选择学习模式</h3>' +
@@ -826,6 +834,23 @@ var FlashcardApp = window.FlashcardApp || {};
             '<span class="overview-label">总进度</span>' +
           '</div>' +
         '</div>' +
+
+        /* 每日目标设置 + 进度（从统计页移入；样式复用 stats.css .daily-goal*） */
+        '<div class="daily-goal" id="modeGoalSection">' +
+          '<div class="daily-goal-settings">' +
+            '<span>🎯 每日目标:</span>' +
+            '<input type="number" id="modeDailyGoalInput" value="' + dailyGoal + '" min="5" max="200" step="5">' +
+            '<span>词</span>' +
+            '<button class="btn btn-outline btn-sm" id="btnModeSaveGoal">保存</button>' +
+          '</div>' +
+          '<div class="daily-goal-progress">' +
+            '<div class="daily-goal-fill" id="modeGoalFill" style="width:' + goalPercent + '%"></div>' +
+          '</div>' +
+          '<div id="modeGoalText" style="text-align:center;font-size:13px;color:var(--text-muted);margin-top:6px;">' +
+            todayTotal + ' / ' + dailyGoal + ' (' + goalPercent + '%)' +
+            (goalPercent >= 100 ? ' 🎉 目标达成！' : '') +
+          '</div>' +
+        '</div>' +
       '</div>';
 
     /* 替换 studyContent 下的内容（保留 header + scene 容器但隐藏它们） */
@@ -873,6 +898,26 @@ var FlashcardApp = window.FlashcardApp || {};
 
     /* 错词折叠区事件委托（展开/收起 + 移出） */
     if (App.bindModeFailedSection) App.bindModeFailedSection();
+
+    /* 每日目标保存（局部刷新进度显示，不重建引导，保住错词折叠区展开态） */
+    var goalInput = document.getElementById('modeDailyGoalInput');
+    var goalSaveBtn = document.getElementById('btnModeSaveGoal');
+    if (goalInput && goalSaveBtn) {
+      goalSaveBtn.addEventListener('click', function () {
+        var v = parseInt(goalInput.value, 10);
+        if (v >= 5 && v <= 200) {
+          localStorage.setItem('flashcard-daily-goal', v);
+          var pct = Math.min(100, Math.round(todayTotal / v * 100));
+          var fill = document.getElementById('modeGoalFill');
+          var text = document.getElementById('modeGoalText');
+          if (fill) fill.style.width = pct + '%';
+          if (text) {
+            text.textContent = todayTotal + ' / ' + v + ' (' + pct + '%)' + (pct >= 100 ? ' 🎉 目标达成！' : '');
+          }
+          if (App.showToast) App.showToast('每日目标已更新', 'success', 2000);
+        }
+      });
+    }
   };
 
   /* ========== 作答 ========== */

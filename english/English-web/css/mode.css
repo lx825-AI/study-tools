@@ -181,7 +181,12 @@
   overflow-y: auto;
 }
 
-/* 新词数量设置 */
+/* 每日目标设置（学习模式引导页；主体样式复用 stats.css .daily-goal*） */
+.mode-guide .daily-goal {
+  margin-bottom: 16px;
+}
+
+/* 新词数量设置（v2.7 遗留样式，无引用保留备用） */
 .mode-setting {
   display: flex;
   align-items: center;

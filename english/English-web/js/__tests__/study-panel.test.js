@@ -322,3 +322,45 @@ describe('完成面板返回模式选择入口', () => {
     expect(ids).toEqual(['btnRestart', 'btnExitReview', 'btnBackToModeSelect']);
   });
 });
+
+describe('学习模式引导页每日目标设置', () => {
+  beforeEach(() => {
+    window.mountStudyDOM();
+    sessionStorage.removeItem('flashcard-study-progress');
+    localStorage.removeItem('flashcard-daily-goal');
+    App.state.decks = [{ id: 'd1', name: '测试', cards: [freshCard({ id: 'a' })] }];
+    App.state.currentDeckId = 'd1';
+    App.studyQueue = [];
+    App.studyIndex = 0;
+    App.studyCompletedWords = 0;
+    App.isReviewMode = false;
+    App.showToast = vi.fn();
+  });
+
+  afterEach(() => {
+    App.state.currentDeckId = null;
+    App.state.decks = [];
+    document.body.innerHTML = '';
+  });
+
+  it('引导页含每日目标设置（默认值 10）与保存按钮', () => {
+    App.renderStudyPanel();
+    const input = document.getElementById('modeDailyGoalInput');
+    const saveBtn = document.getElementById('btnModeSaveGoal');
+    expect(input).not.toBeNull();
+    expect(input.value).toBe('10');
+    expect(saveBtn).not.toBeNull();
+    expect(document.getElementById('modeGoalText').textContent).toContain('0 / 10');
+  });
+
+  it('修改目标保存：写 localStorage + 进度文本局部刷新 + toast', () => {
+    App.renderStudyPanel();
+    const input = document.getElementById('modeDailyGoalInput');
+    input.value = '50';
+    document.getElementById('btnModeSaveGoal').click();
+
+    expect(localStorage.getItem('flashcard-daily-goal')).toBe('50');
+    expect(document.getElementById('modeGoalText').textContent).toContain('0 / 50');
+    expect(App.showToast).toHaveBeenCalled();
+  });
+});

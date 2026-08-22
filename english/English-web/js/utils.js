@@ -105,4 +105,11 @@ var FlashcardApp = window.FlashcardApp || {};
     return -1;
   };
 
+  /* 每日目标词数（默认 10，损坏值兜底；统计页 KPI 与学习模式引导页共用） */
+  App.getDailyGoal = function () {
+    var goal = parseInt(localStorage.getItem('flashcard-daily-goal') || '10', 10);
+    if (!isFinite(goal) || goal <= 0) goal = 10;
+    return goal;
+  };
+
 })(FlashcardApp);

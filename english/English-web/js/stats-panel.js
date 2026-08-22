@@ -262,27 +262,6 @@ var FlashcardApp = window.FlashcardApp || {};
     '</div>';
   }
 
-  function _htmlDailyGoal(dailyGoal, todayTotal, goalPercent) {
-    return '<div class="stats-section">' +
-      '<div class="section-title">🎯 每日目标</div>' +
-      '<div class="daily-goal">' +
-        '<div class="daily-goal-settings">' +
-          '<span>每日目标:</span>' +
-          '<input type="number" id="dailyGoalInput" value="' + dailyGoal + '" min="5" max="200" step="5">' +
-          '<span>词</span>' +
-          '<button class="btn btn-outline btn-sm" id="btnSaveGoal">保存</button>' +
-        '</div>' +
-        '<div class="daily-goal-progress">' +
-          '<div class="daily-goal-fill" style="width:' + goalPercent + '%"></div>' +
-        '</div>' +
-        '<div style="text-align:center;font-size:13px;color:var(--text-muted);margin-top:6px;">' +
-          todayTotal + ' / ' + dailyGoal + ' (' + goalPercent + '%)' +
-          (goalPercent >= 100 ? ' 🎉 目标达成！' : '') +
-        '</div>' +
-      '</div>' +
-    '</div>';
-  }
-
   function _htmlShare() {
     return '<div class="stats-section">' +
       '<div class="section-title">📣 分享</div>' +
@@ -316,18 +295,6 @@ var FlashcardApp = window.FlashcardApp || {};
   function bindStatsEvents() {
     var btnShare = document.getElementById('btnShareAchievement');
     if (btnShare) btnShare.addEventListener('click', App.shareAchievement);
-
-    var goalInput = document.getElementById('dailyGoalInput');
-    var saveBtn = document.getElementById('btnSaveGoal');
-    if (goalInput && saveBtn) {
-      saveBtn.addEventListener('click', function () {
-        var v = parseInt(goalInput.value, 10);
-        if (v >= 5 && v <= 200) {
-          localStorage.setItem('flashcard-daily-goal', v);
-          App.renderStatsPanel();
-        }
-      });
-    }
 
     var goStudyBtn = document.getElementById('btnStatsGoStudy');
     if (goStudyBtn) goStudyBtn.addEventListener('click', function () { App.switchTab('study'); });
@@ -381,9 +348,8 @@ var FlashcardApp = window.FlashcardApp || {};
     var heatmapWeeks = App.buildHeatmapWeeks(mergedLog, now, 26); /* 近 26 周（半年，GitHub 风格） */
     var curveEntries = Object.values(mergedLog);
 
-    /* 每日目标 */
-    var dailyGoal = parseInt(localStorage.getItem('flashcard-daily-goal') || '10', 10);
-    if (!isFinite(dailyGoal) || dailyGoal <= 0) dailyGoal = 10; /* 默认 10（对齐小程序）+ 损坏值兜底 */
+    /* 每日目标（KPI 行目标进度用；设置入口在学习模式选择引导页） */
+    var dailyGoal = App.getDailyGoal();
     var todayData = mergedLog[todayKey] || { correct: 0, wrong: 0 };
     var todayTotal = todayData.correct + todayData.wrong;
     var goalPercent = Math.min(100, Math.round(todayTotal / dailyGoal * 100));
@@ -413,7 +379,6 @@ var FlashcardApp = window.FlashcardApp || {};
         '<div class="stats-col">' +
           _htmlCalendar() +
           App.renderCurveSectionHtml(curveEntries) +
-          _htmlDailyGoal(dailyGoal, todayTotal, goalPercent) +
           _htmlShare() +
         '</div>' +
       '</div>' +
