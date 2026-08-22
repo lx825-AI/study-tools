@@ -1,12 +1,11 @@
-/* stats-charts.css —— 统计页图表模块（打卡日历 / 12 周热力图 / 遗忘曲线，对齐小程序） */
+/* stats-charts.css —— 统计页图表模块（打卡日历 / 26 周热力图 / 遗忘曲线，Web 卡片规范） */
 
-/* ========== 打卡日历（对齐小程序 calendar-card） ========== */
+/* ========== 打卡日历 ========== */
 .calendar-card {
   background: var(--surface);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   padding: 16px;
-  margin-bottom: 12px;
 }
 .calendar-header {
   display: flex;
@@ -61,10 +60,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 34px;
+  height: 40px;
   border-radius: var(--radius-sm);
   font-size: 13px;
   color: var(--text-primary);
+  transition: background 0.15s;
+}
+.calendar-day:hover {
+  background: var(--surface-hover);
 }
 .calendar-day.is-studied {
   background: var(--primary-bg);
@@ -78,11 +81,11 @@
   color: transparent;
 }
 
-/* ========== 12 周热力图（对齐小程序 HeatmapChart，横向滚动 + 5 档色阶） ========== */
+/* ========== 26 周热力图（GitHub 风格：11px 格 hover 放大，桌面无滚动） ========== */
 .heatmap-card {
   background: var(--surface);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   padding: 16px;
   margin-bottom: 12px;
 }
@@ -128,8 +131,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 14px;
-  height: 14px;
+  width: 11px;
+  height: 11px;
   font-size: 10px;
   color: var(--text-muted);
 }
@@ -147,10 +150,16 @@
   gap: 2px;
 }
 .heatmap-cell {
-  width: 14px;
-  height: 14px;
+  width: 11px;
+  height: 11px;
   border-radius: 2px;
   flex-shrink: 0;
+  transition: transform 0.1s ease;
+}
+.heatmap-cell:hover {
+  transform: scale(1.5);
+  position: relative;
+  z-index: 1;
 }
 .heatmap-cell.is-future {
   opacity: 0.25;
@@ -168,13 +177,12 @@
 [data-theme="dark"] .heat12-l3 { background: #4f46e5; }
 [data-theme="dark"] .heat12-l4 { background: #7c3aed; }
 
-/* ========== 遗忘曲线（对齐小程序 ForgettingCurve） ========== */
+/* ========== 遗忘曲线 ========== */
 .curve-card {
   background: var(--surface);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   padding: 16px;
-  margin-bottom: 12px;
 }
 .curve-title {
   font-size: 15px;
@@ -187,6 +195,7 @@
   margin: 0 auto;
   border-radius: var(--radius-sm);
   max-width: 100%;
+  height: auto; /* 窄列缩放时保持纵横比 */
 }
 .curve-legend {
   display: flex;

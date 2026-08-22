@@ -93,10 +93,19 @@ var FlashcardApp = window.FlashcardApp || {};
     '</div>';
   }
 
-  function _htmlStreakCard(streak) {
-    return '<div class="streak-card">' +
-      '<span class="streak-label">连续打卡</span>' +
-      '<span class="streak-count">🔥 ' + streak + ' 天</span>' +
+  /** KPI 指标行（Web 仪表盘：4 张居中大数字卡） */
+  function _htmlKpiRow(streak, weekWords, weekAccuracy, goalPercent) {
+    function kpi(icon, value, label) {
+      return '<div class="kpi-card">' +
+        '<div class="kpi-value">' + icon + ' ' + value + '</div>' +
+        '<div class="kpi-label">' + label + '</div>' +
+      '</div>';
+    }
+    return '<div class="stats-kpi">' +
+      kpi('🔥', streak + ' 天', '连续打卡') +
+      kpi('📊', weekWords, '本周单词') +
+      kpi('🎯', weekAccuracy + '%', '正确率') +
+      kpi('⚡', goalPercent + '%', '目标进度') +
     '</div>';
   }
 
@@ -126,7 +135,8 @@ var FlashcardApp = window.FlashcardApp || {};
       '<div class="week-chart">' +
         series.bars.map(function (b) {
           return '<div class="week-bar-col">' +
-            '<div class="week-bar" style="height:' + b.heightPx + 'px"></div>' +
+            '<span class="week-bar-num">' + b.total + '</span>' +
+            '<div class="week-bar" style="height:' + b.heightPx + 'px" title="' + b.label + '：' + b.total + ' 词"></div>' +
             '<span class="week-bar-label">' + b.label + '</span>' +
           '</div>';
         }).join('') +
@@ -196,7 +206,7 @@ var FlashcardApp = window.FlashcardApp || {};
     }).join('');
     return '<div class="heatmap-card">' +
       '<div class="heatmap-header">' +
-        '<span class="heatmap-title">学习热力图（近 12 周）</span>' +
+        '<span class="heatmap-title">学习热力图（近 26 周）</span>' +
         '<div class="heatmap-legend"><span class="legend-label">少</span>' + legendCells + '<span class="legend-label">多</span></div>' +
       '</div>' +
       '<div class="heatmap-grid">' +
@@ -368,7 +378,7 @@ var FlashcardApp = window.FlashcardApp || {};
     /* 打卡/周报/曲线数据 */
     var streak = App.calcStreak(mergedLog);
     var weekSeries = App.buildWeekSeries(mergedLog, now);
-    var heatmapWeeks = App.buildHeatmapWeeks(mergedLog, now);
+    var heatmapWeeks = App.buildHeatmapWeeks(mergedLog, now, 26); /* 近 26 周（半年，GitHub 风格） */
     var curveEntries = Object.values(mergedLog);
 
     /* 每日目标 */
@@ -391,17 +401,24 @@ var FlashcardApp = window.FlashcardApp || {};
 
     var failedCards = App.collectFailedCards ? App.collectFailedCards() : [];
 
+    /* 双列仪表盘布局：KPI 行 → 左列（报告/总览/错题）→ 右列（日历/曲线/目标/分享）→ 热力图与阶段分布跨列 */
     panel.innerHTML =
-      _htmlStreakCard(streak) +
-      _htmlReportCard(weekSeries) +
-      _htmlOverviewGrid(totalCards, masteredCount, dueToday, dueTomorrow) +
-      _htmlCalendar() +
+      _htmlKpiRow(streak, weekSeries.weekWords, weekSeries.weekAccuracy, goalPercent) +
+      '<div class="stats-cols">' +
+        '<div class="stats-col">' +
+          _htmlReportCard(weekSeries) +
+          _htmlOverviewGrid(totalCards, masteredCount, dueToday, dueTomorrow) +
+          _htmlFailedWords(weekSeries.weekWrong, failedCards) +
+        '</div>' +
+        '<div class="stats-col">' +
+          _htmlCalendar() +
+          App.renderCurveSectionHtml(curveEntries) +
+          _htmlDailyGoal(dailyGoal, todayTotal, goalPercent) +
+          _htmlShare() +
+        '</div>' +
+      '</div>' +
       _htmlHeatmapCard(heatmapWeeks) +
-      App.renderCurveSectionHtml(curveEntries) +
-      _htmlEbDistribution(distItems) +
-      _htmlFailedWords(weekSeries.weekWrong, failedCards) +
-      _htmlDailyGoal(dailyGoal, todayTotal, goalPercent) +
-      _htmlShare();
+      _htmlEbDistribution(distItems);
 
     bindStatsEvents();
     App.drawStatsCurve();

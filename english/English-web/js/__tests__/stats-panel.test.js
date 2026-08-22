@@ -206,20 +206,24 @@ describe('renderStatsPanel DOM 层（重设计 11 模块）', () => {
     spy.mockRestore();
   });
 
-  it('有数据时 11 模块容器齐全且 quick 日志计入打卡（合并口径）', () => {
+  it('有数据时模块容器齐全且 quick 日志计入打卡（合并口径）', () => {
     seedStudyData();
     App.renderStatsPanel();
     const panel = document.getElementById('panelStats');
-    /* 连续打卡：今天 deep + 昨天 quick = 2 天 */
-    expect(panel.querySelector('.streak-card .streak-count').textContent).toBe('🔥 2 天');
+    /* KPI 行：连续打卡（今天 deep + 昨天 quick = 2 天）+ 本周单词 + 正确率 + 目标进度 */
+    expect(panel.querySelectorAll('.stats-kpi .kpi-card').length).toBe(4);
+    expect(panel.querySelector('.stats-kpi').innerHTML).toContain('🔥 2 天');
+    /* 双列布局 */
+    expect(panel.querySelectorAll('.stats-cols .stats-col').length).toBe(2);
     expect(panel.querySelector('.report-card')).not.toBeNull();
     expect(panel.querySelectorAll('.report-item').length).toBe(3);
     expect(panel.querySelectorAll('.week-bar').length).toBe(7);
+    expect(panel.querySelectorAll('.week-bar-num').length).toBe(7);
     expect(panel.querySelector('.calendar-card')).not.toBeNull();
     expect(panel.querySelector('.calendar-title').textContent).toBe('2026年 8月');
     expect(panel.querySelector('.heatmap-card')).not.toBeNull();
     const cellCount = panel.querySelectorAll('.heatmap-cell').length;
-    expect(cellCount).toBeGreaterThanOrEqual(7 * 12);
+    expect(cellCount).toBeGreaterThanOrEqual(7 * 26);
     expect(panel.querySelector('.curve-card canvas')).not.toBeNull();
     expect(panel.querySelectorAll('.eb-dist-row').length).toBe(8);
     expect(panel.querySelector('.daily-goal')).not.toBeNull();

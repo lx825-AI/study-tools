@@ -47,14 +47,17 @@ describe('buildWeekSeries', () => {
     expect(s.bars.map(b => b.label)).toEqual(['一', '二', '三', '四', '五', '六', '日']);
   });
 
-  it('柱高 clamp：1000→60、1→4、0→0', () => {
+  it('柱高 clamp：1000→60、1→4、0→0，且 bars 带 total 数值', () => {
     const log = {};
     log[utcKey(2026, 7, 17)] = { cardsStudied: 1000 };
     log[utcKey(2026, 7, 18)] = { cardsStudied: 1 };
     const s = App.buildWeekSeries(log, NOW);
     expect(s.bars[0].heightPx).toBe(60);
+    expect(s.bars[0].total).toBe(1000);
     expect(s.bars[1].heightPx).toBe(4);
+    expect(s.bars[1].total).toBe(1);
     expect(s.bars[2].heightPx).toBe(0);
+    expect(s.bars[2].total).toBe(0);
   });
 
   it('趋势 ↑：本周多于上周', () => {
@@ -161,6 +164,15 @@ describe('heatLevel / buildHeatmapWeeks', () => {
       expect(c.count).toBe(0);
     });
     expect(last.find(c => c.date === todayKey).isFuture).toBe(false);
+  });
+
+  it('weekCount=26：26~27 列且首列对齐周一（GitHub 风格半年视图）', () => {
+    const weeks = App.buildHeatmapWeeks({}, NOW, 26);
+    expect(weeks.length).toBeGreaterThanOrEqual(26);
+    expect(weeks.length).toBeLessThanOrEqual(27);
+    weeks.forEach(col => expect(col.length).toBe(7));
+    const firstDate = weeks[0][0].date;
+    expect(new Date(firstDate + 'T00:00:00Z').getUTCDay()).toBe(1);
   });
 });
 

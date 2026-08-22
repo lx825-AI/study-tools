@@ -54,7 +54,8 @@ var FlashcardApp = window.FlashcardApp || {};
       /* 柱高 clamp(4, count/100*60)，对齐小程序 weekBars */
       bars.push({
         label: App.WEEKDAY_LABELS[i],
-        heightPx: count > 0 ? Math.max(4, Math.min(60, Math.round(count / 100 * 60))) : 0
+        heightPx: count > 0 ? Math.max(4, Math.min(60, Math.round(count / 100 * 60))) : 0,
+        total: count
       });
     }
 
@@ -117,10 +118,11 @@ var FlashcardApp = window.FlashcardApp || {};
     };
   };
 
-  /** 12 周热力图（now-84 天对齐 UTC 周一后逐周 7 天，13 列；对齐小程序 HeatmapChart weeks） */
-  App.buildHeatmapWeeks = function (log, now) {
+  /** 热力图（回退 weekCount 周对齐 UTC 周一后逐周 7 天；默认 12 周；对齐小程序 HeatmapChart weeks） */
+  App.buildHeatmapWeeks = function (log, now, weekCount) {
+    var span = (weekCount || 12) * 7;
     var start = new Date(now);
-    start.setUTCDate(now.getUTCDate() - 84);
+    start.setUTCDate(now.getUTCDate() - span);
     var offset = start.getUTCDay() === 0 ? 6 : start.getUTCDay() - 1; /* 对齐 UTC 周一 */
     start.setUTCDate(start.getUTCDate() - offset);
 

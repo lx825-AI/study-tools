@@ -1,4 +1,48 @@
-/* stats.css —— 统计面板（重设计：对齐小程序 stats.vue + 保留 Web 特有模块） */
+/* stats.css —— 统计面板（Web 仪表盘：KPI 行 + 双列 + 跨列图表；内容卡 = shadow-sm + 12px 圆角） */
+
+/* ========== KPI 指标行 ========== */
+.stats-kpi {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.kpi-card {
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 14px 10px;
+  text-align: center;
+}
+.kpi-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+.kpi-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ========== 双列仪表盘布局 ========== */
+.stats-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: start;
+}
+.stats-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+/* 列内模块间距统一由 flex gap 控制，覆盖旧 .stats-section 的 24px */
+.stats-col .stats-section {
+  margin-top: 0;
+}
 
 /* ========== 基础卡片网格 ========== */
 .stats-grid {
@@ -8,9 +52,9 @@
 }
 .stat-card {
   background: var(--surface);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  padding: 16px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 14px 12px;
 }
 .stat-value {
   font-size: 28px;
@@ -50,51 +94,28 @@
 }
 .stats-empty-btn {
   margin-top: 20px;
-  padding: 10px 28px;
-  border: none;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
-  color: #fff;
-  font-size: 15px;
+  padding: 8px 24px;
+  border: 2px solid var(--primary);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--primary);
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
-  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.3);
-  transition: all 0.2s;
+  transition: all 0.15s;
 }
 .stats-empty-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+  background: var(--primary);
+  color: #fff;
 }
 
-/* ========== 连续打卡卡（对齐小程序 streak-card） ========== */
-.streak-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--surface);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  padding: 16px;
-  margin-bottom: 12px;
-}
-.streak-label {
-  font-size: 14px;
-  color: var(--text-secondary);
-}
-.streak-count {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--warning);
-}
-
-/* ========== 本周学习报告（对齐小程序 report-card） ========== */
+/* ========== 本周学习报告 ========== */
 .report-card {
   background: var(--surface);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   padding: 16px;
-  margin-bottom: 12px;
 }
 .report-header {
   display: flex;
@@ -171,16 +192,23 @@
   background: var(--primary);
   transition: height 0.3s;
 }
+.week-bar:hover {
+  background: var(--primary-hover);
+}
+.week-bar-num {
+  font-size: 11px;
+  color: var(--text-muted);
+}
 .week-bar-label {
   font-size: 11px;
   color: var(--text-muted);
 }
 
-/* ========== 艾宾浩斯阶段分布（8 色横条，对齐小程序 dist-bar-row） ========== */
+/* ========== 艾宾浩斯阶段分布（8 色横条） ========== */
 .eb-distribution {
   background: var(--surface);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   padding: 16px;
 }
 .eb-dist-row {
@@ -250,11 +278,11 @@
   margin-left: auto;
 }
 
-/* ========== 每日目标（保留） ========== */
+/* ========== 每日目标 ========== */
 .daily-goal {
   background: var(--surface);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
   padding: 16px;
 }
 .daily-goal-settings {
@@ -295,27 +323,34 @@
 
 /* ========== 移动端 ========== */
 @media (max-width: 480px) {
-  .stats-grid {
+  .stats-kpi {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .stats-cols {
     grid-template-columns: 1fr;
     gap: 8px;
   }
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
   .stat-card {
-    padding: 14px 12px;
+    padding: 12px 10px;
   }
   .stat-value {
-    font-size: 24px;
+    font-size: 22px;
   }
   .report-value {
-    font-size: 24px;
+    font-size: 22px;
+  }
+  .kpi-value {
+    font-size: 20px;
   }
   .week-bar {
     width: 20px;
   }
   .stats-section {
     margin-top: 18px;
-  }
-  .streak-card {
-    flex-wrap: wrap;
-    gap: 4px;
   }
 }

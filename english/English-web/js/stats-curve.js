@@ -65,8 +65,7 @@ var FlashcardApp = window.FlashcardApp || {};
     var dpr = window.devicePixelRatio || 1;
     canvas.width = Math.round(W * dpr);
     canvas.height = Math.round(H * dpr);
-    canvas.style.width = W + 'px';
-    canvas.style.height = H + 'px';
+    /* 不设内联宽高：显示尺寸交给 CSS（窄列内 max-width:100% 自适应，dpr 位图缩放仍清晰） */
     ctx.scale(dpr, dpr);
 
     var pad = { top: 20, right: 20, bottom: 30, left: 40 };
