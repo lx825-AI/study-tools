@@ -58,6 +58,10 @@ math/
 
 **拼写模式性能优化（同日）**：打字去每键 value 回写（受控 input 原生往返是卡顿主因）+ 聚焦延后 350ms 错峰入场转场 + 退出先收键盘再导航 + pauseSpeak 软暂停复用音频实例 + 光标 v-show；测试 302→304
 
+**左滑退出修复（同日）**：拼写正确后键盘弹出吞掉 touchend 致左滑失效——改为 touchmove 越阈值即触发 + touchend 兜底 + navigateBack 失败重置 backLock
+
+**拼写模式全链路审查修复（同日，8 项）**：tts 超时看门狗模块级化（旧局部 timer 连续播放时误 destroy 复用实例）；StudyCard suppressClick 每手势重置（微信不补发 click 残留吞翻卡）；SpellInput 判定守卫 !idle（「完成」键+定时器双入口防二次朗读）；study.vue 自动发音 4 处收敛 scheduleAutoSpeak（initStudy/goPrevCard 裸 setTimeout 未登记致拼写页残留发声）；删 SpellInput 死 prop word、study.vue 死样式；spell.vue 删历史 storage 清理 + decodeURIComponent try/catch；空词 letterCount 守卫；测试 304→307
+
 ## 最近更新（2026-08-16）— English-mini-app v2.5
 
 **卡片编辑表单扩展**：cards 页编辑弹窗新增词组短语/同义词/反义词/易混淆词 4 个编辑框，解析逻辑抽 card-form.js 纯函数模块；startEdit 对旧格式数据（字符串 definitions/例句元素）防崩溃防脏数据
