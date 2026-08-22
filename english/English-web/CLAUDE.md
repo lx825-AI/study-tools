@@ -42,7 +42,7 @@ js/
   preview-panel.js  -- 表格预览（200+ 卡片虚拟滚动）、搜索、高亮
   cards-panel.js    -- 卡片列表（100+ 虚拟滚动）、批量选择与删除
   import.js         -- 内置词书注册表（10 本）、script 动态加载、词书来源声明、导入弹窗两级分类（级别×大纲/核心，对齐小程序）
-  stats-panel.js    -- 统计面板编排（11 模块：空状态/连续打卡/本周报告/总览/打卡日历/12周热力图/遗忘曲线/阶段分布/错题/每日目标/分享）
+  stats-panel.js    -- 统计面板编排（双列仪表盘：KPI 行/本周报告/总览/打卡日历/26周热力图/遗忘曲线/阶段分布/错题统计）
   stats-aggregate.js -- 统计纯聚合函数（mergeLogs/buildWeekSeries/buildCalendarData/buildHeatmapWeeks/stageDistribution/estimateUserCurve/curveNoteText/heatLevel）
   stats-curve.js    -- 遗忘曲线 Canvas 模块（renderCurveSectionHtml/drawStatsCurve/refreshStatsCharts）
 data/
@@ -76,6 +76,10 @@ scripts/
 **槽位式输入改造（2026-08-20）**：删除下方独立输入框+确认按钮（index.html spellInputArea 整块删除、app.js 三处旧绑定删除、mode.css 旧 input 样式清理），改为卡片正面下划线处逐格输入字母——`buildSpellSlotHtml` 纯函数渲染单字符槽位（字母→input 槽连续编号、空白→gap 间隔、撇号/连字符→固定展示）；document 事件委托（input 过滤+自动跳格+末槽全满自动判定 / Backspace 空槽回退 / focusin 键盘避让，绑定于 study-panel.js IIFE 顶层因测试不加载 app.js）；checkSpelling 槽位化（守卫顺序不变，两侧剥除非字母归一化——dont 判对）；错误：槽位红框 shake+禁入，600ms 后清空重拼（App._spellWrongTimer 双清防跨卡残留）；toggleSpellMode 加回看守卫+聚焦首槽；测试 192→199；Playwright 端到端 15/15 通过
 
 **判定反馈 3 项优化（2026-08-20，对齐小程序 SpellInput 纯练习化）**：正确后不清空重拼——字母保留槽位+绿色边框（spell-slot-correct），修改字母即回输入态清除陈旧 ✅（input 委托检测 spell-correct 态）；错误后答案不常驻——600ms 清空回调同时清空 feedback 文字（防照着拼写）；判定反馈从卡片下方移入卡片内部拼写格子正下方（盲拼分支动态渲染 #spellFeedback，index.html/setup.js 桩同步删除）；测试 199→201；Playwright 端到端 12/12 通过
+
+## 最近更新（2026-08-22）— 删除统计界面分享功能
+
+**分享模块删除**：统计页「📣 分享」模块与按钮删除（对齐小程序统计页无分享）；`App.shareAchievement`（唯一调用者即该按钮）成死代码一并删除；README 功能清单与 v2.7「保留」清单同步清理；测试 276→275
 
 ## 最近更新（2026-08-22）— 每日目标设置移至学习模式选择界面
 
@@ -155,7 +159,7 @@ scripts/
 
 **删除 Web 独有功能（19 项）**：智能混合模式（restore 旧会话归一化为 review）、运行时排序切换（队列固定 EF 升序）、全局搜索、键盘快捷键、移动端手势（滑动/长按/上滑朗读）、彩带、牌组导出、外部词书导入（文件/URL/粘贴）、系统通知提醒、备份提醒+数据备份区、云同步（SyncProvider 半成品死代码）、小程序引导条、卡片批量粘贴导入、演示数据、学习头部错题复习按钮、每日一句换一句按钮、新词数设置输入框、预览隐藏释义开关、错词 CSV 导出；LOCAL_KEYS 死数组清理
 
-**保留**：PWA 离线/安装、拼写模式、预览搜索、卡片批量删除、统计面板、分享、错题强化练习/移出（2026-08-21 起并入学习模式引导页）、快速模式、内置词书导入、待复习 toast
+**保留**：PWA 离线/安装、拼写模式、预览搜索、卡片批量删除、统计面板、错题强化练习/移出（2026-08-21 起并入学习模式引导页）、快速模式、内置词书导入、待复习 toast
 
 **测试**：115→114（删除 nextQuote 用例 + wrong-words CSV 断言）
 

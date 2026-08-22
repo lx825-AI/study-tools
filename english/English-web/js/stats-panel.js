@@ -262,15 +262,6 @@ var FlashcardApp = window.FlashcardApp || {};
     '</div>';
   }
 
-  function _htmlShare() {
-    return '<div class="stats-section">' +
-      '<div class="section-title">📣 分享</div>' +
-      '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-        '<button id="btnShareAchievement" class="btn btn-outline btn-sm">🏆 分享学习成果</button>' +
-      '</div>' +
-    '</div>';
-  }
-
   /* ===== 事件绑定 ===== */
 
   /** 翻月（-1 上一月 / +1 下一月）后局部重建日历卡 */
@@ -293,9 +284,6 @@ var FlashcardApp = window.FlashcardApp || {};
   };
 
   function bindStatsEvents() {
-    var btnShare = document.getElementById('btnShareAchievement');
-    if (btnShare) btnShare.addEventListener('click', App.shareAchievement);
-
     var goStudyBtn = document.getElementById('btnStatsGoStudy');
     if (goStudyBtn) goStudyBtn.addEventListener('click', function () { App.switchTab('study'); });
 
@@ -379,7 +367,6 @@ var FlashcardApp = window.FlashcardApp || {};
         '<div class="stats-col">' +
           _htmlCalendar() +
           App.renderCurveSectionHtml(curveEntries) +
-          _htmlShare() +
         '</div>' +
       '</div>' +
       _htmlHeatmapCard(heatmapWeeks) +

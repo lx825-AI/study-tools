@@ -478,24 +478,4 @@ var FlashcardApp = window.FlashcardApp || {};
     }
   };
 
-  /* 分享学习成果 */
-  App.shareAchievement = function () {
-    var today = new Date().toISOString().slice(0, 10);
-    var log = {};
-    try { log = JSON.parse(localStorage.getItem('flashcard-learning-log') || '{}'); } catch (e) {}
-    var todayData = log[today] || { correct: 0, wrong: 0 };
-    var total = todayData.correct + todayData.wrong;
-    var rate = total > 0 ? Math.round(todayData.correct / total * 100) : 0;
-    var text = '我今天学习了 ' + total + ' 个英语单词，正确率 ' + rate + '%！📚 #Flashcard抽认卡';
-    if (navigator.share) {
-      navigator.share({ title: '我的学习成果', text: text, url: window.location.href }).catch(function () {});
-    } else if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(function () {
-        App.showToast('已复制分享内容', 'success');
-      });
-    } else {
-      App.showToast(text, 'info', 4000);
-    }
-  };
-
 })(FlashcardApp);
