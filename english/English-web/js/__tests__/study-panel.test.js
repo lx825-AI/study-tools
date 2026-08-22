@@ -131,6 +131,59 @@ describe('v2.8 审查修复回归', () => {
   });
 });
 
+describe('startReview/startFailedReview 会话初始化（对齐小程序 initStudy 统一清零）', () => {
+  it('进入复习模式时队列卡 _consecutiveFails/_sessionAppearances 清零', () => {
+    window.mountStudyDOM();
+    App.state.decks = [{
+      id: 'd1', name: '测试',
+      cards: [freshCard({ id: 'a', ebbinghausStage: 2, ebbinghausNextReview: '2020-01-01', easeFactor: 2.5, repetitions: 1, _consecutiveFails: 3 })],
+    }];
+    App.state.currentDeckId = 'd1';
+    const spyRender = vi.spyOn(App, 'renderStudyPanel').mockImplementation(() => {});
+    const origToast = App.showToast; /* showToast 定义在 app.js，测试环境未加载 */
+    App.showToast = vi.fn();
+
+    App.startReview();
+
+    expect(App.studyMode).toBe('review');
+    expect(App.studyQueue.length).toBe(1);
+    expect(App.state.decks[0].cards[0]._consecutiveFails).toBe(0);
+    expect(App.state.decks[0].cards[0]._sessionAppearances).toBe(0);
+
+    App.showToast = origToast;
+    spyRender.mockRestore();
+    App.state.currentDeckId = null;
+    App.state.decks = [];
+    document.body.innerHTML = '';
+  });
+
+  it('进入错题强化时副本卡连败清零且字段归一', () => {
+    window.mountStudyDOM();
+    App.state.decks = [{
+      id: 'd1', name: '测试',
+      cards: [freshCard({ id: 'a', easeFactor: 1.5, repetitions: 3, ebbinghausStage: 2, _consecutiveFails: 4 })],
+    }];
+    App.state.currentDeckId = 'd1';
+    const spyRender = vi.spyOn(App, 'renderStudyPanel').mockImplementation(() => {});
+    const origToast = App.showToast;
+    App.showToast = vi.fn();
+
+    App.startFailedReview();
+
+    expect(App.studyQueue.length).toBe(1);
+    expect(App.studyQueue[0]._consecutiveFails).toBe(0);
+    expect(App.studyQueue[0]._sessionAppearances).toBe(0);
+    /* initEbbinghaus 补字段（副本缺 history） */
+    expect(App.studyQueue[0].ebbinghausHistory).toEqual([]);
+
+    App.showToast = origToast;
+    spyRender.mockRestore();
+    App.state.currentDeckId = null;
+    App.state.decks = [];
+    document.body.innerHTML = '';
+  });
+});
+
 describe('自动播放发音（对齐小程序 speakCurrentCard：换卡 300ms 后朗读）', () => {
   beforeEach(() => {
     window.mountStudyDOM();

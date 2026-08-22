@@ -139,6 +139,13 @@ describe('buildStudyQueue - quick 分支', () => {
     const queue = App.buildStudyQueue(deck);
     expect(queue.length).toBe(3);
   });
+
+  it('畸形字符串 stage 经 initEbbinghaus 归一为新词进队（旧数据防御）', () => {
+    const deck = makeDeck([freshCard({ id: 'broken', ebbinghausStage: '3' })]);
+    const queue = App.buildStudyQueue(deck);
+    expect(queue.length).toBe(1);
+    expect(queue[0].ebbinghausStage).toBe(0);
+  });
 });
 
 describe('loadQuickLog', () => {

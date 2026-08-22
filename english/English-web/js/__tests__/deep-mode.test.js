@@ -184,3 +184,33 @@ describe('回看状态守卫（B1）', () => {
     App.isReviewing = false;
   });
 });
+
+describe('恢复失败回滚（防御：防残留状态误进完成面板「完美通关」）', () => {
+  it('快照队列卡全部失效：返回 false 且会话状态被清空', () => {
+    App.state.decks = [{ id: 'd1', name: '测试', cards: [] }];
+    App.state.currentDeckId = 'd1';
+    /* 预置脏状态：模拟 restore 前的会话残余 */
+    App.studyQueue = [freshCard({ id: 'x' })];
+    App.studyIndex = 0;
+    App.studyCompletedWords = 5;
+    App.studyInitialQueueLength = 10;
+    App.studyResults = [{ cardId: 'x', passed: true }];
+
+    sessionStorage.setItem('flashcard-study-progress', JSON.stringify({
+      mode: 'new',
+      queue: [freshCard({ id: 'gone' })],
+      index: 0,
+      timestamp: Date.now(),
+      completedWords: 2,
+      initialQueueLength: 3,
+    }));
+    expect(App.restoreStudyProgress()).toBe(false);
+    expect(App.studyQueue).toEqual([]);
+    expect(App.studyCompletedWords).toBe(0);
+    expect(App.studyInitialQueueLength).toBe(0);
+    expect(App.studyResults).toEqual([]);
+    sessionStorage.removeItem('flashcard-study-progress');
+    App.state.currentDeckId = null;
+    App.state.decks = [];
+  });
+});

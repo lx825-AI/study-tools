@@ -50,7 +50,6 @@ var FlashcardApp = window.FlashcardApp || {};
           ebInfo +
         '</div>' +
         '<div class="deck-actions">' +
-          '<button class="btn btn-outline btn-sm" data-action="study" data-deck="' + d.id + '">学习</button>' +
           '<button class="btn btn-outline btn-sm" data-action="edit" data-deck="' + d.id + '">编辑</button>' +
           '<button class="btn btn-danger btn-sm" data-action="delete" data-deck="' + d.id + '">删除</button>' +
         '</div>' +

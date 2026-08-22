@@ -120,3 +120,32 @@ describe('buildStudyQueue - review 分支', () => {
     localStorage.removeItem('flashcard-daily-goal');
   });
 });
+
+describe('buildStudyQueue - new 分支（每轮新词数跟随每日目标，对齐小程序 slice(0, goal)）', () => {
+  beforeEach(() => {
+    localStorage.removeItem('flashcard-daily-goal');
+    App.studyMode = 'new';
+  });
+
+  it('截断到 dailyGoal 且保持词书原序', () => {
+    localStorage.setItem('flashcard-daily-goal', '3');
+    const deck = makeDeck([
+      freshCard({ id: 'a', ebbinghausStage: 0 }),
+      freshCard({ id: 'b', ebbinghausStage: 0 }),
+      freshCard({ id: 'c', ebbinghausStage: 0 }),
+      freshCard({ id: 'd', ebbinghausStage: 0 }),
+      freshCard({ id: 'e', ebbinghausStage: 0 }),
+    ]);
+    const queue = App.buildStudyQueue(deck);
+    expect(queue.map((c) => c.id)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('默认目标 10 且只含新词', () => {
+    const cards = [];
+    for (let i = 0; i < 12; i++) cards.push(freshCard({ id: 'n' + i, ebbinghausStage: 0 }));
+    cards.push(freshCard({ id: 'old', ebbinghausStage: 2 }));
+    const queue = App.buildStudyQueue(makeDeck(cards));
+    expect(queue.length).toBe(10);
+    expect(queue.every((c) => c.ebbinghausStage === 0)).toBe(true);
+  });
+});

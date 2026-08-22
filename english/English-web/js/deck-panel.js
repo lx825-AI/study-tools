@@ -4,15 +4,7 @@ var FlashcardApp = window.FlashcardApp || {};
   'use strict';
 
   App.handleDeckAction = function (action, deckId) {
-    if (action === 'study') {
-      App.state.currentDeckId = deckId;
-      App.isReviewMode = false;
-      App.reviewSourceDeckId = null;
-      App.saveData();
-      App.startStudy();
-      App.switchTab('study');
-      App.renderDeckSelect();
-    } else if (action === 'edit') {
+    if (action === 'edit') {
       App.state.currentDeckId = deckId;
       App.saveData();
       App.renderDeckSelect();
