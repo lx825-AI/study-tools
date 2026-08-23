@@ -77,6 +77,7 @@ var FlashcardApp = window.FlashcardApp || {};
     if (card.ebbinghausHistory && card.ebbinghausHistory.length > 0) stripped.eh = card.ebbinghausHistory;
     if (card.wrongCount) stripped.wc = card.wrongCount;
     if (card.wrongDates && card.wrongDates.length > 0) stripped.wd = card.wrongDates;
+    if (card.isHard) stripped.ih = true; /* 生词本收藏（数据联通跨端合并字段） */
     return stripped;
   }
 
@@ -105,16 +106,19 @@ var FlashcardApp = window.FlashcardApp || {};
       ebbinghausHistory: stripped.eh || [],
       wrongCount: stripped.wc || 0,
       wrongDates: stripped.wd || [],
+      isHard: !!stripped.ih,
     };
   }
 
   /** 精简牌组 */
   function stripDeck(deck) {
-    return {
+    var stripped = {
       id: deck.id,
       name: deck.name,
       cards: deck.cards.map(stripCard),
     };
+    if (deck.source) stripped.src = deck.source; /* 词书 key（数据联通跨端锚点） */
+    return stripped;
   }
 
   /** 展开牌组 */
@@ -122,6 +126,7 @@ var FlashcardApp = window.FlashcardApp || {};
     return {
       id: stripped.id,
       name: stripped.name,
+      source: stripped.src || null,
       cards: stripped.cards.map(expandCard),
     };
   }

@@ -31,6 +31,7 @@ const JS_ORDER = [
   'js/quick-mode.js', 'js/study-panel.js', 'js/wrong-words.js',
   'js/preview-panel.js', 'js/cards-panel.js',
   'js/import.js', 'js/stats-aggregate.js', 'js/stats-curve.js', 'js/stats-panel.js',
+  'js/sync-codec.js', 'js/sync-ui.js',
   'data/word-schema.js', 'js/app.js'
 ];
 

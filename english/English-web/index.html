@@ -23,6 +23,7 @@
 <div id="app">
   <header>
     <h1>📚 Flashcard 抽认卡</h1>
+    <button class="theme-toggle" id="btnSyncToggle" title="数据同步（与小程序互通）">🔄</button>
     <button class="theme-toggle" id="themeToggle" title="切换暗色模式">🌙</button>
   </header>
 
@@ -206,6 +207,20 @@
       <button class="modal-cancel" id="btnModalCancel">取消</button>
     </div>
   </div>
+
+  <!-- 数据同步弹窗 -->
+  <div class="import-modal-overlay" id="syncModal" style="display:none">
+    <div class="import-modal" style="max-width:440px;width:calc(100% - 32px)">
+      <h3>🔄 数据同步</h3>
+      <p>与微信小程序版互通学习数据（词书内容两端同源，不传输）</p>
+      <div class="sync-actions">
+        <button class="btn btn-outline" data-sync-action="export">📤 导出数据文件</button>
+        <button class="btn btn-outline" data-sync-action="import">📥 导入数据文件</button>
+      </div>
+      <p id="syncStatus" style="font-size:13px;margin:12px 0;min-height:20px;"></p>
+      <button class="modal-cancel" id="btnSyncCancel">取消</button>
+    </div>
+  </div>
 </div>
 
 <!-- JS 加载顺序：依赖关系 -->
@@ -226,6 +241,8 @@
 <script src="js/stats-aggregate.js"></script>
 <script src="js/stats-curve.js"></script>
 <script src="js/stats-panel.js"></script>
+<script src="js/sync-codec.js"></script>
+<script src="js/sync-ui.js"></script>
 <script src="data/word-schema.js"></script>
 <script src="js/app.js"></script>
 <script>

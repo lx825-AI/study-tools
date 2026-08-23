@@ -238,3 +238,15 @@ input[type="search"] {
   }
 }
 
+
+/* ========== 数据同步弹窗 ========== */
+.sync-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+}
+.sync-actions .btn {
+  width: 100%;
+  justify-content: center;
+}

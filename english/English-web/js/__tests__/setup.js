@@ -25,6 +25,8 @@ const files = [
   'stats-aggregate.js',
   'stats-curve.js',
   'stats-panel.js',
+  'sync-codec.js',
+  'sync-ui.js',
   'cards-panel.js',
 ];
 
