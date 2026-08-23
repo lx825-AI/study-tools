@@ -74,6 +74,14 @@ math/
 
 **预览页删除搜索栏（同日，迁移第一步）**：preview 页单词搜索栏全链路删除（迁移至词书管理页跨词书搜索的第二步待做）；测试 328 不变
 
+## 最近更新（2026-08-23）— English 双子项目数据联通一期（文件通道）
+
+**跨端规范 schema + 合并纯函数（两端共享测试向量）**：新增 web js/sync-codec.js + js/sync-ui.js 与 mini src/utils/sync-codec.js + sync-transfer.js，语义完全一致——共享向量单一来源 mini tests/data/sync-vectors.js（web 测试跨仓引用防漂移，子模块缺失优雅跳过）；词书 key canonical=小程序 key（web 5 本 enriched→new/core 映射表，未知 key 拒绝传输）；卡片锚点 (词书 source, lower(word))，仅传进度字段（w/st/nr/h/r/e/wc/wd/ih，零词条内容）；日志对端合并 M = max(本地, 快照) + max(0, 远端 − 远端上次全量)（按发送端 deviceKind 分槽存状态：防重复累计、重复导入不动点、多轮同步收敛、同日覆盖回退守卫）；设置以导出端为准（字段级 LWW 简化，en-US/en-GB↔us/uk 归一）；分块协议 chunkPayload/assembleChunks（64KB/FNV-1a，为二期云中转预留）
+
+**文件直传通道**：web 头部 🔄 同步弹窗（JSON 导出下载/导入合并，旧 data-io 备份格式自动转换）；mini 复活 data-io.js 改合并语义（覆盖式→merge）+ 新增 pages/sync/sync.vue + mine 页「数据同步」入口 + 隐私政策补同步说明（更新日期 08-23）；mini 导入后派生值重算（today_progress/quick_progress/streak/total_cards/total_mastered/deck 元数据）；web idb-storage 精简格式补 ih（isHard）+ deck source 持久化（同步锚点）；未导入词书整本跳过并计入摘要；**已知局限**：两端「当日覆盖」日志语义下，合并后本端同日继续学习会覆盖合并值（两端既有对齐行为，不引入新问题）
+
+**测试**：web 293→323（+30）；mini 328→367（+39）；两端构建通过。二期（云中转配对码：createTransfer/takeTransfer 云函数 + web SDK 匿名登录）待做
+
 ## 最近更新（2026-08-16）— English-mini-app v2.5
 
 **卡片编辑表单扩展**：cards 页编辑弹窗新增词组短语/同义词/反义词/易混淆词 4 个编辑框，解析逻辑抽 card-form.js 纯函数模块；startEdit 对旧格式数据（字符串 definitions/例句元素）防崩溃防脏数据
