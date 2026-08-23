@@ -46,51 +46,6 @@ describe('parseCSVLine', () => {
   });
 });
 
-describe('levenshtein', () => {
-  it('相同字符串距离为 0', () => {
-    expect(App.levenshtein('hello', 'hello')).toBe(0);
-  });
-
-  it('一个字符差异', () => {
-    expect(App.levenshtein('cat', 'cut')).toBe(1);
-  });
-
-  it('两个字符差异', () => {
-    expect(App.levenshtein('test', 'tent')).toBe(1);
-    expect(App.levenshtein('book', 'back')).toBe(2);
-  });
-
-  it('完全不同的字符串', () => {
-    expect(App.levenshtein('abc', 'xyz')).toBe(3);
-  });
-
-  it('空字符串', () => {
-    expect(App.levenshtein('', 'abc')).toBe(3);
-    expect(App.levenshtein('abc', '')).toBe(3);
-  });
-});
-
-describe('fuzzyMatch', () => {
-  it('子串匹配（大小写不敏感）', () => {
-    expect(App.fuzzyMatch('ab', 'abandon')).toBe(true);
-    expect(App.fuzzyMatch('AB', 'abandon')).toBe(true);
-    expect(App.fuzzyMatch('don', 'abandon')).toBe(true);
-  });
-
-  it('编辑距离 ≤ 2 匹配', () => {
-    expect(App.fuzzyMatch('abndon', 'abandon')).toBe(true);
-    expect(App.fuzzyMatch('abundon', 'abandon')).toBe(true);
-  });
-
-  it('编辑距离 > 2 不匹配', () => {
-    expect(App.fuzzyMatch('xyz', 'abandon')).toBe(false);
-  });
-
-  it('短输入(< 3 字符)不做模糊匹配', () => {
-    expect(App.fuzzyMatch('ab', 'xyz')).toBe(false);
-  });
-});
-
 describe('lettersOnly', () => {
   it('剥除撇号/连字符/空格/数字/中文/标点', () => {
     expect(App.lettersOnly("don't")).toBe('dont');

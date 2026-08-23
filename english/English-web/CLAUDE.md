@@ -77,6 +77,12 @@ scripts/
 
 **判定反馈 3 项优化（2026-08-20，对齐小程序 SpellInput 纯练习化）**：正确后不清空重拼——字母保留槽位+绿色边框（spell-slot-correct），修改字母即回输入态清除陈旧 ✅（input 委托检测 spell-correct 态）；错误后答案不常驻——600ms 清空回调同时清空 feedback 文字（防照着拼写）；判定反馈从卡片下方移入卡片内部拼写格子正下方（盲拼分支动态渲染 #spellFeedback，index.html/setup.js 桩同步删除）；测试 199→201；Playwright 端到端 12/12 通过
 
+## 最近更新（2026-08-23）— 删除预览界面搜索栏
+
+**搜索栏删除**：index.html 删 `.preview-controls` 容器（#previewSearch input）；app.js 删 `_filterPreviewCards` 过滤、`debounce` 工具（唯一调用者即搜索监听）与 input 监听；preview-panel.js 删 `_pvHighlight`/`highlightWord` 高亮逻辑（`<mark>` 分支/`_renderPreviewTable` 第二参数）；utils.js 删 `levenshtein`/`fuzzyMatch`（唯一生产调用者）；preview.css `.preview-controls` 与 components.css `mark` 样式删除
+
+**测试**：302→293（utils 删 levenshtein 5 + fuzzyMatch 4 例）；SW 缓存 v15→v16
+
 ## 最近更新（2026-08-23）— 统计界面审查修复（对齐小程序求和口径）
 
 **mergeLogs 改同日求和（HIGH）**：原"deep 覆盖 quick"与小程序 08-23 求和口径（mergeDailyCounts）反向漂移——同日快速 40 + 深度 10 只计 10；改为 cardsStudied/correct/wrong 逐项相加 + typeof number 归一（防字符串字段 NaN%、null 条目白屏）；引导页目标进度/KPI/周报/热力图/个人曲线全部自愈为求和口径；跨键早退守卫击穿（deep 早退覆盖 quick 完成回退统计）随求和语义根除
@@ -215,7 +221,7 @@ scripts/
 
 **删除 Web 独有功能（19 项）**：智能混合模式（restore 旧会话归一化为 review）、运行时排序切换（队列固定 EF 升序）、全局搜索、键盘快捷键、移动端手势（滑动/长按/上滑朗读）、彩带、牌组导出、外部词书导入（文件/URL/粘贴）、系统通知提醒、备份提醒+数据备份区、云同步（SyncProvider 半成品死代码）、小程序引导条、卡片批量粘贴导入、演示数据、学习头部错题复习按钮、每日一句换一句按钮、新词数设置输入框、预览隐藏释义开关、错词 CSV 导出；LOCAL_KEYS 死数组清理
 
-**保留**：PWA 离线/安装、拼写模式、预览搜索、卡片批量删除、统计面板、错题强化练习/移出（2026-08-21 起并入学习模式引导页）、快速模式、内置词书导入、待复习 toast
+**保留**：PWA 离线/安装、拼写模式、卡片批量删除、统计面板、错题强化练习/移出（2026-08-21 起并入学习模式引导页）、快速模式、内置词书导入、待复习 toast
 
 **测试**：115→114（删除 nextQuote 用例 + wrong-words CSV 断言）
 

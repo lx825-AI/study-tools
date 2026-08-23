@@ -1,23 +1,4 @@
 /* 预览模式 */
-.preview-controls {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-.preview-controls input {
-  flex: 1;
-  min-width: 0;
-  padding: 8px 12px;
-  border: 2px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  outline: none;
-  background: var(--surface);
-  color: var(--text-primary);
-}
-.preview-controls input:focus { border-color: var(--primary); }
-
 .preview-table {
   width: 100%;
   border-collapse: collapse;

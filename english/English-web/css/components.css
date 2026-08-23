@@ -50,17 +50,6 @@ input[type="search"] {
   transition: width 0.3s;
 }
 
-/* 关键词高亮 */
-mark {
-  background: #fef08a;
-  color: inherit;
-  border-radius: 2px;
-  padding: 0 1px;
-}
-[data-theme="dark"] mark {
-  background: #854d0e;
-}
-
 /* 加载动画 */
 .spinner {
   display: inline-block;

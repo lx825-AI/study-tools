@@ -10,7 +10,6 @@ var FlashcardApp = window.FlashcardApp || {};
 
   /* 虚拟滚动状态 */
   App._pvCards = null;
-  App._pvHighlight = null;
   App._pvShowPos = false;
   App._pvScrollTop = 0;
   App._pvRange = [0, 0];
@@ -24,7 +23,6 @@ var FlashcardApp = window.FlashcardApp || {};
     document.getElementById('previewContent').style.display = 'block';
     document.getElementById('previewDeckName').textContent = deck.name;
     document.getElementById('previewCount').textContent = deck.cards.length;
-    document.getElementById('previewSearch').value = '';
 
     /* 重置虚拟滚动状态 */
     App._pvCards = null;
@@ -35,15 +33,12 @@ var FlashcardApp = window.FlashcardApp || {};
   };
 
   /** 渲染单行 HTML */
-  function rowHTML(c, i, showPos, highlightWord) {
+  function rowHTML(c, i, showPos) {
     let front = App.getCardFront(c);
     let back = App.getCardBack(c);
     let pos = c.pos || '';
     let frontHtml = App.escHtml(front);
     let backHtml = App.escHtml(back);
-    if (highlightWord && front.toLowerCase() === highlightWord.toLowerCase()) {
-      frontHtml = '<mark>' + frontHtml + '</mark>';
-    }
     return '<tr>' +
       '<td class="col-idx">' + (i + 1) + '</td>' +
       '<td class="col-front">' + frontHtml +
@@ -87,7 +82,7 @@ var FlashcardApp = window.FlashcardApp || {};
 
     var html = '';
     for (var i = firstVisible; i < lastVisible; i++) {
-      html += rowHTML(cards[i], i, App._pvShowPos, App._pvHighlight);
+      html += rowHTML(cards[i], i, App._pvShowPos);
     }
 
     /* 用 top spacer 占位已滚过的行，bottom spacer 占位剩余行 */
@@ -97,7 +92,7 @@ var FlashcardApp = window.FlashcardApp || {};
       '<tr aria-hidden="true" style="height:' + ((cards.length - lastVisible) * ROW_HEIGHT) + 'px;line-height:0;padding:0;border:none;"></tr>';
   };
 
-  App._renderPreviewTable = function (cards, highlightWord) {
+  App._renderPreviewTable = function (cards) {
     var tbody = document.getElementById('previewTbody');
     var showPos = cards.some(function (c) { return c.pos; });
 
@@ -115,14 +110,13 @@ var FlashcardApp = window.FlashcardApp || {};
       }
 
       tbody.innerHTML = cards.map(function (c, i) {
-        return rowHTML(c, i, showPos, highlightWord);
+        return rowHTML(c, i, showPos);
       }).join('');
       return;
     }
 
     /* 大量卡片：虚拟滚动 */
     App._pvCards = cards;
-    App._pvHighlight = highlightWord || null;
     App._pvShowPos = showPos;
     App._pvRange = [0, 0];
     App._pvScrollTop = 0;

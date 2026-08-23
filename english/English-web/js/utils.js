@@ -37,34 +37,6 @@ var FlashcardApp = window.FlashcardApp || {};
     return result;
   };
 
-  /* Levenshtein 距离，用于模糊搜索 */
-  App.levenshtein = function (a, b) {
-    if (a.length === 0) return b.length;
-    if (b.length === 0) return a.length;
-    let matrix = [];
-    for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
-    for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
-    for (let i = 1; i <= b.length; i++) {
-      for (let j = 1; j <= a.length; j++) {
-        if (b.charAt(i - 1) === a.charAt(j - 1)) {
-          matrix[i][j] = matrix[i - 1][j - 1];
-        } else {
-          matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
-        }
-      }
-    }
-    return matrix[b.length][a.length];
-  };
-
-  /* 判读字符串是否模糊匹配（编辑距离 ≤ 2） */
-  App.fuzzyMatch = function (input, target) {
-    let inp = input.toLowerCase();
-    let tgt = target.toLowerCase();
-    if (tgt.indexOf(inp) !== -1) return true;            // 子串匹配
-    if (inp.length >= 3 && App.levenshtein(inp, tgt) <= 2) return true; // 模糊匹配
-    return false;
-  };
-
   /* ========== 拼写槽位纯函数（对齐小程序 helpers.js） ========== */
 
   /* 剥除非字母（撇号/连字符/空格/数字/标点全部去除） */

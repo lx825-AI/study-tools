@@ -3,17 +3,6 @@ var FlashcardApp = window.FlashcardApp || {};
 (function (App) {
   'use strict';
 
-  /* 预览搜索辅助：支持模糊匹配英文 + 精确匹配释义/词性 */
-  App._filterPreviewCards = function (deck, query) {
-    if (!query) return deck.cards;
-    return deck.cards.filter(function (c) {
-      let front = App.getCardFront(c).toLowerCase();
-      let back = App.getCardBack(c).toLowerCase();
-      let pos = (c.pos || '').toLowerCase();
-      return App.fuzzyMatch(query, front) || back.indexOf(query) !== -1 || pos.indexOf(query) !== -1;
-    });
-  };
-
   /* ========== Toast 通知 ========== */
   App.showToast = function (message, type, duration) {
     type = type || 'info';
@@ -26,16 +15,6 @@ var FlashcardApp = window.FlashcardApp || {};
       toast.classList.add('toast-exit');
       setTimeout(function () { toast.remove(); }, 300);
     }, duration);
-  };
-
-  /* debounce 工具 */
-  App.debounce = function (fn, delay) {
-    let timer;
-    return function () {
-      let ctx = this, args = arguments;
-      clearTimeout(timer);
-      timer = setTimeout(function () { fn.apply(ctx, args); }, delay);
-    };
   };
 
   /* ========== 事件绑定 ========== */
@@ -149,13 +128,6 @@ var FlashcardApp = window.FlashcardApp || {};
       App.returnToModeSelect();
     });
 
-    /* 预览模式 */
-    document.getElementById('previewSearch').addEventListener('input', App.debounce(function () {
-      let deck = App.getCurrentDeck();
-      if (!deck) return;
-      let query = this.value.trim().toLowerCase();
-      App._renderPreviewTable(App._filterPreviewCards(deck, query));
-    }, 150));
 
     /* 预览表格朗读按钮 */
     document.getElementById('previewTbody').addEventListener('click', function (e) {
