@@ -51,18 +51,20 @@ describe('buildRegistrySource', () => {
 });
 
 describe('BOOK_CONFIG', () => {
-  it('共 10 本，key 与 sourceFile 均唯一', () => {
-    expect(BOOK_CONFIG).toHaveLength(10);
+  it('共 20 本（乱序 10 + 正序 10），key 与 sourceFile 均唯一', () => {
+    expect(BOOK_CONFIG).toHaveLength(20);
     const keys = BOOK_CONFIG.map((b) => b.key);
     const files = BOOK_CONFIG.map((b) => b.sourceFile);
-    expect(new Set(keys).size).toBe(10);
-    expect(new Set(files).size).toBe(10);
+    expect(new Set(keys).size).toBe(20);
+    expect(new Set(files).size).toBe(20);
   });
 
-  it('前 5 本为替换书（沿用旧 key），后 5 本为新增词书', () => {
+  it('前 10 本为乱序组（前 5 替换书沿用旧 key + 5 本新增），后 10 本为正序组', () => {
     const replaceKeys = ['senior-high-enriched', 'cet4-syllabus-enriched', 'cet6-core-enriched', 'cet6-syllabus-enriched', 'kaoyan-enriched'];
     expect(BOOK_CONFIG.slice(0, 5).map((b) => b.key)).toEqual(replaceKeys);
-    expect(BOOK_CONFIG.slice(5).map((b) => b.key)).toEqual(['junior-high', 'junior-high-core', 'senior-high-core', 'cet4-core', 'kaoyan-core']);
+    expect(BOOK_CONFIG.slice(5, 10).map((b) => b.key)).toEqual(['junior-high', 'junior-high-core', 'senior-high-core', 'cet4-core', 'kaoyan-core']);
+    const sortedKeys = ['junior-high-sorted', 'junior-high-core-sorted', 'senior-high-sorted', 'senior-high-core-sorted', 'cet4-sorted', 'cet4-core-sorted', 'cet6-sorted', 'cet6-core-sorted', 'kaoyan-sorted', 'kaoyan-core-sorted'];
+    expect(BOOK_CONFIG.slice(10).map((b) => b.key)).toEqual(sortedKeys);
   });
 
   it('每本都有 name/description/sourceFile', () => {

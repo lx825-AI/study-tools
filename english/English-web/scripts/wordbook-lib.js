@@ -73,6 +73,67 @@ const BOOK_CONFIG = [
     description: '考研英语考试高频核心词汇',
     sourceFile: 'kaoyan-core.json',
   },
+  /* 正序版（与上述 10 本同源同词，仅按字母正序排列；对齐小程序 -sorted 系列） */
+  {
+    key: 'junior-high-sorted',
+    name: '初中大纲词汇（正序）',
+    description: '初中英语完整大纲词汇，按字母正序排列',
+    sourceFile: 'junior-high-sorted.json',
+  },
+  {
+    key: 'junior-high-core-sorted',
+    name: '初中核心词汇（正序）',
+    description: '初中英语考试高频核心词汇，按字母正序排列',
+    sourceFile: 'junior-high-core-sorted.json',
+  },
+  {
+    key: 'senior-high-sorted',
+    name: '高中英语词汇（含词性）（正序）',
+    description: '高中英语完整大纲词汇，100% 音标覆盖，按字母正序排列',
+    sourceFile: 'senior-high-sorted.json',
+  },
+  {
+    key: 'senior-high-core-sorted',
+    name: '高中核心词汇（正序）',
+    description: '高中英语考试高频核心词汇，按字母正序排列',
+    sourceFile: 'senior-high-core-sorted.json',
+  },
+  {
+    key: 'cet4-sorted',
+    name: '四级大纲词汇（含词性）（正序）',
+    description: 'CET-4 完整大纲词汇，100% 音标覆盖，按字母正序排列',
+    sourceFile: 'cet4-sorted.json',
+  },
+  {
+    key: 'cet4-core-sorted',
+    name: '四级核心词汇（正序）',
+    description: 'CET-4 考试高频核心词汇，按字母正序排列',
+    sourceFile: 'cet4-core-sorted.json',
+  },
+  {
+    key: 'cet6-sorted',
+    name: '六级完整大纲（含词性）（正序）',
+    description: 'CET-6 完整大纲词汇，100% 音标覆盖，按字母正序排列',
+    sourceFile: 'cet6-sorted.json',
+  },
+  {
+    key: 'cet6-core-sorted',
+    name: '六级核心高频（含词性）（正序）',
+    description: 'CET-6 考试高频核心词汇，100% 音标覆盖，按字母正序排列',
+    sourceFile: 'cet6-core-sorted.json',
+  },
+  {
+    key: 'kaoyan-sorted',
+    name: '考研英语词汇（含词性）（正序）',
+    description: '考研英语完整大纲词汇，100% 音标覆盖，按字母正序排列',
+    sourceFile: 'kaoyan-sorted.json',
+  },
+  {
+    key: 'kaoyan-core-sorted',
+    name: '考研核心词汇（正序）',
+    description: '考研英语考试高频核心词汇，按字母正序排列',
+    sourceFile: 'kaoyan-core-sorted.json',
+  },
 ];
 
 /**

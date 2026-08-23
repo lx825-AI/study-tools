@@ -48,6 +48,7 @@ fs.writeFileSync(path.join(DIST, 'app.bundle.js'), result.code);
 console.log('✓ JS merged + minified (' + jsContent.length + ' -> ' + result.code.length + ' bytes)');
 
 /* ========== 词书：直接复制 JS 文件（通过动态 &lt;script&gt; 标签加载） ========== */
+/* 与 wordbook-lib.js BOOK_CONFIG / import.js BUILTIN_WORDBOOKS 保持同步（20 本：乱序 10 + 正序 10） */
 const WORDBOOKS = [
   'senior-high-enriched',
   'kaoyan-enriched',
@@ -58,7 +59,17 @@ const WORDBOOKS = [
   'junior-high-core',
   'senior-high-core',
   'cet4-core',
-  'kaoyan-core'
+  'kaoyan-core',
+  'junior-high-sorted',
+  'junior-high-core-sorted',
+  'senior-high-sorted',
+  'senior-high-core-sorted',
+  'cet4-sorted',
+  'cet4-core-sorted',
+  'cet6-sorted',
+  'cet6-core-sorted',
+  'kaoyan-sorted',
+  'kaoyan-core-sorted'
 ];
 
 WORDBOOKS.forEach(name => {

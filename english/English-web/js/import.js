@@ -17,7 +17,18 @@ var FlashcardApp = window.FlashcardApp || {};
     { key: 'cet6-syllabus-enriched',   name: '六级完整大纲（含词性）',  desc: 'CET-6 完整大纲词汇，100% 音标覆盖',          file: 'wordbooks/cet6-syllabus-enriched.js', level: 'cet6',        type: 'syllabus' },
     { key: 'cet6-core-enriched',       name: '六级核心高频（含词性）',  desc: 'CET-6 考试高频核心词汇，100% 音标覆盖',      file: 'wordbooks/cet6-core-enriched.js',     level: 'cet6',        type: 'core' },
     { key: 'kaoyan-enriched',          name: '考研英语词汇（含词性）',  desc: '考研英语完整大纲词汇，100% 音标覆盖',        file: 'wordbooks/kaoyan-enriched.js',        level: 'kaoyan',      type: 'syllabus' },
-    { key: 'kaoyan-core',              name: '考研核心词汇',            desc: '考研英语考试高频核心词汇',                   file: 'wordbooks/kaoyan-core.js',            level: 'kaoyan',      type: 'core' }
+    { key: 'kaoyan-core',              name: '考研核心词汇',            desc: '考研英语考试高频核心词汇',                   file: 'wordbooks/kaoyan-core.js',            level: 'kaoyan',      type: 'core' },
+    /* 正序版（同源同词，仅按字母正序排列；对齐小程序 -sorted 系列） */
+    { key: 'junior-high-sorted',       name: '初中大纲词汇（正序）',    desc: '初中英语完整大纲词汇，按字母正序排列',       file: 'wordbooks/junior-high-sorted.js',       level: 'junior-high',  type: 'syllabus' },
+    { key: 'junior-high-core-sorted',  name: '初中核心词汇（正序）',    desc: '初中英语考试高频核心词汇，按字母正序排列',   file: 'wordbooks/junior-high-core-sorted.js',  level: 'junior-high',  type: 'core' },
+    { key: 'senior-high-sorted',       name: '高中英语词汇（含词性）（正序）', desc: '高中英语完整大纲词汇，100% 音标覆盖，按字母正序排列', file: 'wordbooks/senior-high-sorted.js', level: 'senior-high', type: 'syllabus' },
+    { key: 'senior-high-core-sorted',  name: '高中核心词汇（正序）',    desc: '高中英语考试高频核心词汇，按字母正序排列',   file: 'wordbooks/senior-high-core-sorted.js',  level: 'senior-high', type: 'core' },
+    { key: 'cet4-sorted',              name: '四级大纲词汇（含词性）（正序）', desc: 'CET-4 完整大纲词汇，100% 音标覆盖，按字母正序排列', file: 'wordbooks/cet4-sorted.js',       level: 'cet4',        type: 'syllabus' },
+    { key: 'cet4-core-sorted',         name: '四级核心词汇（正序）',    desc: 'CET-4 考试高频核心词汇，按字母正序排列',     file: 'wordbooks/cet4-core-sorted.js',         level: 'cet4',        type: 'core' },
+    { key: 'cet6-sorted',              name: '六级完整大纲（含词性）（正序）', desc: 'CET-6 完整大纲词汇，100% 音标覆盖，按字母正序排列', file: 'wordbooks/cet6-sorted.js',       level: 'cet6',        type: 'syllabus' },
+    { key: 'cet6-core-sorted',         name: '六级核心高频（含词性）（正序）', desc: 'CET-6 考试高频核心词汇，100% 音标覆盖，按字母正序排列', file: 'wordbooks/cet6-core-sorted.js', level: 'cet6',        type: 'core' },
+    { key: 'kaoyan-sorted',            name: '考研英语词汇（含词性）（正序）', desc: '考研英语完整大纲词汇，100% 音标覆盖，按字母正序排列', file: 'wordbooks/kaoyan-sorted.js', level: 'kaoyan',      type: 'syllabus' },
+    { key: 'kaoyan-core-sorted',       name: '考研核心词汇（正序）',    desc: '考研英语考试高频核心词汇，按字母正序排列',   file: 'wordbooks/kaoyan-core-sorted.js',       level: 'kaoyan',      type: 'core' }
   ];
 
   /* 词书级别分类（对齐小程序 decks 页：先选级别，再看大纲/核心） */
@@ -198,12 +209,13 @@ var FlashcardApp = window.FlashcardApp || {};
       { type: 'core', icon: '⭐', title: '核心词汇', desc: '考试高频重点词汇' }
     ];
     typeSections.forEach(function (section) {
-      var book = books.find(function (b) { return b.type === section.type; });
+      /* 每类渲染全部词书（乱序 + 正序），对齐小程序 decks 页双本节布局 */
+      var sectionBooks = books.filter(function (b) { return b.type === section.type; });
       html += '<div class="import-section-title" style="margin-top:12px;">' + section.icon + ' ' + section.title + '</div>' +
         '<div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">' + section.desc + '</div>';
-      if (book) {
+      sectionBooks.forEach(function (book) {
         html += App._renderWordbookButton(book);
-      }
+      });
     });
 
     bookList.innerHTML = html;

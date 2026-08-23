@@ -22,16 +22,16 @@ describe('WORDBOOK_LEVELS 与 BUILTIN_WORDBOOKS 分类完整性', () => {
     expect(new Set(ids).size).toBe(5);
   });
 
-  it('每个级别恰好有 1 本大纲词书 + 1 本核心词书，无孤儿词书', () => {
+  it('每个级别恰好有 2 本大纲 + 2 本核心（乱序/正序各一），无孤儿词书', () => {
     App.WORDBOOK_LEVELS.forEach((level) => {
       const books = App.BUILTIN_WORDBOOKS.filter((b) => b.level === level.id);
-      expect(books).toHaveLength(2);
-      expect(books.filter((b) => b.type === 'syllabus')).toHaveLength(1);
-      expect(books.filter((b) => b.type === 'core')).toHaveLength(1);
+      expect(books).toHaveLength(4);
+      expect(books.filter((b) => b.type === 'syllabus')).toHaveLength(2);
+      expect(books.filter((b) => b.type === 'core')).toHaveLength(2);
     });
   });
 
-  it('全部 10 本词书都归属某个级别', () => {
+  it('全部 20 本词书都归属某个级别', () => {
     const levelIds = new Set(App.WORDBOOK_LEVELS.map((l) => l.id));
     App.BUILTIN_WORDBOOKS.forEach((b) => {
       expect(levelIds.has(b.level)).toBe(true);
@@ -61,17 +61,18 @@ describe('renderImportLevelBooks（第二屏：大纲/核心词书）', () => {
     document.body.innerHTML = '';
   });
 
-  it('渲染返回按钮 + 大纲/核心两个 section 各一本词书', () => {
+  it('渲染返回按钮 + 大纲/核心两个 section 各两本（乱序 + 正序）', () => {
     setupModal();
     App.renderImportLevelBooks('cet4');
     const list = document.getElementById('importBookList');
     expect(list.querySelector('#btnImportBack')).not.toBeNull();
     expect(list.innerHTML).toContain('大纲词汇');
     expect(list.innerHTML).toContain('核心词汇');
+    expect(list.innerHTML).toContain('正序');
     const bookBtns = list.querySelectorAll('button[data-book]');
-    expect(bookBtns.length).toBe(2);
+    expect(bookBtns.length).toBe(4);
     const keys = Array.from(bookBtns).map((b) => b.getAttribute('data-book')).sort();
-    expect(keys).toEqual(['cet4-core', 'cet4-syllabus-enriched']);
+    expect(keys).toEqual(['cet4-core', 'cet4-core-sorted', 'cet4-sorted', 'cet4-syllabus-enriched']);
   });
 
   it('未知级别不渲染词书按钮', () => {
