@@ -77,81 +77,84 @@
   margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;
 }
 
-/* 词书双节列表（对齐小程序 decks 页 wb-option：🔀乱序/🔤正序 短标签 + 词数 + 导入 pill/已导入）
+/* 词书双节内容卡（Web 风格：无边框 + shadow-sm 12px 圆角，hover shadow-md；「导入」主色实心小按钮）
    #importBookList 前缀覆盖 .modal-options button 的通用按钮样式 */
-#importBookList .wb-option {
-  width: 100%;
+.wb-section-header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.wb-section-desc { font-size: 12px; color: var(--text-muted); }
+.wb-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 4px;
+}
+#importBookList .wb-option {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: none; /* 覆盖 .modal-options button 通用 2px 边框 */
+  border-radius: var(--radius-md);
   background: var(--surface);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
   font-family: inherit;
   font-size: 14px;
   color: var(--text-primary);
-  transition: border-color 0.15s, background 0.15s;
-  margin-bottom: 8px;
+  text-align: left;
+  transition: box-shadow 0.15s, transform 0.15s;
 }
-#importBookList .wb-option:hover {
-  border-color: var(--primary);
-  background: var(--primary-bg);
-}
+#importBookList .wb-option:hover { box-shadow: var(--shadow-md); }
+#importBookList .wb-option:active { transform: scale(0.98); }
 #importBookList .wb-option:disabled {
   opacity: 0.6;
   cursor: default;
 }
-#importBookList .wb-option:disabled:hover {
-  border-color: var(--border);
-  background: var(--surface);
+#importBookList .wb-option:disabled:hover { box-shadow: var(--shadow-sm); }
+#importBookList .wb-option:disabled:active { transform: none; }
+#importBookList .wb-option.selected {
+  box-shadow: var(--shadow-sm), inset 0 0 0 1.5px var(--success);
 }
-#importBookList .wb-option.selected { border-color: var(--success); }
-.wb-option-left {
+.wb-option-top {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 .wb-option-icon { font-size: 18px; }
 .wb-option-name { font-size: 14px; font-weight: 600; }
-.wb-option-right {
+.wb-option-count { font-size: 12px; color: var(--text-muted); margin-left: auto; }
+.wb-option-action {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  justify-content: flex-end;
 }
-.wb-option-count { font-size: 12px; color: var(--text-muted); }
-.wb-option-check { font-size: 12px; color: var(--success); font-weight: 600; }
-.wb-option-import {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--primary);
-  background: var(--primary-bg);
-  border: 1px solid var(--primary);
-  border-radius: 999px;
-  padding: 4px 14px;
-}
+.wb-option-check { font-size: 13px; color: var(--success); font-weight: 600; }
 
-/* 词书级别列表（对齐小程序 decks 页） */
-.level-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+/* 词书级别选择（Web 内容卡网格：无边框 + shadow-sm，hover shadow-md） */
+.level-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
 }
 .level-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  padding: 14px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   background: var(--surface);
-  transition: border-color 0.15s, background 0.15s;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.15s, transform 0.15s;
 }
 .level-item:hover {
-  border-color: var(--primary);
-  background: var(--primary-bg);
+  box-shadow: var(--shadow-md);
+}
+.level-item:active {
+  transform: scale(0.98);
 }
 .level-icon { font-size: 20px; flex-shrink: 0; }
 .level-info { flex: 1; }
@@ -360,5 +363,13 @@
     width: 36px;
     height: 36px;
     font-size: 16px;
+  }
+
+  /* 导入界面：级别卡与书卡移动端单列 */
+  .level-grid {
+    grid-template-columns: 1fr;
+  }
+  .wb-options {
+    grid-template-columns: 1fr;
   }
 }

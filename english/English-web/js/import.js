@@ -169,22 +169,22 @@ var FlashcardApp = window.FlashcardApp || {};
     }
   };
 
-  /* 渲染单本词书（对齐小程序 decks 页 wb-option：🔀乱序版/🔤正序版 短标签 + 词数 + 导入 pill/已导入） */
+  /* 渲染单本词书（Web 内容卡：🔀乱序版/🔤正序版 短标签 + 词数 + 主色导入按钮/已导入态） */
   App._renderWordbookButton = function (b) {
     var imported = App.isWordbookImported(b);
     var isSorted = b.order === 'sorted';
     var count = b.loaded ? b.count : b.wordCount;
     return '<button class="wb-option' + (imported ? ' selected' : '') + '" data-book="' + b.key + '"' +
       (imported ? ' disabled' : '') + '>' +
-      '<span class="wb-option-left">' +
+      '<span class="wb-option-top">' +
         '<span class="wb-option-icon">' + (isSorted ? '🔤' : '🔀') + '</span>' +
         '<span class="wb-option-name">' + (isSorted ? '正序版' : '乱序版') + '</span>' +
-      '</span>' +
-      '<span class="wb-option-right">' +
         '<span class="wb-option-count">' + count + ' 词</span>' +
+      '</span>' +
+      '<span class="wb-option-action">' +
         (imported
           ? '<span class="wb-option-check">✓ 已导入</span>'
-          : '<span class="wb-option-import">导入</span>') +
+          : '<span class="btn btn-primary btn-sm wb-option-import">导入</span>') +
       '</span>' +
     '</button>';
   };
@@ -197,7 +197,7 @@ var FlashcardApp = window.FlashcardApp || {};
     statusEl.textContent = '';
 
     var html = '<div class="import-section-title">📚 选择级别</div>' +
-      '<div class="level-list">' +
+      '<div class="level-grid">' +
       App.WORDBOOK_LEVELS.map(function (level) {
         return '<div class="level-item" data-level="' + level.id + '">' +
           '<span class="level-icon">' + level.icon + '</span>' +
@@ -247,13 +247,17 @@ var FlashcardApp = window.FlashcardApp || {};
       { type: 'core', icon: '⭐', title: '核心词汇', desc: '考试高频重点词汇' }
     ];
     typeSections.forEach(function (section) {
-      /* 每类渲染全部词书（乱序 + 正序），对齐小程序 decks 页双本节布局 */
+      /* 每类渲染全部词书（乱序 + 正序），Web 内容卡双列布局 */
       var sectionBooks = books.filter(function (b) { return b.type === section.type; });
-      html += '<div class="import-section-title" style="margin-top:12px;">' + section.icon + ' ' + section.title + '</div>' +
-        '<div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">' + section.desc + '</div>';
+      html += '<div class="wb-section-header" style="margin-top:12px;">' +
+        '<span class="import-section-title" style="margin-bottom:0;">' + section.icon + ' ' + section.title + '</span>' +
+        '<span class="wb-section-desc">' + section.desc + '</span>' +
+      '</div>' +
+      '<div class="wb-options">';
       sectionBooks.forEach(function (book) {
         html += App._renderWordbookButton(book);
       });
+      html += '</div>';
     });
 
     bookList.innerHTML = html;
