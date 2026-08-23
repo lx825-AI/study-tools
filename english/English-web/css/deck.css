@@ -99,25 +99,6 @@
 }
 .deck-difficulty span.active { background: var(--warning); }
 
-/* 新建牌组 */
-.add-deck-form {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-.add-deck-form input {
-  flex: 1;
-  padding: 10px 14px;
-  border: 2px solid var(--border);
-  border-radius: var(--radius);
-  font-size: 15px;
-  outline: none;
-  transition: border-color 0.2s;
-  background: var(--surface);
-  color: var(--text-primary);
-}
-.add-deck-form input:focus { border-color: var(--primary); }
-
 /* 导入区域 */
 .import-area {
   margin-bottom: 20px;

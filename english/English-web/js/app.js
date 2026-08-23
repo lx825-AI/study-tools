@@ -19,21 +19,6 @@ var FlashcardApp = window.FlashcardApp || {};
 
   /* ========== 事件绑定 ========== */
   App.init = function () {
-    /* 创建牌组 */
-    document.getElementById('btnAddDeck').addEventListener('click', function () {
-      let input = document.getElementById('deckNameInput');
-      let name = input.value.trim();
-      if (!name) return;
-      App.state.decks.push({ id: App.genId(), name: name, cards: [] });
-      App.saveData();
-      input.value = '';
-      App.renderAll();
-    });
-
-    document.getElementById('deckNameInput').addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') document.getElementById('btnAddDeck').click();
-    });
-
     /* 牌组选择器 */
     document.getElementById('deckSelect').addEventListener('change', function (e) {
       App.state.currentDeckId = e.target.value || null;

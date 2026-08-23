@@ -1,6 +1,6 @@
 /* Service Worker —— 离线缓存 */
-var CACHE_APP = 'flashcard-app-v16';
-var CACHE_DATA = 'flashcard-data-v16';
+var CACHE_APP = 'flashcard-app-v17';
+var CACHE_DATA = 'flashcard-data-v17';
 var STATIC_FILES = [
   './',
   './index.html',

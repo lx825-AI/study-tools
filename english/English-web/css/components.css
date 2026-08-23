@@ -130,20 +130,6 @@ input[type="search"] {
     min-height: 40px;
   }
 
-  /* 新建牌组表单 */
-  .add-deck-form {
-    flex-direction: column;
-    gap: 8px;
-  }
-  .add-deck-form input {
-    width: 100%;
-    padding: 12px;
-  }
-  .add-deck-form .btn {
-    width: 100%;
-    min-height: 44px;
-  }
-
   /* 学习头部 */
   .study-header {
     padding-top: 8px;

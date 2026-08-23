@@ -35,7 +35,7 @@ js/
   ebbinghaus.js     -- 艾宾浩斯遗忘曲线：8阶段复习调度、到期检测、逾期排序
   ui.js             -- 牌组选择渲染、面板切换（panelMap 含 wrong）、导航徽章、renderAll
   daily-quote.js    -- 每日英语名言（34 条，与小程序同源）、pickTodayQuote/getNextQuote/switchQuote/renderDailyQuote
-  deck-panel.js     -- 牌组 CRUD（学习/编辑/删除）
+  deck-panel.js     -- 牌组管理（编辑/删除；牌组仅由内置词书导入产生，无手动创建）
   quick-mode.js     -- 快速浏览模式（startQuickMode/applyQuickResult/loadQuickLog）
   study-panel.js    -- 多模式学习 + 拼写模式（⌨️ 内嵌）+ 艾宾浩斯作答（单轨）+ 进度持久化
   wrong-words.js    -- 错词列表模块：学习模式引导页「错题强化」折叠区（collectFailedCards 复用、单卡移出）
@@ -90,6 +90,10 @@ scripts/
 **已知局限**：两端「当日覆盖」日志语义下，合并后本端同日继续学习会覆盖合并值（两端既有对齐行为，同步不引入新问题）
 
 **测试**：293→323（sync-codec +30：fnv1a/映射/卡片合并/日志合并/设置/往返/分块/收集应用全链路）；二期（云中转配对码）待做
+
+## 最近更新（2026-08-23）— 删除手动创建牌组（对齐小程序）
+
+**创建牌组删除**：index.html 删 `.add-deck-form` 表单（input#deckNameInput + button#btnAddDeck）；app.js 删两段绑定（btnAddDeck click 创建逻辑 + deckNameInput Enter 触发）；deck.css / components.css 各删 `.add-deck-form` 规则块；空状态文案改「点击上方「📥 导入词书」选择内置词书吧」——牌组仅由内置词书导入产生（对齐小程序：useDeckImport 是唯一建组点）；「添加新卡片」表单保留（与创建牌组零耦合，可为词书牌组补自定义卡）；genId 保留（导入路径仍用）；测试 323 不变；SW 缓存 v16→v17
 
 ## 最近更新（2026-08-23）— 删除预览界面搜索栏
 
