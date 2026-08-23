@@ -68,6 +68,10 @@ math/
 
 **⭐ 收藏持久化修复（HIGH）**：学习页点 ⭐ 后直接退出收藏静默丢失（toggleHard 只改内存 + saveProgress 仅落盘答题卡 + 零答题提前 return）——persistProcessedCards 幂等合并落盘 + 800ms debounce + onUnmounted flush；**本周新增口径修复（MED）**：周起点改周一 UTC 口径 + 首次错误计 1（周日当天整周错误全消失 bug）；**旧格式 definitions 展示守卫（MED）**：wordbook 崩页/wrong-words 首字符/study 逐字符渲染三处接入 safeDefinitionLines；另修 batchPractice 队列超限静默失败、wordbook listHeight 溢出、storage 旧数据数组守卫；测试 303→318
 
+## 最近更新（2026-08-23）— English-mini-app 统计界面审查修复
+
+**周报告桶错位一天（MED）**：本地午夜+toISOString 与 UTC 日志 key 混用致周一学的词显示在周二柱——getWeekDates 纯函数统一 UTC 口径；**日志合并口径（MED-LOW）**：同日快速+深度求和对齐首页 todayProgress（原深度覆盖快速只计其一）；**热力图 UTC 化（MED-LOW）**：上午 0-8 点全网格错位 + 未来格淡色区分；另修周趋势下降色不生效、stage 负值/NaN 钳制、死代码清理；测试 318→328
+
 ## 最近更新（2026-08-16）— English-mini-app v2.5
 
 **卡片编辑表单扩展**：cards 页编辑弹窗新增词组短语/同义词/反义词/易混淆词 4 个编辑框，解析逻辑抽 card-form.js 纯函数模块；startEdit 对旧格式数据（字符串 definitions/例句元素）防崩溃防脏数据
