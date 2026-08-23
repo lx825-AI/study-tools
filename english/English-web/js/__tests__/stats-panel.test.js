@@ -136,6 +136,28 @@ describe('finalizeStudyLog', () => {
   });
 });
 
+describe('loadLearningLog 损坏数据防御', () => {
+  afterEach(() => {
+    localStorage.removeItem(App.LEARNING_LOG_KEY);
+  });
+
+  it('null 顶层返回空对象（对象形状守卫）', () => {
+    localStorage.setItem(App.LEARNING_LOG_KEY, 'null');
+    expect(App.loadLearningLog()).toEqual({});
+  });
+
+  it('条目为 null 时合并层归零不崩（mergeLogs 防御）', () => {
+    localStorage.setItem(App.LEARNING_LOG_KEY, JSON.stringify({ '2026-08-01': null }));
+    const merged = App.mergeLogs({}, App.loadLearningLog());
+    expect(merged['2026-08-01']).toEqual({ cardsStudied: 0, correct: 0, wrong: 0 });
+  });
+
+  it('JSON 损坏返回空对象', () => {
+    localStorage.setItem(App.LEARNING_LOG_KEY, '{invalid');
+    expect(App.loadLearningLog()).toEqual({});
+  });
+});
+
 describe('calcStreak', () => {
   afterEach(() => {
     vi.useRealTimers();

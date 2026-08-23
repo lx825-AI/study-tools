@@ -14,14 +14,38 @@ function utcKey(y, m, d) {
 const NOW = new Date(Date.UTC(2026, 7, 21, 12));
 
 describe('mergeLogs', () => {
-  it('合并两日志，同日深度覆盖快速', () => {
+  it('合并两日志，同日三字段求和（对齐小程序 mergeDailyCounts）', () => {
     const merged = App.mergeLogs(
-      { '2026-08-01': { cardsStudied: 5 }, '2026-08-02': { cardsStudied: 3 } },
-      { '2026-08-02': { cardsStudied: 10 }, '2026-08-03': { cardsStudied: 7 } }
+      { '2026-08-01': { cardsStudied: 5, correct: 4, wrong: 1 }, '2026-08-02': { cardsStudied: 3, correct: 2, wrong: 1 } },
+      { '2026-08-02': { cardsStudied: 10, correct: 8, wrong: 2 }, '2026-08-03': { cardsStudied: 7, correct: 6, wrong: 1 } }
     );
     expect(merged['2026-08-01'].cardsStudied).toBe(5);
-    expect(merged['2026-08-02'].cardsStudied).toBe(10); /* deep 覆盖 */
+    expect(merged['2026-08-02'].cardsStudied).toBe(13); /* 求和而非覆盖 */
+    expect(merged['2026-08-02'].correct).toBe(10);
+    expect(merged['2026-08-02'].wrong).toBe(3);
     expect(merged['2026-08-03'].cardsStudied).toBe(7);
+  });
+
+  it('跨键守卫回归：quick 完成 + deep 早退同日并存 → 求和不回退', () => {
+    const merged = App.mergeLogs(
+      { '2026-08-02': { cardsStudied: 40, correct: 35, wrong: 5 } }, /* quick 完成 */
+      { '2026-08-02': { cardsStudied: 1, correct: 1, wrong: 0 } }      /* deep 早退 */
+    );
+    expect(merged['2026-08-02'].cardsStudied).toBe(41);
+    expect(merged['2026-08-02'].correct).toBe(36);
+  });
+
+  it('null/字符串字段归一：null 条目归零、字符串字段跳过', () => {
+    const merged = App.mergeLogs(
+      { '2026-08-01': null, '2026-08-02': { cardsStudied: '8', correct: '8', wrong: '2' } },
+      { '2026-08-02': { cardsStudied: 10 }, '2026-08-03': { correct: 5 } }
+    );
+    expect(merged['2026-08-01']).toEqual({ cardsStudied: 0, correct: 0, wrong: 0 });
+    expect(merged['2026-08-02'].cardsStudied).toBe(10); /* '8' 字符串归 0 */
+    expect(merged['2026-08-02'].correct).toBe(0);
+    expect(merged['2026-08-02'].wrong).toBe(0);
+    expect(merged['2026-08-03'].cardsStudied).toBe(0); /* 缺字段补 0 */
+    expect(merged['2026-08-03'].correct).toBe(5);
   });
 
   it('仅 quick 时全部合入', () => {
@@ -177,8 +201,9 @@ describe('heatLevel / buildHeatmapWeeks', () => {
 });
 
 describe('estimateUserCurve', () => {
-  it('不足 3 天返回固定回退数组', () => {
-    expect(App.estimateUserCurve([{}, {}])).toEqual([0.72, 0.62, 0.52, 0.42, 0.32, 0.25]);
+  it('null 条目防御跳过不崩', () => {
+    const curve = App.estimateUserCurve([null, { correct: 7, cardsStudied: 10 }, { correct: 7, cardsStudied: 10 }]);
+    expect(curve[0]).toBeCloseTo(0.7, 5);
   });
 
   it('baseRate 超 0.9 夹紧为 0.9', () => {
@@ -246,5 +271,45 @@ describe('stageDistribution', () => {
       expect(d.count).toBe(0);
       expect(d.percent).toBe(0);
     });
+  });
+
+  it('脏数据防御：负值/NaN/字符串归 0、浮点取整，计数不丢失', () => {
+    const cards = [
+      { ebbinghausStage: -3 },
+      { ebbinghausStage: NaN },
+      { ebbinghausStage: '3' },
+      { ebbinghausStage: 2.7 },
+      { ebbinghausStage: 3 },
+    ];
+    const dist = App.stageDistribution(cards);
+    expect(dist[0].count).toBe(3); /* -3 / NaN / '3' 均归 0 */
+    expect(dist[2].count).toBe(1); /* 2.7 → 2 */
+    expect(dist[3].count).toBe(1);
+    expect(dist.reduce((s, d) => s + d.count, 0)).toBe(5); /* 无计数丢失 */
+  });
+});
+
+describe('凌晨窗口（UTC+8 本地 07:00 = UTC 前一日 23:00；now 参数注入）', () => {
+  /* 本地 2026-08-23 周一 07:00 → UTC 2026-08-22 周日 23:00 */
+  const EARLY_NOW = new Date('2026-08-22T23:00:00Z');
+
+  it('buildWeekSeries 窗口为 UTC 周（8-17 周一 ~ 8-23 周日），凌晨学习落在周六格不位移', () => {
+    const log = { '2026-08-22': { cardsStudied: 10, correct: 9, wrong: 1 } };
+    const s = App.buildWeekSeries(log, EARLY_NOW);
+    expect(s.bars.map(b => b.total)).toEqual([0, 0, 0, 0, 0, 10, 0]);
+    expect(s.weekWords).toBe(10);
+    expect(s.weekDays).toBe(1);
+    expect(s.weekAccuracy).toBe(90);
+  });
+
+  it('buildHeatmapWeeks 今日格为 UTC 日期（8-22），count/level 正确且 isFuture=false', () => {
+    const log = { '2026-08-22': { cardsStudied: 10 } };
+    const weeks = App.buildHeatmapWeeks(log, EARLY_NOW, 2);
+    const last = weeks[weeks.length - 1];
+    const today = last.find(c => c.date === '2026-08-22');
+    expect(today).toBeDefined();
+    expect(today.count).toBe(10);
+    expect(today.level).toBe(2);
+    expect(today.isFuture).toBe(false);
   });
 });

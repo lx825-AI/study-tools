@@ -10,12 +10,26 @@ var FlashcardApp = window.FlashcardApp || {};
   App.THEORETICAL_CURVE = [0.67, 0.55, 0.45, 0.35, 0.25, 0.21];
   App.WEEKDAY_LABELS = ['一', '二', '三', '四', '五', '六', '日'];
 
-  /** 合并快速/深度日志：同日深度覆盖快速（对齐小程序 {...quickLogs, ...deepLogs}） */
+  /** 合并快速/深度日志：同日求和（对齐小程序 mergeDailyCounts：cardsStudied/correct/wrong 逐项相加，
+      与引导页每日目标 todayTotal、首页 todayProgress = deep + quick 口径一致；
+      typeof number 归一防御损坏条目（字符串字段致 NaN%、null 条目致白屏）） */
   App.mergeLogs = function (quickLog, deepLog) {
     var merged = {};
-    var k;
-    for (k in quickLog) { if (quickLog.hasOwnProperty(k)) merged[k] = quickLog[k]; }
-    for (k in deepLog) { if (deepLog.hasOwnProperty(k)) merged[k] = deepLog[k]; }
+    var FIELD_KEYS = ['cardsStudied', 'correct', 'wrong'];
+    var sources = [quickLog, deepLog];
+    sources.forEach(function (src) {
+      var k, entry, i, field, cur;
+      for (k in src) {
+        if (!src.hasOwnProperty(k)) continue;
+        entry = src[k];
+        cur = merged[k] || { cardsStudied: 0, correct: 0, wrong: 0 };
+        for (i = 0; i < FIELD_KEYS.length; i++) {
+          field = FIELD_KEYS[i];
+          cur[field] += (entry && typeof entry[field] === 'number') ? entry[field] : 0;
+        }
+        merged[k] = cur;
+      }
+    });
     return merged;
   };
 
@@ -96,7 +110,9 @@ var FlashcardApp = window.FlashcardApp || {};
     };
   };
 
-  /** 打卡日历数据（周一为首日；本地月历手动拼日期串，对齐小程序 buildCalendar） */
+  /** 打卡日历数据（周一为首日；本地月历手动拼日期串，对齐小程序 buildCalendar）
+      已知偏差（与小程序同款不修）：日志 key 为 UTC 日期，本地 UTC+8 凌晨 00:00-08:00 窗口
+      （本地日期 = UTC 日期 + 1）下：今日圈画在前一格；月初该窗口学习记录显示到上月格 */
   App.buildCalendarData = function (year, month, studiedMap, todayStr) {
     var firstDay = new Date(year, month, 1);
     var lastDay = new Date(year, month + 1, 0);
@@ -145,11 +161,14 @@ var FlashcardApp = window.FlashcardApp || {};
     return weeks;
   };
 
-  /** 艾宾浩斯 8 阶段分布（stage 夹紧 0-7；按最大 count 归一化，对齐小程序 loadStats） */
+  /** 艾宾浩斯 8 阶段分布（stage 整数钳制 0-7；负值/浮点/NaN/非数字统一归 0 防计数静默丢失；
+      按最大 count 归一化，对齐小程序 loadStats） */
   App.stageDistribution = function (cards) {
     var dist = [0, 0, 0, 0, 0, 0, 0, 0];
     cards.forEach(function (c) {
-      var stage = Math.min(c.ebbinghausStage || 0, 7);
+      var raw = c.ebbinghausStage;
+      var stage = (typeof raw === 'number' && isFinite(raw))
+        ? Math.max(0, Math.min(7, Math.floor(raw))) : 0;
       dist[stage]++;
     });
     var maxCount = Math.max.apply(null, dist.concat([1]));
@@ -164,13 +183,13 @@ var FlashcardApp = window.FlashcardApp || {};
     });
   };
 
-  /** 个人记忆曲线估算（对齐小程序 estimateUserCurve：按历史总正确率定基点再递减） */
+  /** 个人记忆曲线估算（对齐小程序 estimateUserCurve：按历史总正确率定基点再递减；
+      调用方保证 entries ≥3（绘制前守卫），null 条目防御跳过） */
   App.estimateUserCurve = function (entries) {
-    if (entries.length < 3) return [0.72, 0.62, 0.52, 0.42, 0.32, 0.25];
     var totalCorrect = 0, totalStudied = 0;
     entries.forEach(function (l) {
-      totalCorrect += l.correct || 0;
-      totalStudied += l.cardsStudied || 0;
+      totalCorrect += (l && l.correct) || 0;
+      totalStudied += (l && l.cardsStudied) || 0;
     });
     var baseRate = totalStudied > 0 ? totalCorrect / totalStudied : 0.8;
     var base = Math.max(0.6, Math.min(0.9, baseRate));
@@ -190,8 +209,8 @@ var FlashcardApp = window.FlashcardApp || {};
     if (entries.length < 3) return '再学习 ' + (3 - entries.length) + ' 天后，就能看到你的记忆曲线了';
     var totalCorrect = 0, totalStudied = 0;
     entries.forEach(function (l) {
-      totalCorrect += l.correct || 0;
-      totalStudied += l.cardsStudied || 0;
+      totalCorrect += (l && l.correct) || 0;
+      totalStudied += (l && l.cardsStudied) || 0;
     });
     var rate = totalStudied > 0 ? Math.round(totalCorrect / totalStudied * 100) : 0;
     if (rate >= 80) return '你的遗忘速度比理论曲线慢，坚持复习有效果！';

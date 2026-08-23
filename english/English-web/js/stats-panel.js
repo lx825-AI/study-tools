@@ -10,7 +10,8 @@ var FlashcardApp = window.FlashcardApp || {};
   App.loadLearningLog = function () {
     try {
       let raw = localStorage.getItem(App.LEARNING_LOG_KEY);
-      return raw ? JSON.parse(raw) : {};
+      let log = raw ? JSON.parse(raw) : {};
+      return log && typeof log === 'object' ? log : {}; /* 对象形状守卫（对齐 loadQuickLog） */
     } catch (e) { return {}; }
   };
 
@@ -69,7 +70,6 @@ var FlashcardApp = window.FlashcardApp || {};
   App.calcStreak = function (log) {
     let streak = 0;
     let d = new Date();
-    d.setDate(d.getDate()); // today
     while (true) {
       let key = d.toISOString().slice(0, 10);
       if (log[key]) { streak++; d.setDate(d.getDate() - 1); }
@@ -307,9 +307,9 @@ var FlashcardApp = window.FlashcardApp || {};
     /* 合并快速/深度日志（对齐小程序统计口径：quick 学习计入统计） */
     var mergedLog = App.mergeLogs(App.loadQuickLog(), App.loadLearningLog());
 
-    /* 全量卡片聚合（现有口径：initEbbinghaus 归一 + 到期检测） */
+    /* 全量卡片聚合（现有口径：initEbbinghaus 归一 + 到期检测；decks 未初始化时防御） */
     var allCards = [];
-    App.state.decks.forEach(function (d) { allCards = allCards.concat(d.cards); });
+    (App.state.decks || []).forEach(function (d) { allCards = allCards.concat(d.cards); });
     allCards.forEach(function (c) { App.initEbbinghaus(c); });
     var totalCards = allCards.length;
 

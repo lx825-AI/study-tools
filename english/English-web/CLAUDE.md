@@ -77,6 +77,18 @@ scripts/
 
 **判定反馈 3 项优化（2026-08-20，对齐小程序 SpellInput 纯练习化）**：正确后不清空重拼——字母保留槽位+绿色边框（spell-slot-correct），修改字母即回输入态清除陈旧 ✅（input 委托检测 spell-correct 态）；错误后答案不常驻——600ms 清空回调同时清空 feedback 文字（防照着拼写）；判定反馈从卡片下方移入卡片内部拼写格子正下方（盲拼分支动态渲染 #spellFeedback，index.html/setup.js 桩同步删除）；测试 199→201；Playwright 端到端 12/12 通过
 
+## 最近更新（2026-08-23）— 统计界面审查修复（对齐小程序求和口径）
+
+**mergeLogs 改同日求和（HIGH）**：原"deep 覆盖 quick"与小程序 08-23 求和口径（mergeDailyCounts）反向漂移——同日快速 40 + 深度 10 只计 10；改为 cardsStudied/correct/wrong 逐项相加 + typeof number 归一（防字符串字段 NaN%、null 条目白屏）；引导页目标进度/KPI/周报/热力图/个人曲线全部自愈为求和口径；跨键早退守卫击穿（deep 早退覆盖 quick 完成回退统计）随求和语义根除
+
+**防御修复**：loadLearningLog 对象形状守卫（对齐 loadQuickLog）；estimateUserCurve/curveNoteText null 条目守卫；stageDistribution 整数钳制（负值/浮点/NaN/字符串归 0 或取整，计数不丢失）；renderStatsPanel decks 未初始化防御
+
+**清理**：calcStreak 空操作行、estimateUserCurve <3 死分支删除（绘制前守卫 ≥3 不可达）；buildCalendarData 补凌晨窗口（UTC+8 00:00-08:00）错位边界注释
+
+**不修（对齐小程序）**：日历本地×UTC 凌晨错位、翻月无边界、曲线 canvas 深色底硬编码
+
+**测试**：294→302（mergeLogs 求和/跨键回归/归一、stageDistribution 脏数据、凌晨窗口 2 例、loadLearningLog 形状 3 例）；SW 缓存 v14→v15
+
 ## 最近更新（2026-08-23）— 导入界面 Web 风格化（去小程序味）
 
 **内容卡化**：第一屏 5 个级别入口从 1px 边框列表改内容卡网格（桌面 2 列/移动 1 列）；第二屏书行改内容卡（12px 圆角 --radius-md + shadow-sm + 无边框、hover shadow-md、:active 下压），每 section 双列（.wb-options grid，移动单列）；「导入」pill 改项目标准主色实心小按钮（.btn .btn-primary .btn-sm）；已导入卡置灰 + 绿 ✓ + 内描边 selected 态；section 标题与 desc 同行（.wb-section-header）
