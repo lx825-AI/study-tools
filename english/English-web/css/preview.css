@@ -77,6 +77,61 @@
   margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;
 }
 
+/* 词书双节列表（对齐小程序 decks 页 wb-option：🔀乱序/🔤正序 短标签 + 词数 + 导入 pill/已导入）
+   #importBookList 前缀覆盖 .modal-options button 的通用按钮样式 */
+#importBookList .wb-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text-primary);
+  transition: border-color 0.15s, background 0.15s;
+  margin-bottom: 8px;
+}
+#importBookList .wb-option:hover {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+}
+#importBookList .wb-option:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+#importBookList .wb-option:disabled:hover {
+  border-color: var(--border);
+  background: var(--surface);
+}
+#importBookList .wb-option.selected { border-color: var(--success); }
+.wb-option-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.wb-option-icon { font-size: 18px; }
+.wb-option-name { font-size: 14px; font-weight: 600; }
+.wb-option-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.wb-option-count { font-size: 12px; color: var(--text-muted); }
+.wb-option-check { font-size: 12px; color: var(--success); font-weight: 600; }
+.wb-option-import {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--primary-bg);
+  border: 1px solid var(--primary);
+  border-radius: 999px;
+  padding: 4px 14px;
+}
+
 /* 词书级别列表（对齐小程序 decks 页） */
 .level-list {
   display: flex;

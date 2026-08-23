@@ -6,29 +6,54 @@ var FlashcardApp = window.FlashcardApp || {};
   window.__VOCAB_REGISTRY__ = window.__VOCAB_REGISTRY__ || {};
 
   /* 内置词书注册表（与 scripts/wordbook-lib.js 的 BOOK_CONFIG 保持同步维护）
-     level: 考试级别 | type: 'syllabus' 大纲词汇 / 'core' 核心词汇 */
+     level: 考试级别 | type: 'syllabus' 大纲词汇 / 'core' 核心词汇
+     order: 'random' 乱序版 / 'sorted' 正序版（对齐小程序 wb-option 短标签）；wordCount 静态词数（免加载即可显示） */
   App.BUILTIN_WORDBOOKS = [
-    { key: 'junior-high',              name: '初中大纲词汇',            desc: '初中英语完整大纲词汇',                       file: 'wordbooks/junior-high.js',            level: 'junior-high',  type: 'syllabus' },
-    { key: 'junior-high-core',         name: '初中核心词汇',            desc: '初中英语考试高频核心词汇',                   file: 'wordbooks/junior-high-core.js',       level: 'junior-high',  type: 'core' },
-    { key: 'senior-high-enriched',     name: '高中英语词汇（含词性）',  desc: '高中英语完整大纲词汇，100% 音标覆盖',        file: 'wordbooks/senior-high-enriched.js',   level: 'senior-high', type: 'syllabus' },
-    { key: 'senior-high-core',         name: '高中核心词汇',            desc: '高中英语考试高频核心词汇',                   file: 'wordbooks/senior-high-core.js',       level: 'senior-high', type: 'core' },
-    { key: 'cet4-syllabus-enriched',   name: '四级大纲词汇（含词性）',  desc: 'CET-4 完整大纲词汇，100% 音标覆盖',          file: 'wordbooks/cet4-syllabus-enriched.js', level: 'cet4',        type: 'syllabus' },
-    { key: 'cet4-core',                name: '四级核心词汇',            desc: 'CET-4 考试高频核心词汇',                    file: 'wordbooks/cet4-core.js',              level: 'cet4',        type: 'core' },
-    { key: 'cet6-syllabus-enriched',   name: '六级完整大纲（含词性）',  desc: 'CET-6 完整大纲词汇，100% 音标覆盖',          file: 'wordbooks/cet6-syllabus-enriched.js', level: 'cet6',        type: 'syllabus' },
-    { key: 'cet6-core-enriched',       name: '六级核心高频（含词性）',  desc: 'CET-6 考试高频核心词汇，100% 音标覆盖',      file: 'wordbooks/cet6-core-enriched.js',     level: 'cet6',        type: 'core' },
-    { key: 'kaoyan-enriched',          name: '考研英语词汇（含词性）',  desc: '考研英语完整大纲词汇，100% 音标覆盖',        file: 'wordbooks/kaoyan-enriched.js',        level: 'kaoyan',      type: 'syllabus' },
-    { key: 'kaoyan-core',              name: '考研核心词汇',            desc: '考研英语考试高频核心词汇',                   file: 'wordbooks/kaoyan-core.js',            level: 'kaoyan',      type: 'core' },
-    /* 正序版（同源同词，仅按字母正序排列；对齐小程序 -sorted 系列） */
-    { key: 'junior-high-sorted',       name: '初中大纲词汇（正序）',    desc: '初中英语完整大纲词汇，按字母正序排列',       file: 'wordbooks/junior-high-sorted.js',       level: 'junior-high',  type: 'syllabus' },
-    { key: 'junior-high-core-sorted',  name: '初中核心词汇（正序）',    desc: '初中英语考试高频核心词汇，按字母正序排列',   file: 'wordbooks/junior-high-core-sorted.js',  level: 'junior-high',  type: 'core' },
-    { key: 'senior-high-sorted',       name: '高中英语词汇（含词性）（正序）', desc: '高中英语完整大纲词汇，100% 音标覆盖，按字母正序排列', file: 'wordbooks/senior-high-sorted.js', level: 'senior-high', type: 'syllabus' },
-    { key: 'senior-high-core-sorted',  name: '高中核心词汇（正序）',    desc: '高中英语考试高频核心词汇，按字母正序排列',   file: 'wordbooks/senior-high-core-sorted.js',  level: 'senior-high', type: 'core' },
-    { key: 'cet4-sorted',              name: '四级大纲词汇（含词性）（正序）', desc: 'CET-4 完整大纲词汇，100% 音标覆盖，按字母正序排列', file: 'wordbooks/cet4-sorted.js',       level: 'cet4',        type: 'syllabus' },
-    { key: 'cet4-core-sorted',         name: '四级核心词汇（正序）',    desc: 'CET-4 考试高频核心词汇，按字母正序排列',     file: 'wordbooks/cet4-core-sorted.js',         level: 'cet4',        type: 'core' },
-    { key: 'cet6-sorted',              name: '六级完整大纲（含词性）（正序）', desc: 'CET-6 完整大纲词汇，100% 音标覆盖，按字母正序排列', file: 'wordbooks/cet6-sorted.js',       level: 'cet6',        type: 'syllabus' },
-    { key: 'cet6-core-sorted',         name: '六级核心高频（含词性）（正序）', desc: 'CET-6 考试高频核心词汇，100% 音标覆盖，按字母正序排列', file: 'wordbooks/cet6-core-sorted.js', level: 'cet6',        type: 'core' },
-    { key: 'kaoyan-sorted',            name: '考研英语词汇（含词性）（正序）', desc: '考研英语完整大纲词汇，100% 音标覆盖，按字母正序排列', file: 'wordbooks/kaoyan-sorted.js', level: 'kaoyan',      type: 'syllabus' },
-    { key: 'kaoyan-core-sorted',       name: '考研核心词汇（正序）',    desc: '考研英语考试高频核心词汇，按字母正序排列',   file: 'wordbooks/kaoyan-core-sorted.js',       level: 'kaoyan',      type: 'core' }
+    /* 初中 */
+    { key: 'junior-high', name: '初中大纲词汇', desc: '初中英语完整大纲词汇',
+      file: 'wordbooks/junior-high.js', level: 'junior-high', type: 'syllabus', order: 'random', wordCount: 1986 },
+    { key: 'junior-high-core', name: '初中核心词汇', desc: '初中英语考试高频核心词汇',
+      file: 'wordbooks/junior-high-core.js', level: 'junior-high', type: 'core', order: 'random', wordCount: 1417 },
+    { key: 'junior-high-sorted', name: '初中大纲词汇（正序）', desc: '初中英语完整大纲词汇，按字母正序排列',
+      file: 'wordbooks/junior-high-sorted.js', level: 'junior-high', type: 'syllabus', order: 'sorted', wordCount: 1986 },
+    { key: 'junior-high-core-sorted', name: '初中核心词汇（正序）', desc: '初中英语考试高频核心词汇，按字母正序排列',
+      file: 'wordbooks/junior-high-core-sorted.js', level: 'junior-high', type: 'core', order: 'sorted', wordCount: 1417 },
+    /* 高中 */
+    { key: 'senior-high-enriched', name: '高中英语词汇（含词性）', desc: '高中英语完整大纲词汇，100% 音标覆盖',
+      file: 'wordbooks/senior-high-enriched.js', level: 'senior-high', type: 'syllabus', order: 'random', wordCount: 3735 },
+    { key: 'senior-high-core', name: '高中核心词汇', desc: '高中英语考试高频核心词汇',
+      file: 'wordbooks/senior-high-core.js', level: 'senior-high', type: 'core', order: 'random', wordCount: 3659 },
+    { key: 'senior-high-sorted', name: '高中英语词汇（含词性）（正序）', desc: '高中英语完整大纲词汇，100% 音标覆盖，按字母正序排列',
+      file: 'wordbooks/senior-high-sorted.js', level: 'senior-high', type: 'syllabus', order: 'sorted', wordCount: 3735 },
+    { key: 'senior-high-core-sorted', name: '高中核心词汇（正序）', desc: '高中英语考试高频核心词汇，按字母正序排列',
+      file: 'wordbooks/senior-high-core-sorted.js', level: 'senior-high', type: 'core', order: 'sorted', wordCount: 3659 },
+    /* 四级 */
+    { key: 'cet4-syllabus-enriched', name: '四级大纲词汇（含词性）', desc: 'CET-4 完整大纲词汇，100% 音标覆盖',
+      file: 'wordbooks/cet4-syllabus-enriched.js', level: 'cet4', type: 'syllabus', order: 'random', wordCount: 4542 },
+    { key: 'cet4-core', name: '四级核心词汇', desc: 'CET-4 考试高频核心词汇',
+      file: 'wordbooks/cet4-core.js', level: 'cet4', type: 'core', order: 'random', wordCount: 1161 },
+    { key: 'cet4-sorted', name: '四级大纲词汇（含词性）（正序）', desc: 'CET-4 完整大纲词汇，100% 音标覆盖，按字母正序排列',
+      file: 'wordbooks/cet4-sorted.js', level: 'cet4', type: 'syllabus', order: 'sorted', wordCount: 4542 },
+    { key: 'cet4-core-sorted', name: '四级核心词汇（正序）', desc: 'CET-4 考试高频核心词汇，按字母正序排列',
+      file: 'wordbooks/cet4-core-sorted.js', level: 'cet4', type: 'core', order: 'sorted', wordCount: 1161 },
+    /* 六级 */
+    { key: 'cet6-syllabus-enriched', name: '六级完整大纲（含词性）', desc: 'CET-6 完整大纲词汇，100% 音标覆盖',
+      file: 'wordbooks/cet6-syllabus-enriched.js', level: 'cet6', type: 'syllabus', order: 'random', wordCount: 3990 },
+    { key: 'cet6-core-enriched', name: '六级核心高频（含词性）', desc: 'CET-6 考试高频核心词汇，100% 音标覆盖',
+      file: 'wordbooks/cet6-core-enriched.js', level: 'cet6', type: 'core', order: 'random', wordCount: 1227 },
+    { key: 'cet6-sorted', name: '六级完整大纲（含词性）（正序）', desc: 'CET-6 完整大纲词汇，100% 音标覆盖，按字母正序排列',
+      file: 'wordbooks/cet6-sorted.js', level: 'cet6', type: 'syllabus', order: 'sorted', wordCount: 3990 },
+    { key: 'cet6-core-sorted', name: '六级核心高频（含词性）（正序）', desc: 'CET-6 考试高频核心词汇，100% 音标覆盖，按字母正序排列',
+      file: 'wordbooks/cet6-core-sorted.js', level: 'cet6', type: 'core', order: 'sorted', wordCount: 1227 },
+    /* 考研 */
+    { key: 'kaoyan-enriched', name: '考研英语词汇（含词性）', desc: '考研英语完整大纲词汇，100% 音标覆盖',
+      file: 'wordbooks/kaoyan-enriched.js', level: 'kaoyan', type: 'syllabus', order: 'random', wordCount: 5045 },
+    { key: 'kaoyan-core', name: '考研核心词汇', desc: '考研英语考试高频核心词汇',
+      file: 'wordbooks/kaoyan-core.js', level: 'kaoyan', type: 'core', order: 'random', wordCount: 1340 },
+    { key: 'kaoyan-sorted', name: '考研英语词汇（含词性）（正序）', desc: '考研英语完整大纲词汇，100% 音标覆盖，按字母正序排列',
+      file: 'wordbooks/kaoyan-sorted.js', level: 'kaoyan', type: 'syllabus', order: 'sorted', wordCount: 5045 },
+    { key: 'kaoyan-core-sorted', name: '考研核心词汇（正序）', desc: '考研英语考试高频核心词汇，按字母正序排列',
+      file: 'wordbooks/kaoyan-core-sorted.js', level: 'kaoyan', type: 'core', order: 'sorted', wordCount: 1340 }
   ];
 
   /* 词书级别分类（对齐小程序 decks 页：先选级别，再看大纲/核心） */
@@ -81,13 +106,17 @@ var FlashcardApp = window.FlashcardApp || {};
         file: b.file,
         level: b.level,
         type: b.type,
+        order: b.order,
+        wordCount: b.wordCount,
         loaded: !!window.__VOCAB_REGISTRY__[b.key],
-        count: window.__VOCAB_REGISTRY__[b.key] ? window.__VOCAB_REGISTRY__[b.key].words.length : 0
+        count: window.__VOCAB_REGISTRY__[b.key] ? window.__VOCAB_REGISTRY__[b.key].words.length : b.wordCount
       };
     });
   };
 
   App.isWordbookImported = function (bookInfo) {
+    /* 按 source（词书 key）优先判定（对齐小程序）；旧牌组无 source 时回退按 name */
+    if (App.state.decks.some(function (d) { return d.source === bookInfo.key; })) return true;
     let data = window.__VOCAB_REGISTRY__[bookInfo.key];
     if (!data) return false;
     return !!App.state.decks.find(function (d) { return d.name === data.name; });
@@ -102,7 +131,7 @@ var FlashcardApp = window.FlashcardApp || {};
     let added = 0;
 
     if (!deck) {
-      deck = { id: App.genId(), name: data.name, cards: [] };
+      deck = { id: App.genId(), name: data.name, cards: [], source: bookKey };
       App.state.decks.push(deck);
     }
 
@@ -140,14 +169,23 @@ var FlashcardApp = window.FlashcardApp || {};
     }
   };
 
-  /* 渲染单个词书按钮（两级导航共用） */
+  /* 渲染单本词书（对齐小程序 decks 页 wb-option：🔀乱序版/🔤正序版 短标签 + 词数 + 导入 pill/已导入） */
   App._renderWordbookButton = function (b) {
     var imported = App.isWordbookImported(b);
-    return '<button data-book="' + b.key + '"' + (imported ? ' disabled' : '') + '>' +
-      (imported ? '✅' : '📥') + ' ' + App.escHtml(b.name) +
-      '<span style="color:#94a3b8;font-size:12px;">— ' + (b.loaded ? b.count + ' 词' : b.desc) + '</span>' +
-      (imported ? '<span style="color:#16a34a;">（已导入）</span>' : '') +
-      (!b.loaded ? '<span style="color:#f59e0b;">（需加载）</span>' : '') +
+    var isSorted = b.order === 'sorted';
+    var count = b.loaded ? b.count : b.wordCount;
+    return '<button class="wb-option' + (imported ? ' selected' : '') + '" data-book="' + b.key + '"' +
+      (imported ? ' disabled' : '') + '>' +
+      '<span class="wb-option-left">' +
+        '<span class="wb-option-icon">' + (isSorted ? '🔤' : '🔀') + '</span>' +
+        '<span class="wb-option-name">' + (isSorted ? '正序版' : '乱序版') + '</span>' +
+      '</span>' +
+      '<span class="wb-option-right">' +
+        '<span class="wb-option-count">' + count + ' 词</span>' +
+        (imported
+          ? '<span class="wb-option-check">✓ 已导入</span>'
+          : '<span class="wb-option-import">导入</span>') +
+      '</span>' +
     '</button>';
   };
 
@@ -223,6 +261,12 @@ var FlashcardApp = window.FlashcardApp || {};
     /* 绑定返回按钮（词书按钮点击由 app.js 的 importModal 委托处理） */
     var backBtn = document.getElementById('btnImportBack');
     if (backBtn) backBtn.addEventListener('click', App.renderImportModal);
+
+    /* 预取该级别全部词书脚本：用户浏览选择时后台并发加载，点击导入时 registry 已就绪，
+       消除动态 script 加载（0.4-2MB/本）这一最大延迟；失败静默，点击时 loadAndImportWordbook 再报错 */
+    books.forEach(function (b) {
+      App.loadWordbookScript(b).catch(function () {});
+    });
   };
 
   App.closeImportModal = function () {
