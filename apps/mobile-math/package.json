@@ -1,0 +1,19 @@
+{
+  "name": "math-reference-android",
+  "version": "1.0.0",
+  "private": true,
+  "description": "数学公式速查 Android 端（Capacitor 壳，加载 math-web 构建产物）",
+  "scripts": {
+    "prepare-www": "node scripts/prepare-www.mjs",
+    "sync": "node scripts/prepare-www.mjs && npx cap sync android",
+    "android": "node scripts/build-android.mjs"
+  },
+  "dependencies": {
+    "@capacitor/core": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^7.0.0"
+  }
+}

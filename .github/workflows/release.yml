@@ -1,0 +1,161 @@
+name: Release Apps
+
+# 打 tag（v1.0.0）或在 Actions 页面手动运行，都会产出：
+#   Windows 安装包 ×2（NSIS）
+#   Android APK ×2（debug 签名，可侧载安装）
+# 并汇总到一个 GitHub Release。
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号（不带 v，例如 1.0.0；留空则用分支名兜底为 0.0.0-dev）'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  desktop:
+    name: Windows 安装包 — ${{ matrix.app }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: english
+            project: english/English-web
+            appdir: apps/desktop-english
+          - app: math
+            project: math/math-web
+            appdir: apps/desktop-math
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          v="${{ inputs.version }}"
+          if [ -z "$v" ]; then v="${GITHUB_REF_NAME#v}"; fi
+          if ! [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]; then v="0.0.0-dev"; fi
+          echo "value=$v" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Build web
+        working-directory: ${{ matrix.project }}
+        run: |
+          npm ci
+          npm run build
+
+      - name: Install app dependencies
+        working-directory: ${{ matrix.appdir }}
+        run: npm ci
+
+      - name: Set app version
+        working-directory: ${{ matrix.appdir }}
+        run: npm pkg set version=${{ steps.version.outputs.value }}
+
+      - name: Package desktop app
+        working-directory: ${{ matrix.appdir }}
+        run: npm run dist
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.app }}
+          path: dist-apps/desktop-${{ matrix.app }}/*.exe
+          if-no-files-found: error
+
+  android:
+    name: Android APK — ${{ matrix.app }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: english
+            project: english/English-web
+            appdir: apps/mobile-english
+          - app: math
+            project: math/math-web
+            appdir: apps/mobile-math
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          v="${{ inputs.version }}"
+          if [ -z "$v" ]; then v="${GITHUB_REF_NAME#v}"; fi
+          if ! [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]; then v="0.0.0-dev"; fi
+          echo "value=$v" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Ensure Android SDK packages
+        run: |
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0" > /dev/null || true
+
+      - name: Build web
+        working-directory: ${{ matrix.project }}
+        run: |
+          npm ci
+          npm run build
+
+      - name: Install app dependencies
+        working-directory: ${{ matrix.appdir }}
+        run: npm ci
+
+      - name: Set app version
+        working-directory: ${{ matrix.appdir }}
+        run: npm pkg set version=${{ steps.version.outputs.value }}
+
+      - name: Build APK
+        working-directory: ${{ matrix.appdir }}
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+        run: npm run android
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-${{ matrix.app }}
+          path: dist-apps/*.apk
+          if-no-files-found: error
+
+  release:
+    name: 发布到 GitHub Releases
+    needs: [desktop, android]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: '*'
+          merge-multiple: true
+
+      - name: List artifacts
+        run: ls -lh artifacts
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*
+          generate_release_notes: true
+          fail_on_unmatched_files: true

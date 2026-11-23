@@ -2,16 +2,18 @@
   "name": "study-tools",
   "version": "1.0.0",
   "private": true,
-  "description": "学习工具 monorepo：英语词汇闪卡 PWA + 数学公式速查 PWA",
+  "description": "学习工具 monorepo：英语词汇闪卡 PWA + 数学公式速查 PWA（含 Windows / Android App 打包）",
   "scripts": {
     "build:english": "cd english/English-web && npm run build",
     "build:math": "cd math/math-web && npm run build",
-    "build:math-mini": "cd math/math-mini-app && npm run build:mp-weixin",
     "build:all": "npm run build:english && npm run build:math",
     "test:english": "cd english/English-web && npm test",
     "test:math": "cd math/math-web && npm test",
-    "test:math-mini": "cd math/math-mini-app && npm test",
-    "test:all": "npm run test:english && npm run test:math && npm run test:math-mini",
-    "ci": "npm run test:all && npm run build:all"
+    "test:all": "npm run test:english && npm run test:math",
+    "ci": "npm run test:all && npm run build:all",
+    "package:desktop:english": "npm run build:english && cd apps/desktop-english && npm run dist",
+    "package:desktop:math": "npm run build:math && cd apps/desktop-math && npm run dist",
+    "package:android:english": "npm run build:english && cd apps/mobile-english && npm run android",
+    "package:android:math": "npm run build:math && cd apps/mobile-math && npm run android"
   }
 }

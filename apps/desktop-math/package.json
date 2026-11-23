@@ -1,0 +1,17 @@
+{
+  "name": "math-reference-desktop",
+  "productName": "数学公式速查",
+  "version": "1.0.0",
+  "private": true,
+  "description": "数学公式速查桌面端（Electron 壳，加载 math-web 构建产物）",
+  "main": "main.js",
+  "scripts": {
+    "prepare-dist": "node scripts/prepare-dist.mjs",
+    "start": "npm run prepare-dist && electron .",
+    "dist": "npm run prepare-dist && electron-builder --win nsis --publish never"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  }
+}

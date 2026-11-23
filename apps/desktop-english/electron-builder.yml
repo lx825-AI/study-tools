@@ -1,0 +1,20 @@
+appId: com.lx825.flashcard
+productName: Flashcard 抽认卡
+directories:
+  output: ../../dist-apps/desktop-english
+files:
+  - main.js
+  - package.json
+  - bundle/**
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: assets/icon.png
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  artifactName: Flashcard-${version}-win-x64-setup.${ext}

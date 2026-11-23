@@ -1,0 +1,11 @@
+{
+  "appId": "com.lx825.math",
+  "appName": "数学公式速查",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}

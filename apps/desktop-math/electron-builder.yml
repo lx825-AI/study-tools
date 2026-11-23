@@ -1,0 +1,20 @@
+appId: com.lx825.math
+productName: 数学公式速查
+directories:
+  output: ../../dist-apps/desktop-math
+files:
+  - main.js
+  - package.json
+  - bundle/**
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: assets/icon.png
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  artifactName: MathReference-${version}-win-x64-setup.${ext}

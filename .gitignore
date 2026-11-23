@@ -9,3 +9,13 @@ tmp/
 .playwright-mcp/
 test-results/
 .vscode/
+
+# App 打包产物与中间目录（apps/ 下生成，不入库）
+dist-apps/
+apps/*/bundle/
+apps/*/www/
+apps/*/android/
+*.apk
+*.exe
+*.msi
+*.dmg

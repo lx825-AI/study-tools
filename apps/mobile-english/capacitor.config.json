@@ -1,0 +1,11 @@
+{
+  "appId": "com.lx825.flashcard",
+  "appName": "Flashcard 抽认卡",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}
