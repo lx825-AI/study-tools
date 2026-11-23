@@ -1,5 +1,8 @@
 # Study Tools
 
+[![CI](https://github.com/lx825-AI/study-tools/actions/workflows/ci.yml/badge.svg)](https://github.com/lx825-AI/study-tools/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/lx825-AI/study-tools)](https://github.com/lx825-AI/study-tools/releases)
+
 两个学习工具，同一套代码同时提供 **网页（PWA）/ Windows 桌面应用 / Android 应用**：
 
 - **[English-web](web/English-web/)** — 基于艾宾浩斯遗忘曲线的英语词汇闪卡，内置 20 套词书（乱序 + 正序，约 28K 词，100% 音标）
@@ -18,6 +21,12 @@
 - 桌面端是 Electron 安装包（NSIS），安装后离线可用。
 - Android 包为 **debug 签名**，仅用于侧载安装（需在系统里允许「未知来源应用」）；上架应用商店需另配正式签名。
 - iOS 暂不提供安装包，用 Safari 打开网页版「添加到主屏幕」即可获得 App 体验。
+
+## 更新
+
+- **桌面端**：v1.1.0 起内置自动更新——启动后静默检查 GitHub Releases，下载完成弹窗询问是否重启，重启即生效。v1.0.0 没有这套机制，需要手动下载一次 v1.1.0。
+- **网页版**：Service Worker 自动换新缓存，刷新即是新版本。
+- **Android**：暂无自动更新。CI 在构建机上临时生成调试签名，跨版本覆盖安装可能被系统拒绝；若提示「应用未安装 / 签名不一致」，先卸载旧版再装（会清掉应用内数据，请先用内置导出功能备份）。要支持直接覆盖升级，需在 CI 里配置固定签名密钥，见下方「打包 App」。
 
 ## 界面预览
 
