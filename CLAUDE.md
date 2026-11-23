@@ -20,10 +20,10 @@ apps/
 
 | 项目 | 构建 | 测试 |
 |------|------|------|
-| English-web | `cd web/English-web && npm run build` | `npm test`（325 用例） |
+| English-web | `cd web/English-web && npm run build` | `npm test`（343 用例） |
 | math-web | `cd web/math-web && npm run build` | `npm test`（48 用例） |
-| 桌面包 | `npm run package:desktop:english` / `:math` | 无自动化测试 |
-| Android 包 | `npm run package:android:english` / `:math` | 无自动化测试 |
+| 桌面包 | `npm run package:desktop:english` / `:math` | `cd apps/desktop-* && npm test`（协议解析 8 例） |
+| Android 包 | `npm run package:android:english` / `:math` | `cd apps/mobile-* && npm test`（版号换算 3 例） |
 
 全量：`npm run test:all` / `npm run build:all`。
 
@@ -42,11 +42,12 @@ apps/
 - math-web: https://lx825-ai.github.io/study-tools/math/
 - Pages 由 `.github/workflows/deploy.yml` 在 push 到 main 且改动 `web/English-web/**` 或 `web/math-web/**` 时自动部署。
 - App 由 `.github/workflows/release.yml` 在 push tag `v*`（或手动运行）时构建：Windows NSIS 安装包 ×2 + Android APK ×2，汇总为一个 GitHub Release。
-- 版本号取 tag 去掉前缀 `v`；CI 用 `npm pkg set version=<v>` 同步到各 app 包。
+- 版本号取 tag 去掉前缀 `v`；CI 与本地都用 `npm run set-version <版本>` 同步 7 个 package.json。
 
 ## English-web 要点
 
 - **学习算法**：艾宾浩斯单轨（SM-2 已删除）。8 阶段 0/1/2/4/7/15/30/90 天；答对 stage++、EF+0.1（≤3.5）、间隔 `round(interval×EF/2.5)`；答错智能回退 + 逾期惩罚取 min 不叠加、EF−0.2（≥1.3）。
+- **日期口径**：所有「今天 / 到期 / 日志 key」走 `web/English-web/js/day-key.js` 的本地日历日；禁止再用 `toISOString().slice(0, 10)` 取今天（UTC+8 凌晨会偏一天）。测试固定 `TZ=Asia/Shanghai`。
 - **学习模式**：深度（动态队列 splice 重插）、今日复习（紧急度排序，软上限 50）、错题强化（EF≤1.8）、快速浏览（线性，答对仅 0→1）、拼写（纯练习，不推进队列/不改曲线/不写日志）。
 - **词书清单三处必须同步**：`scripts/wordbook-lib.js` 的 `BOOK_CONFIG`、`js/import.js` 的 `BUILTIN_WORDBOOKS`、`scripts/build.js` 的 `WORDBOOKS`（共 20 本：10 乱序 + 10 正序）。
 - **词书生成**：源数据在 `web/English-web/wordbooks-src/`（20 个 JSON，约 24MB）；`npm run gen:wordbooks` 读取并生成 `wordbooks/*.js`（约 17MB，入库）。
@@ -61,9 +62,11 @@ apps/
 
 ## apps/ 打包要点
 
-- **桌面包**：Electron 33 + electron-builder。`scripts/prepare-dist.mjs` 把对应 web 的 `dist/` 拷到 `bundle/`；`main.js` 注册 `app://` 特权协议（`standard + secure + supportFetchAPI`）加载 `app://bundle/index.html`，`resolveBundlePath` 做路径越界校验。自定义协议下 Service Worker 不可用（注册已 try/catch），离线能力来自本地文件本身。
+- **桌面包**：Electron 33 + electron-builder。`scripts/prepare-dist.mjs` 把对应 web 的 `dist/` 拷到 `bundle/`；`main.js` 注册 `app://` 特权协议（`standard + secure + supportFetchAPI`）加载 `app://bundle/index.html`。路径解析与 MIME 表在 `lib/protocol.js`（纯函数，`node --test` 直测，覆盖 `../` 与 `%2e%2e%2f` 越界）。自定义协议下 Service Worker 不可用（注册已 try/catch），离线能力来自本地文件本身。
+- **自动更新**：依赖 `electron-updater`；`electron-builder.yml` 的 `publish` 指向 GitHub Release，CI 产物含 `latest.yml` 与 `.blockmap`。`main.js` 仅在 `app.isPackaged` 时检查更新，下载完成后弹窗询问是否重启。
 - **移动包**：Capacitor 7 + Gradle。`scripts/build-android.mjs`：拷 dist → `www/` → 无 `android/` 时 `npx cap add android` → `cap sync` → 生成图标 → 改写 `versionCode`/`versionName` → `./gradlew assembleDebug` → APK 落 `dist-apps/`。`android/`、`www/`、`bundle/` 均不入库（CI 生成）。
-- **版本号规则**：`versionCode = major*10000 + minor*100 + patch`；`VERSION` 环境变量由 release.yml 传入。
+- **版本号规则**：`versionCode = major*10000 + minor*100 + patch`（`scripts/version-code.mjs` 单测覆盖）；发版前用 `npm run set-version 1.1.0`（或 `VERSION=1.1.0`）一次性同步 7 个 package.json，CI 走同一脚本。
+- **壳层测试**：`apps/*/test/` 用 `node --test`（`npm test`）；CI 的 `apps` job 先构建两个 web 产物，再跑桌面壳 `prepare-dist` + 协议单测、移动壳版号换算单测。
 - **图标**：`apps/*/assets/icon.png`，1024×1024（由 `web/English-web/icon.svg` 与 `web/math-web/public/icon-512.png` 渲染生成）。
 - **Android 前置条件**：JDK 21 + Android SDK `platforms;android-35` 与 `build-tools;35.0.0`。
 - **签名**：当前用 Gradle debug 签名，仅可侧载；正式发布需 keystore + GitHub Secrets，尚未接入。
@@ -81,3 +84,11 @@ apps/
 - 跨端同步只保留文件通道：删除 `js/sync-cloud.js`、`vendor/cloudbase.full.js`、配对码 UI 与 SW 预缓存；`sync-codec.test.js` 改用本地共享向量 `js/__tests__/data/sync-vectors.js`。
 - 新增 `apps/` 四个打包工程与 `.github/workflows/release.yml`；`package.json` 增加 `package:desktop:*` / `package:android:*` 脚本。
 - 测试：English-web 334→325（减 sync-cloud 的 9 条），math-web 48 不变。
+
+## 最近更新（2026-11-23）— v1.1.0：日期口径修正 + 分发与自动更新
+
+- **日期口径改本地时区**：新增 `js/day-key.js`（`dayKey/isDayKey/parseDayKey/addDays/daysBetween/weekStartKey/todayKey`），替换 24 处 `toISOString().slice(0,10)`；修掉 UTC+8 凌晨 00:00-08:00 记到前一天、到期提前一天、打卡与热力图错位。测试固定 Asia/Shanghai，新增 `day-key.test.js`（18 例），English-web 343 用例。
+- **分发**：新增 `LICENSE`（MIT）；README 补「界面预览」「安装与首次运行」（SmartScreen、未知来源、数据目录、卸载）与「许可证与数据来源」；`docs/screenshots/` 五张截图；四个 `apps/*/README.md`。
+- **桌面自动更新**：electron-updater + `publish` 指向 GitHub Release；CI 产物带 `latest.yml` 与 `.blockmap`。
+- **版本一致**：`scripts/set-version.mjs`（7 个 package.json），本地与 CI 共用；当前版本 1.1.0。
+- **壳层单测进 CI**：`apps/desktop-*/lib/protocol.js` 抽离路径解析（8 例/端）；`apps/mobile-*/scripts/version-code.mjs` 抽离版号换算（3 例/端）；`ci.yml` 新增 `apps` job。

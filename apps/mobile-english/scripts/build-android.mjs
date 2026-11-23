@@ -10,6 +10,8 @@ import { copyFile, cp, mkdir, readFile, rm, stat, writeFile } from 'node:fs/prom
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { semverToVersionCode } from './version-code.mjs';
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const WEB_DIST = path.resolve(ROOT, '../../web/English-web/dist');
 const WWW = path.join(ROOT, 'www');
@@ -53,8 +55,7 @@ if (await exists(path.join(ROOT, 'assets', 'icon.png'))) {
 
 /* versionName / versionCode 跟随 VERSION（CI 按 tag 传入） */
 const gradleFile = path.join(ANDROID, 'app', 'build.gradle');
-const [major = 0, minor = 0, patch = 0] = VERSION.split('.').map((n) => parseInt(n, 10) || 0);
-const versionCode = major * 10000 + minor * 100 + patch;
+const versionCode = semverToVersionCode(VERSION);
 let gradle = await readFile(gradleFile, 'utf8');
 gradle = gradle.replace(/versionCode \d+/, `versionCode ${versionCode}`);
 gradle = gradle.replace(/versionName "[^"]*"/, `versionName "${VERSION}"`);

@@ -40,3 +40,39 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+
+  apps:
+    name: apps — 壳层单测
+    runs-on: ubuntu-latest
+    env:
+      # 壳层单测不启动 Electron，跳过 ~100MB 的二进制下载
+      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            apps/desktop-english/package-lock.json
+            apps/desktop-math/package-lock.json
+            apps/mobile-english/package-lock.json
+            apps/mobile-math/package-lock.json
+      - name: 构建两个 web 产物（prepare-dist 的输入）
+        run: |
+          npm ci --prefix web/English-web
+          npm run build --prefix web/English-web
+          npm ci --prefix web/math-web
+          npm run build --prefix web/math-web
+      - name: desktop-english — 协议解析单测
+        working-directory: apps/desktop-english
+        run: npm ci && npm run prepare-dist && npm test
+      - name: desktop-math — 协议解析单测
+        working-directory: apps/desktop-math
+        run: npm ci && npm run prepare-dist && npm test
+      - name: mobile-english — versionCode 换算单测
+        working-directory: apps/mobile-english
+        run: npm ci && npm test
+      - name: mobile-math — versionCode 换算单测
+        working-directory: apps/mobile-math
+        run: npm ci && npm test
