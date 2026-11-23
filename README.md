@@ -1,31 +1,49 @@
 # Study Tools
 
-学习工具集合：两个 PWA 网页应用 + 两个微信小程序。
+两个学习工具，同一套代码同时提供 **网页（PWA）/ Windows 桌面应用 / Android 应用**：
 
-- **[English-web](english/English-web/)** — 基于 SM-2 间隔重复算法的英语词汇闪卡 PWA，内置高考/CET-4/CET-6/考研 5 套词书（~22K 词）
-- **[English-mini-app](english/English-mini-app/)** — 英语背单词微信小程序（uni-app + 微信云开发）
-- **[math-web](math/math-web/)** — 大学数学公式速查 PWA（React + KaTeX），覆盖 5 学科 34 章节 177 条公式
-- **[math-mini-app](math/math-mini-app/)** — 数学公式速查微信小程序（uni-app + 自研 Canvas 公式渲染引擎 + 云端同步）
+- **[English-web](english/English-web/)** — 基于艾宾浩斯遗忘曲线的英语词汇闪卡，内置 20 套词书（乱序 + 正序，约 28K 词，100% 音标）
+- **[math-web](math/math-web/)** — 大学数学公式速查（React + KaTeX），覆盖 5 学科 34 章节 177 条公式
+
+## 应用下载
+
+发布包由 GitHub Actions 在打 tag 时自动构建，统一放在 [Releases](../../releases)：
+
+| 平台 | 英语闪卡 | 数学公式 |
+|------|----------|----------|
+| Windows | `Flashcard-<版本>-win-x64-setup.exe` | `MathReference-<版本>-win-x64-setup.exe` |
+| Android | `flashcard-<版本>-android.apk` | `math-reference-<版本>-android.apk` |
+| 网页 | https://lx825-ai.github.io/study-tools/english/ | https://lx825-ai.github.io/study-tools/math/ |
+
+- 桌面端是 Electron 安装包（NSIS），安装后离线可用。
+- Android 包为 **debug 签名**，仅用于侧载安装（需在系统里允许「未知来源应用」）；上架应用商店需另配正式签名。
+- iOS 暂不提供安装包，用 Safari 打开网页版「添加到主屏幕」即可获得 App 体验。
 
 ## 快速开始
 
 ```bash
-# 安装依赖（根目录 workspace 脚本）
-npm run test:all     # 运行全部测试
-npm run build:all    # 构建全部项目
+# 网页开发与测试（根目录脚本）
+npm run test:all      # 两端测试（English-web + math-web）
+npm run build:all     # 两端构建产物
 
 # 或单独操作
-cd english/English-web   && npm install && npm run build
-cd math/math-web         && npm install && npm run build
-cd math/math-mini-app    && npm install && npm test && npm run build:mp-weixin
+cd english/English-web && npm install && npm run build && npm test
+cd math/math-web       && npm install && npm run build && npm test
 ```
 
-## 线上访问
+## 打包 App
 
-| 工具 | 地址 |
-|------|------|
-| 英语闪卡 | https://lx825-ai.github.io/study-tools/english/ |
-| 数学公式 | https://lx825-ai.github.io/study-tools/math/ |
+```bash
+# Windows 安装包（需本机可下载 Electron，产物写入 dist-apps/）
+npm run package:desktop:english
+npm run package:desktop:math
+
+# Android APK（需 JDK 21 + Android SDK；本机没有工具链时交给 CI）
+npm run package:android:english
+npm run package:android:math
+```
+
+发布流程：`git tag v1.0.0 && git push origin v1.0.0` → `.github/workflows/release.yml` 在 Windows/Ubuntu runner 上构建 4 个产物并汇总成一个 Release。
 
 ## 功能特性
 
@@ -33,15 +51,14 @@ cd math/math-mini-app    && npm install && npm test && npm run build:mp-weixin
 
 | 功能 | 说明 |
 |------|------|
-| SM-2 间隔重复 | 自适应难度调度，到期卡片优先复习 |
-| 词书 | 高考 (~3.5K)、四级 (~4.5K)、六级核心 (~2.1K)、六级大纲 (~6.4K)、考研 (~5.5K) |
-| 音标 | 全部词条已填充音标（ECDICT 词典匹配，99.8% 覆盖率） |
-| 导入 | 内置词书一键导入、文件导入 (JSON/CSV/TXT)、粘贴 JSON、从 URL 获取 |
-| 学习模式 | 翻卡模式、打字模式 |
-| 数据管理 | 牌组 CRUD、批量导入、JSON/CSV 导出、全部数据备份与恢复 |
-| PWA | Service Worker 离线缓存、独立窗口运行 |
+| 艾宾浩斯调度 | 8 阶段（0/1/2/4/7/15/30/90 天）单轨间隔重复，EF 自适应间隔 |
+| 词书 | 20 套（初/高中、四级、六级、考研 × 大纲/核心 × 乱序/正序），约 28K 词 |
+| 学习模式 | 深度（动态队列重插）、今日复习（紧急度排序）、错题强化、快速浏览、拼写（纯练习） |
+| 发音 | 有道音频，英/美音切换，失败自动重试 |
+| 数据管理 | 牌组导入、卡片列表与批量删除、统计仪表盘（热力图/遗忘曲线）、JSON 导出导入同步 |
+| 离线 | PWA Service Worker 缓存，桌面端与 Android 端为本地文件加载 |
 
-### math-web 数学公式（PWA）
+### math-web 数学公式
 
 | 功能 | 说明 |
 |------|------|
@@ -51,38 +68,33 @@ cd math/math-mini-app    && npm install && npm test && npm run build:mp-weixin
 | 公式测验 | 选择题/闪卡模式、每日挑战、错题本 |
 | 学习进度 | 章节级别已学/未学追踪 |
 | 主题 | 自动/暗色/亮色三模式 |
-| PWA | Service Worker 预缓存、离线可用、打印支持 |
+| 离线 | Service Worker 预缓存、打印支持 |
 
-### English-mini-app 英语背单词（微信小程序）
+## 项目结构
 
-| 功能 | 说明 |
-|------|------|
-| 学习模式 | 快速模式 / 深度模式（连续答对3次掌握） |
-| 生词本 | 手动⭐标记，支持搜索和移除 |
-| 词书 | 20套考试词书（初中/高中/四级/六级/考研 × 大纲/核心 × 正序/乱序） |
-| 拼写模式 | 手机键盘自适应布局 |
-| 会话持久化 | 页面重建后2小时内自动恢复 |
-| 数据管理 | 卡片数据使用文件系统，突破 Storage 1MB 限制 |
-| 隐私政策 | 完善的8章节隐私政策，符合审核要求 |
-
-### math-mini-app 数学公式（微信小程序）
-
-| 功能 | 说明 |
-|------|------|
-| 公式渲染 | 自研 LaTeX→Canvas 引擎（tokenizer→parser→renderer 三阶段管线 + LRU 缓存），渲染失败自动降级纯文本 |
-| 公式速查 | 与 math-web 同源 177 条公式，章节浏览 + 全文搜索（300ms 防抖 + 学科/难度筛选） |
-| 学习功能 | 选择题/闪卡测验、每日挑战（连续打卡 emoji 阶梯）、错题本、进度追踪 |
-| 个人笔记 | 每条公式 Markdown 笔记，云端同步 |
-| 云端同步 | 本地优先 + 离线队列 + 增量同步（微信云开发 6 集合 4 云函数） |
-| 主题 | 自动/暗色/亮色 + 公式字号三档 |
+```
+english/English-web/   -- 英语闪卡 PWA + 词书源数据（wordbooks-src/）
+math/math-web/         -- 数学公式 PWA
+apps/
+  desktop-english/     -- Electron 壳（加载 English-web dist）
+  desktop-math/        -- Electron 壳（加载 math-web dist）
+  mobile-english/      -- Capacitor 壳（Android，加载 English-web dist）
+  mobile-math/         -- Capacitor 壳（Android，加载 math-web dist）
+.github/workflows/     -- ci.yml（测试+构建）、deploy.yml（Pages）、release.yml（App 发布）
+```
 
 ## 技术栈
 
-| | English-web | English-mini-app | math-web | math-mini-app |
-|------|---------|---------|------|------|
-| 框架 | 纯 JavaScript (ES2017+) | uni-app (Vue 3) | React 18 + TypeScript | uni-app (Vue 3 + TS) |
-| 构建 | esbuild | Vite 5 | Vite 6 | Vite 5 |
-| 公式渲染 | — | — | KaTeX | 自研 Canvas 引擎 |
-| 后端 | — | 微信云开发 | — | 微信云开发 |
-| 测试 | Vitest (43 tests) | Vitest (97 tests) | Vitest (48 tests) | Vitest (45 tests) |
-| 部署 | GitHub Pages | 微信小程序 | GitHub Pages | 微信小程序（待上架） |
+| | English-web | math-web | apps/ 桌面 | apps/ 移动 |
+|------|------|------|------|------|
+| 框架 | 纯 JavaScript (ES2017+) | React 18 + TypeScript | Electron 33 | Capacitor 7 |
+| 构建 | esbuild | Vite 6 | electron-builder | Gradle + Android SDK |
+| 公式渲染 | — | KaTeX | — | — |
+| 测试 | Vitest（325 用例） | Vitest（48 用例） | — | — |
+| 部署 | GitHub Pages | GitHub Pages | GitHub Releases | GitHub Releases |
+
+## 文档
+
+- 根目录 [CLAUDE.md](CLAUDE.md)：仓库级约定、命令、架构约束
+- [english/English-web/CLAUDE.md](english/English-web/CLAUDE.md)：英语闪卡的学习算法、词书系统与同步协议
+- [math/math-web/CLAUDE.md](math/math-web/CLAUDE.md)：数学公式应用的结构与约定

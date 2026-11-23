@@ -1,6 +1,6 @@
 # Math Formula Reference
 
-React + TypeScript + Vite 数学公式速查 SPA。KaTeX 渲染，PWA 离线支持。
+React + TypeScript + Vite 数学公式速查 SPA。KaTeX 渲染，PWA 离线支持。同一套 `dist/` 也用于 Windows（`apps/desktop-math`）与 Android（`apps/mobile-math`）打包，`base: './'` 因此不能改成绝对路径。
 
 ## 项目结构
 
