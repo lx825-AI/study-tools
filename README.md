@@ -19,6 +19,33 @@
 - Android 包为 **debug 签名**，仅用于侧载安装（需在系统里允许「未知来源应用」）；上架应用商店需另配正式签名。
 - iOS 暂不提供安装包，用 Safari 打开网页版「添加到主屏幕」即可获得 App 体验。
 
+## 界面预览
+
+| 英语闪卡 | 数学公式 |
+|------|------|
+| ![英语闪卡 · 牌组与每日一句](docs/screenshots/english-decks.png) | ![数学公式 · 公式速查](docs/screenshots/math-home.png) |
+| ![英语闪卡 · 学习卡片](docs/screenshots/english-study.png) | ![数学公式 · 公式测验](docs/screenshots/math-practice.png) |
+| ![英语闪卡 · 导入词书](docs/screenshots/english-import.png) | |
+
+## 安装与首次运行
+
+**Windows（`.exe`）**
+
+1. 下载 `*-win-x64-setup.exe`，双击运行。
+2. 若出现蓝色「Windows 已保护你的电脑」提示，这是 SmartScreen 对**未签名**应用的默认拦截（本项目没有代码签名证书）。点 **更多信息 → 仍要运行**。
+3. 如果安装包是从浏览器下载后放了一段时间才运行，可能被标记为「来自其他计算机」：右键文件 → 属性 → 底部勾选 **解除锁定** → 确定。
+4. 安装完成后从开始菜单启动；数据保存在 `%APPDATA%/Flashcard 抽认卡`、`%APPDATA%/数学公式速查`（Electron 的用户数据目录）。
+5. 卸载：设置 → 应用 → 已安装的应用 → 选择对应条目 → 卸载。
+
+**Android（`.apk`）**
+
+1. 下载 `*-android.apk` 并点击安装。
+2. 系统会提示「禁止安装未知应用」——在弹窗里选择 **设置** 并允许该来源（浏览器或文件管理器）安装应用。
+3. 安装包使用 debug 签名，因此可以正常侧载，但无法直接上传应用商店。
+4. 卸载：长按图标 → 应用信息 → 卸载。
+
+> 首次启动如果是全新安装，应用会引导你选择词书（英语）或直接进入公式库（数学）；不需要联网。
+
 ## 快速开始
 
 ```bash
@@ -90,7 +117,7 @@ apps/
 | 框架 | 纯 JavaScript (ES2017+) | React 18 + TypeScript | Electron 33 | Capacitor 7 |
 | 构建 | esbuild | Vite 6 | electron-builder | Gradle + Android SDK |
 | 公式渲染 | — | KaTeX | — | — |
-| 测试 | Vitest（325 用例） | Vitest（48 用例） | — | — |
+| 测试 | Vitest（343 用例） | Vitest（48 用例） | — | — |
 | 部署 | GitHub Pages | GitHub Pages | GitHub Releases | GitHub Releases |
 
 ## 文档
@@ -98,3 +125,10 @@ apps/
 - 根目录 [CLAUDE.md](CLAUDE.md)：仓库级约定、命令、架构约束
 - [web/English-web/CLAUDE.md](web/English-web/CLAUDE.md)：英语闪卡的学习算法、词书系统与同步协议
 - [web/math-web/CLAUDE.md](web/math-web/CLAUDE.md)：数学公式应用的结构与约定
+
+## 许可证与数据来源
+
+- 本仓库代码以 [MIT License](LICENSE) 发布，Copyright © 2026 lx825-AI。
+- 英语词书数据来自 [KyleBing/english-vocabulary](https://github.com/KyleBing/english-vocabulary)（MIT），经脚本整理为 `web/English-web/wordbooks-src/` 下的 20 套 JSON。
+- 英语发音使用有道的公开音频接口（`dictvoice`），仅用于个人学习场景，不保证长期可用。
+- 数学公式内容为教学整理，渲染依赖 [KaTeX](https://katex.org/)（MIT）。
