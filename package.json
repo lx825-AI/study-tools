@@ -1,6 +1,6 @@
 {
   "name": "study-tools",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "private": true,
   "description": "学习工具 monorepo：英语词汇闪卡 PWA + 数学公式速查 PWA（含 Windows / Android App 打包）",
   "scripts": {

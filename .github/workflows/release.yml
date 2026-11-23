@@ -156,6 +156,25 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: npm run android
 
+      - name: 校验 APK 签名
+        shell: bash
+        working-directory: ${{ matrix.appdir }}
+        env:
+          ANDROID_KEYSTORE_FILE: ${{ steps.signing.outputs.configured == 'true' && format('{0}/release.keystore', runner.temp) || '' }}
+        run: |
+          apk=$(ls ../../dist-apps/*.apk | head -n 1)
+          echo "APK: $apk"
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --print-certs "$apk" > certs.txt 2>&1 || {
+            echo "::error::APK 签名校验失败"; cat certs.txt; exit 1;
+          }
+          grep "Signer #1 certificate DN" certs.txt
+          if [ -n "$ANDROID_KEYSTORE_FILE" ]; then
+            grep -q "CN=Study Tools" certs.txt || { echo "::error::APK 未使用仓库固定签名"; exit 1; }
+            echo "::notice::APK 已用固定签名，可在后续版本覆盖安装"
+          else
+            echo "::notice::未配置签名 Secrets，本次为调试签名"
+          fi
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:

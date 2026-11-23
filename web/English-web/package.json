@@ -1,6 +1,6 @@
 {
   "name": "english-flashcard-pwa",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "基于间隔重复的英语单词学习 PWA，支持 CET-4/CET-6 词书",
   "private": true,
   "scripts": {
