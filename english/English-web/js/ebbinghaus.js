@@ -1,4 +1,4 @@
-/* ebbinghaus.js —— 艾宾浩斯遗忘曲线复习调度（与小程序 English-mini-app 行为一致） */
+/* ebbinghaus.js —— 艾宾浩斯遗忘曲线复习调度（8 阶段单轨调度，与 Web 端学习流程一致） */
 var FlashcardApp = window.FlashcardApp || {};
 (function (App) {
   'use strict';

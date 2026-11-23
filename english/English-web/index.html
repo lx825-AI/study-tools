@@ -23,7 +23,7 @@
 <div id="app">
   <header>
     <h1>📚 Flashcard 抽认卡</h1>
-    <button class="theme-toggle" id="btnSyncToggle" title="数据同步（与小程序互通）">🔄</button>
+    <button class="theme-toggle" id="btnSyncToggle" title="数据同步（导出/导入文件）">🔄</button>
     <button class="theme-toggle" id="themeToggle" title="切换暗色模式">🌙</button>
   </header>
 
@@ -208,7 +208,7 @@
   <div class="import-modal-overlay" id="syncModal" style="display:none">
     <div class="import-modal" style="max-width:440px;width:calc(100% - 32px)">
       <h3>🔄 数据同步</h3>
-      <p>与微信小程序版互通学习数据（词书内容两端同源，不传输）</p>
+      <p>在手机与电脑 App 之间同步学习数据（导出文件后到另一台设备导入；词书内容两端同源，不传输）</p>
       <div class="sync-actions">
         <button class="btn btn-outline" data-sync-action="export">📤 导出数据文件</button>
         <button class="btn btn-outline" data-sync-action="import">📥 导入数据文件</button>

@@ -7,7 +7,7 @@ var FlashcardApp = window.FlashcardApp || {};
    * - 词书 key canonical = 小程序 key（词书数据上游）；web 侧经 WORDBOOK_KEY_MAP 换算
    * - 卡片锚点 = (canonical source, lower(word))；词条内容不传输
    * - 日志对端合并防重复累计：M = max(本地, 快照) + max(0, 远端 − 远端上次全量)
-   * 共享测试向量：English-mini-app/tests/data/sync-vectors.js（两端测试共同引用） */
+   * 共享测试向量：js/__tests__/data/sync-vectors.js（单一来源） */
 
   var SC = {};
 
@@ -78,6 +78,13 @@ var FlashcardApp = window.FlashcardApp || {};
     if (typeof key !== 'string' || !key) return null;
     var mapped = deviceKind === 'web' ? (SC.WORDBOOK_KEY_MAP[key] || key) : key;
     return CANONICAL_SET[mapped] ? mapped : null;
+  };
+
+  /* 配对码（迁移码）字符集与格式校验（与云函数 lib.js 一致） */
+  SC.CODE_ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
+  var CODE_RE = new RegExp('^[' + SC.CODE_ALPHABET + ']{8}$');
+  SC.validateTransferCode = function (code) {
+    return typeof code === 'string' && CODE_RE.test(code);
   };
 
   /* ================= 进度对象 ================= */

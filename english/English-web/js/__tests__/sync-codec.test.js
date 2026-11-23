@@ -1,17 +1,9 @@
 /**
  * sync-codec.test.js —— 跨端数据联通 codec/合并纯函数 + Web 端收集/应用
- * 共享向量引用 English-mini-app/tests/data/sync-vectors.js（单一来源；
- * 子模块缺失时优雅跳过向量用例，本地结构用例仍全量执行）
+ * 共享向量见 js/__tests__/data/sync-vectors.js（单一来源，向量用例必跑）
  */
 import { describe, it, expect, beforeEach } from 'vitest'
-
-let V = null
-try {
-  V = await import('../../../English-mini-app/tests/data/sync-vectors.js')
-} catch (e) {
-  V = null
-}
-const describeV = V ? describe : describe.skip
+import * as V from './data/sync-vectors.js'
 
 const App = window.FlashcardApp
 const SC = App.SyncCodec
@@ -91,6 +83,24 @@ describe('fnv1a', () => {
   })
 })
 
+describe('validateTransferCode（配对码）', () => {
+  it('本地基本断言', () => {
+    expect(SC.CODE_ALPHABET).toHaveLength(31)
+    expect(SC.validateTransferCode('23456789')).toBe(true)
+    expect(SC.validateTransferCode('0O1IL234')).toBe(false)
+    expect(SC.validateTransferCode('abcdefgh')).toBe(false)
+  })
+
+  describe('与共享向量一致', () => {
+    it('三方一致', () => {
+      expect(SC.CODE_ALPHABET).toBe(V.CODE_ALPHABET)
+      V.VALID_CODE_CASES.forEach((c) => {
+        expect(SC.validateTransferCode(c.input)).toBe(c.valid)
+      })
+    })
+  })
+})
+
 describe('词书 key 映射', () => {
   it('覆盖本端 BUILTIN_WORDBOOKS 全部 20 本 key（防漂移）', () => {
     expect(App.BUILTIN_WORDBOOKS).toHaveLength(20)
@@ -105,7 +115,7 @@ describe('词书 key 映射', () => {
     expect(SC.canonicalizeKey(null, 'web')).toBeNull()
   })
 
-  describeV('与小程序共享映射向量', () => {
+  describe('词书 key 共享映射向量', () => {
     it('5 组固定映射断言', () => {
       V.WORDBOOK_KEY_PAIRS.forEach((p) => {
         expect(SC.canonicalizeKey(p.web, 'web')).toBe(p.mini)
@@ -115,7 +125,7 @@ describe('词书 key 映射', () => {
   })
 })
 
-describeV('cardMerge（共享向量）', () => {
+describe('cardMerge（共享向量）', () => {
   V.CARD_MERGE_CASES.forEach((c) => {
     it(c.name, () => {
       expect(SC.cardMerge(c.a, c.b)).toEqual(c.expected)
@@ -147,7 +157,7 @@ describe('mergeDeckCards', () => {
   })
 })
 
-describeV('logMerge（共享向量）', () => {
+describe('logMerge（共享向量）', () => {
   V.LOG_MERGE_CASES.forEach((c) => {
     it(c.name, () => {
       const res = SC.logMerge(c.local, c.remote, { snap: c.snap, remotePrev: c.remotePrev })
@@ -164,7 +174,7 @@ describeV('logMerge（共享向量）', () => {
   })
 })
 
-describeV('settingsMerge（共享向量）', () => {
+describe('settingsMerge（共享向量）', () => {
   V.SETTINGS_MERGE_CASES.forEach((c) => {
     it(c.name, () => {
       expect(SC.settingsMerge(c.local, c.remote)).toEqual(c.expected)
@@ -251,7 +261,9 @@ describe('Web 端收集/应用（collectPayload / mergeIntoLocal）', () => {
   it('mergeIntoLocal：卡片/日志/设置合并 + 快照状态 + 重复导入不动点', () => {
     seedWeb()
     const summary = SC.mergeIntoLocal(miniPayload())
-    expect(summary).toEqual({ decksMerged: 1, cardsMerged: 1, cardsSkipped: 1, decksSkipped: [] })
+    expect(summary).toMatchObject({ decksMerged: 1, cardsMerged: 1, cardsSkipped: 1, decksSkipped: [] })
+    /* 返回扩展：logs = 合并后日志（配对码 commit 回传值） */
+    expect(summary.logs.deep[today].cardsStudied).toBe(13)
 
     /* 卡片：stage 1 → 3（web source 映射回 cete4-syllabus-enriched 匹配成功） */
     const deck = App.state.decks.find((d) => d.source === 'cet4-syllabus-enriched')

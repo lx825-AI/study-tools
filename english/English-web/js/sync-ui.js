@@ -1,4 +1,4 @@
-/* sync-ui.js —— 数据联通：Web 端收集/应用 + 同步面板（文件通道；二期接配对码云通道） */
+/* sync-ui.js —— 数据联通：Web 端收集/应用 + 同步面板（文件通道，手机与电脑 App 之间互通） */
 var FlashcardApp = window.FlashcardApp || {};
 (function (App) {
   'use strict';
@@ -31,6 +31,10 @@ var FlashcardApp = window.FlashcardApp || {};
       localStorage.setItem(App.SYNC_STATE_KEY, JSON.stringify(all));
     } catch (e) { /* ignore */ }
   }
+
+  /* 状态槽读写（文件通道与测试复用） */
+  App.loadSyncStateSlot = loadStateSlot;
+  App.saveSyncStateSlot = saveStateSlot;
 
   /* 读取本端设置并归一化（web 值域 → payload 值域） */
   function readLocalSettings() {
@@ -139,6 +143,8 @@ var FlashcardApp = window.FlashcardApp || {};
     } catch (e) { /* ignore */ }
     if (data.settings) applyLocalSettings(data.settings);
     App.saveData();
+    /* 附合并后日志（配对码 commit 回传值；文件通道调用方不受影响） */
+    summary.logs = { deep: deep.merged, quick: quick.merged };
     return summary;
   };
 
