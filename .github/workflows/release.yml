@@ -59,8 +59,9 @@ jobs:
         run: npm ci
 
       - name: Set app version
-        working-directory: ${{ matrix.appdir }}
-        run: npm pkg set version=${{ steps.version.outputs.value }}
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+        run: node scripts/set-version.mjs
 
       - name: Package desktop app
         working-directory: ${{ matrix.appdir }}
@@ -69,8 +70,12 @@ jobs:
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
+          # latest.yml + blockmap 必须一起上传：electron-updater 靠 latest.yml 判断新版本
           name: desktop-${{ matrix.app }}
-          path: dist-apps/desktop-${{ matrix.app }}/*.exe
+          path: |
+            dist-apps/desktop-${{ matrix.app }}/*.exe
+            dist-apps/desktop-${{ matrix.app }}/latest.yml
+            dist-apps/desktop-${{ matrix.app }}/*.blockmap
           if-no-files-found: error
 
   android:
@@ -123,8 +128,9 @@ jobs:
         run: npm ci
 
       - name: Set app version
-        working-directory: ${{ matrix.appdir }}
-        run: npm pkg set version=${{ steps.version.outputs.value }}
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+        run: node scripts/set-version.mjs
 
       - name: Build APK
         working-directory: ${{ matrix.appdir }}

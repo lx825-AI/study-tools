@@ -1,17 +1,21 @@
 {
   "name": "flashcard-desktop",
   "productName": "Flashcard 抽认卡",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "英语闪卡桌面端（Electron 壳，加载 English-web 构建产物）",
   "main": "main.js",
   "scripts": {
     "prepare-dist": "node scripts/prepare-dist.mjs",
     "start": "npm run prepare-dist && electron .",
-    "dist": "npm run prepare-dist && electron-builder --win nsis --publish never"
+    "dist": "npm run prepare-dist && electron-builder --win nsis --publish never",
+    "test": "node --test"
   },
   "devDependencies": {
     "electron": "^33.2.0",
     "electron-builder": "^25.1.8"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
   }
 }

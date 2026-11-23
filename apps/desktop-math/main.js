@@ -7,25 +7,13 @@
  * Service Worker 在自定义协议下不可用，页面里的注册失败已被 catch 吞掉，
  * 桌面端本身加载的是本地文件，不需要离线缓存。
  */
-const { app, BrowserWindow, protocol, shell } = require('electron');
+const { app, BrowserWindow, dialog, protocol, shell } = require('electron');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const { resolveBundlePath, contentType } = require('./lib/protocol');
 
 const SCHEME = 'app';
 const BUNDLE_DIR = path.join(__dirname, 'bundle');
-
-const MIME_TYPES = {
-  '.html': 'text/html; charset=utf-8',
-  '.js': 'text/javascript; charset=utf-8',
-  '.css': 'text/css; charset=utf-8',
-  '.json': 'application/json; charset=utf-8',
-  '.svg': 'image/svg+xml',
-  '.png': 'image/png',
-  '.ico': 'image/x-icon',
-  '.woff': 'font/woff',
-  '.woff2': 'font/woff2',
-  '.ttf': 'font/ttf'
-};
 
 protocol.registerSchemesAsPrivileged([
   {
@@ -34,23 +22,14 @@ protocol.registerSchemesAsPrivileged([
   }
 ]);
 
-/** 把 app://bundle/<path> 映射到 bundle 目录内的文件；越界返回 null */
-function resolveBundlePath(requestUrl) {
-  const { pathname } = new URL(requestUrl);
-  const relative = decodeURIComponent(pathname === '/' ? '/index.html' : pathname);
-  const target = path.normalize(path.join(BUNDLE_DIR, relative));
-  if (target !== BUNDLE_DIR && !target.startsWith(BUNDLE_DIR + path.sep)) return null;
-  return target;
-}
-
+/** 把 app://bundle/<path> 映射到 bundle 目录内的文件；越界返回 null（实现在 lib/protocol.js） */
 function registerProtocol() {
   protocol.handle(SCHEME, async (request) => {
-    const filePath = resolveBundlePath(request.url);
+    const filePath = resolveBundlePath(BUNDLE_DIR, request.url);
     if (!filePath) return new Response('Not found', { status: 404 });
     try {
       const data = await fs.readFile(filePath);
-      const type = MIME_TYPES[path.extname(filePath).toLowerCase()] || 'application/octet-stream';
-      return new Response(data, { headers: { 'content-type': type } });
+      return new Response(data, { headers: { 'content-type': contentType(filePath) } });
     } catch {
       return new Response('Not found', { status: 404 });
     }
@@ -90,9 +69,42 @@ function createWindow() {
   win.loadURL(SCHEME + '://bundle/index.html');
 }
 
+/** 打包后从 GitHub Release 检查更新；下载完成提示重启（开发模式跳过） */
+function setupAutoUpdate() {
+  if (!app.isPackaged) return;
+  let autoUpdater;
+  try {
+    ({ autoUpdater } = require('electron-updater'));
+  } catch (err) {
+    console.warn('[update] electron-updater 未安装，跳过自动更新:', err.message);
+    return;
+  }
+  autoUpdater.autoDownload = true;
+  autoUpdater.on('error', (err) => console.warn('[update] 检查更新失败:', err && err.message));
+  autoUpdater.on('update-downloaded', (info) => {
+    dialog
+      .showMessageBox({
+        type: 'info',
+        buttons: ['立即重启', '稍后'],
+        defaultId: 0,
+        cancelId: 1,
+        message: '发现新版本 ' + (info && info.version ? info.version : ''),
+        detail: '更新已下载，重启应用即可生效。'
+      })
+      .then(({ response }) => {
+        if (response === 0) autoUpdater.quitAndInstall();
+      })
+      .catch((err) => console.warn('[update] 提示失败:', err && err.message));
+  });
+  autoUpdater
+    .checkForUpdatesAndNotify()
+    .catch((err) => console.warn('[update] 检查失败:', err && err.message));
+}
+
 app.whenReady().then(() => {
   registerProtocol();
   createWindow();
+  setupAutoUpdate();
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });

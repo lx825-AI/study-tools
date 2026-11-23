@@ -4,6 +4,7 @@ directories:
   output: ../../dist-apps/desktop-english
 files:
   - main.js
+  - lib/**
   - package.json
   - bundle/**
 win:
@@ -18,3 +19,9 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
   artifactName: Flashcard-${version}-win-x64-setup.${ext}
+# 自动更新：electron-updater 读取这里生成的 app-update.yml，从 GitHub Release 拉 latest.yml
+publish:
+  provider: github
+  owner: lx825-AI
+  repo: study-tools
+  releaseType: release
