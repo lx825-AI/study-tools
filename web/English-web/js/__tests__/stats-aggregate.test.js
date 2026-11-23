@@ -7,7 +7,7 @@ const App = window.FlashcardApp;
 
 /** 与实现同款的 UTC key 生成（保留时刻的 Date → toISOString；12:00 UTC 保证 UTC+8 下同日） */
 function utcKey(y, m, d) {
-  return new Date(Date.UTC(y, m, d, 12)).toISOString().slice(0, 10);
+  return window.dayKeyOf(new Date(Date.UTC(y, m, d, 12)));
 }
 
 /* 固定"现在"：2026-08-21（周五）UTC 中午，本地同日 20:00，getDay/toISOString 一致 */
@@ -167,7 +167,7 @@ describe('heatLevel / buildHeatmapWeeks', () => {
   });
 
   it('末列包含今天，count/level 映射正确', () => {
-    const todayKey = NOW.toISOString().slice(0, 10);
+    const todayKey = window.dayKeyOf(NOW);
     const log = { [todayKey]: { cardsStudied: 12 } };
     const weeks = App.buildHeatmapWeeks(log, NOW);
     const last = weeks[weeks.length - 1];
@@ -178,7 +178,7 @@ describe('heatLevel / buildHeatmapWeeks', () => {
   });
 
   it('未来日期格 isFuture=true 且 count=0', () => {
-    const todayKey = NOW.toISOString().slice(0, 10);
+    const todayKey = window.dayKeyOf(NOW);
     const weeks = App.buildHeatmapWeeks({}, NOW);
     const last = weeks[weeks.length - 1];
     const future = last.filter(c => c.date > todayKey);

@@ -36,7 +36,7 @@ var FlashcardApp = window.FlashcardApp || {};
 
   /* ========== 队列构建（按模式） ========== */
   App.buildStudyQueue = function (deck) {
-    var today = new Date().toISOString().slice(0, 10);
+    var today = App.dayKey();
     var dailyGoal = App.getDailyGoal(); /* 默认 10 + 损坏值兜底（对齐小程序） */
     var cards;
 
@@ -744,7 +744,7 @@ var FlashcardApp = window.FlashcardApp || {};
     /* 每日目标（设置入口从统计页移入学习模式选择） */
     var dailyGoal = App.getDailyGoal();
     var mergedLog = App.mergeLogs(App.loadQuickLog(), App.loadLearningLog());
-    var todayKey = new Date().toISOString().slice(0, 10);
+    var todayKey = App.dayKey();
     var todayData = mergedLog[todayKey] || { correct: 0, wrong: 0 };
     var todayTotal = todayData.correct + todayData.wrong;
     var goalPercent = Math.min(100, Math.round(todayTotal / dailyGoal * 100));
@@ -955,7 +955,7 @@ var FlashcardApp = window.FlashcardApp || {};
       if (!passed) {
         deckCard.wrongCount = (deckCard.wrongCount || 0) + 1;
         deckCard.wrongDates = deckCard.wrongDates || [];
-        deckCard.wrongDates.push(new Date().toISOString().slice(0, 10));
+        deckCard.wrongDates.push(App.dayKey());
       }
 
       /* 同步回队列副本 */

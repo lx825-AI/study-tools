@@ -54,7 +54,7 @@ var FlashcardApp = window.FlashcardApp || {};
       }
       /* stage>0 答对：原样保留 */
     } else {
-      var today = new Date().toISOString().slice(0, 10);
+      var today = App.dayKey();
       card.wrongCount = (card.wrongCount || 0) + 1;
       card.wrongDates = card.wrongDates || [];
       card.wrongDates.push(today);

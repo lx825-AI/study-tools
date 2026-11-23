@@ -42,21 +42,15 @@ var FlashcardApp = window.FlashcardApp || {};
     return 4;
   };
 
-  /** 本周学习报告（周一为首日 7 天窗口；含上周对比趋势与副文案，对齐小程序 loadStats） */
+  /** 本周学习报告（本地周一为首日 7 天窗口；含上周对比趋势与副文案） */
   App.buildWeekSeries = function (log, now) {
-    /* 全部用 UTC 星期运算：log key 是 toISOString 的 UTC 日期，本地星期在
-       UTC+8 凌晨（00:00-08:00，UTC 仍前一天）会让窗口错位一天 */
-    var dow = (now.getUTCDay() + 6) % 7; /* UTC 周一=0 */
-    var monday = new Date(now);
-    monday.setUTCDate(now.getUTCDate() - dow);
+    var mondayKey = App.weekStartKey(now || new Date());
 
     var weekWords = 0, weekDays = 0, weekCorrect = 0, weekWrong = 0;
     var bars = [];
-    var i, d, key, entry, count;
+    var i, key, entry, count;
     for (i = 0; i < 7; i++) {
-      d = new Date(monday);
-      d.setDate(monday.getDate() + i);
-      key = d.toISOString().slice(0, 10);
+      key = App.addDays(mondayKey, i);
       entry = log[key];
       count = entry ? (entry.cardsStudied || 0) : 0;
       if (count > 0) {
@@ -65,7 +59,7 @@ var FlashcardApp = window.FlashcardApp || {};
         weekCorrect += entry.correct || 0;
         weekWrong += entry.wrong || 0;
       }
-      /* 柱高 clamp(4, count/100*60)，对齐小程序 weekBars */
+      /* 柱高 clamp(4, count/100*60) */
       bars.push({
         label: App.WEEKDAY_LABELS[i],
         heightPx: count > 0 ? Math.max(4, Math.min(60, Math.round(count / 100 * 60))) : 0,
@@ -76,14 +70,10 @@ var FlashcardApp = window.FlashcardApp || {};
     var accuracy = (weekCorrect + weekWrong) > 0
       ? Math.round(weekCorrect / (weekCorrect + weekWrong) * 100) : 0;
 
-    /* 上周总量与趋势（对齐小程序 weekTrend） */
-    var lastMonday = new Date(monday);
-    lastMonday.setUTCDate(monday.getUTCDate() - 7);
+    /* 上周总量与趋势 */
     var lastWeekTotal = 0;
     for (i = 0; i < 7; i++) {
-      d = new Date(lastMonday);
-      d.setDate(lastMonday.getDate() + i);
-      key = d.toISOString().slice(0, 10);
+      key = App.addDays(mondayKey, i - 7);
       entry = log[key];
       if (entry) lastWeekTotal += entry.cardsStudied || 0;
     }
@@ -110,9 +100,7 @@ var FlashcardApp = window.FlashcardApp || {};
     };
   };
 
-  /** 打卡日历数据（周一为首日；本地月历手动拼日期串，对齐小程序 buildCalendar）
-      已知偏差（与小程序同款不修）：日志 key 为 UTC 日期，本地 UTC+8 凌晨 00:00-08:00 窗口
-      （本地日期 = UTC 日期 + 1）下：今日圈画在前一格；月初该窗口学习记录显示到上月格 */
+  /** 打卡日历数据（周一为首日；日期串由本地年月日拼接，与 App.dayKey() 同口径） */
   App.buildCalendarData = function (year, month, studiedMap, todayStr) {
     var firstDay = new Date(year, month, 1);
     var lastDay = new Date(year, month + 1, 0);
@@ -134,29 +122,24 @@ var FlashcardApp = window.FlashcardApp || {};
     };
   };
 
-  /** 热力图（回退 weekCount 周对齐 UTC 周一后逐周 7 天；默认 12 周；对齐小程序 HeatmapChart weeks） */
+  /** 热力图（按本地周一逐周 7 天；默认 12 周） */
   App.buildHeatmapWeeks = function (log, now, weekCount) {
+    var anchor = now || new Date();
     var span = (weekCount || 12) * 7;
-    var start = new Date(now);
-    start.setUTCDate(now.getUTCDate() - span);
-    var offset = start.getUTCDay() === 0 ? 6 : start.getUTCDay() - 1; /* 对齐 UTC 周一 */
-    start.setUTCDate(start.getUTCDate() - offset);
-
-    var todayKey = now.toISOString().slice(0, 10);
+    var todayKey = App.dayKey(anchor);
+    var startKey = App.weekStartKey(App.parseDayKey(App.addDays(todayKey, -span)));
     var weeks = [];
-    var cursor = new Date(start);
-    while (cursor <= now) {
+    var cursorKey = startKey;
+    while (cursorKey <= todayKey) {
       var col = [];
-      var i, d, key, count;
+      var i, key, count;
       for (i = 0; i < 7; i++) {
-        d = new Date(cursor);
-        d.setUTCDate(cursor.getUTCDate() + i);
-        key = d.toISOString().slice(0, 10);
+        key = App.addDays(cursorKey, i);
         count = (log[key] && log[key].cardsStudied) || 0;
         col.push({ date: key, count: count, level: App.heatLevel(count), isFuture: key > todayKey });
       }
       weeks.push(col);
-      cursor.setUTCDate(cursor.getUTCDate() + 7);
+      cursorKey = App.addDays(cursorKey, 7);
     }
     return weeks;
   };

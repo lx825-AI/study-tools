@@ -29,7 +29,7 @@ describe('applyQuickResult', () => {
       expect(card.ebbinghausHistory[0].quality).toBe('correct');
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
-      expect(card.ebbinghausNextReview).toBe(tomorrow.toISOString().slice(0, 10));
+      expect(card.ebbinghausNextReview).toBe(window.dayKeyOf(tomorrow));
     });
 
     it('stage 3：原样保留（不被降级——核心回归）', () => {
@@ -56,7 +56,7 @@ describe('applyQuickResult', () => {
       expect(card.ebbinghausStage).toBe(2);
       expect(card.easeFactor).toBe(2.5);
       expect(card.wrongCount).toBe(1);
-      expect(card.wrongDates).toEqual([new Date().toISOString().slice(0, 10)]);
+      expect(card.wrongDates).toEqual([window.dayKeyOf(new Date())]);
       expect(card._consecutiveFails).toBe(1);
       expect(card.ebbinghausHistory.length).toBe(0);
     });
@@ -83,7 +83,7 @@ describe('buildStudyQueue - quick 分支', () => {
   function daysAgoDate(n) {
     const d = new Date();
     d.setDate(d.getDate() - n);
-    return d.toISOString().slice(0, 10);
+    return window.dayKeyOf(d);
   }
 
   it('只包含 stage<5 的卡片（排除 stage 5/6/7）', () => {
@@ -111,7 +111,7 @@ describe('buildStudyQueue - quick 分支', () => {
     const future = new Date();
     future.setDate(future.getDate() + 5);
     const deck = makeDeck([
-      freshCard({ id: 'future', ebbinghausStage: 2, ebbinghausNextReview: future.toISOString().slice(0, 10) }),
+      freshCard({ id: 'future', ebbinghausStage: 2, ebbinghausNextReview: window.dayKeyOf(future) }),
       freshCard({ id: 'due', ebbinghausStage: 2, ebbinghausNextReview: daysAgoDate(1) }),
     ]);
     const queue = App.buildStudyQueue(deck);

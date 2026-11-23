@@ -45,7 +45,7 @@ var FlashcardApp = window.FlashcardApp || {};
     var unique = App.dedupeStudyResults(results);
     if (unique.length === 0) return;
 
-    var today = new Date().toISOString().slice(0, 10);
+    var today = App.dayKey();
     var correct = unique.filter(function (r) { return r.passed; }).length;
     var duration = App.studyStartTime ? Math.round((Date.now() - App.studyStartTime) / 1000) : 0;
     var entry = {
@@ -69,12 +69,8 @@ var FlashcardApp = window.FlashcardApp || {};
   /* 计算连续打卡天数 */
   App.calcStreak = function (log) {
     let streak = 0;
-    let d = new Date();
-    while (true) {
-      let key = d.toISOString().slice(0, 10);
-      if (log[key]) { streak++; d.setDate(d.getDate() - 1); }
-      else break;
-    }
+    let key = App.dayKey();
+    while (log[key]) { streak++; key = App.addDays(key, -1); }
     return streak;
   };
 
@@ -299,10 +295,8 @@ var FlashcardApp = window.FlashcardApp || {};
     if (!panel) return;
 
     var now = new Date();
-    var todayKey = now.toISOString().slice(0, 10);
-    var tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    var tomorrowKey = tomorrow.toISOString().slice(0, 10);
+    var todayKey = App.dayKey(now);
+    var tomorrowKey = App.addDays(todayKey, 1);
 
     /* 合并快速/深度日志（对齐小程序统计口径：quick 学习计入统计） */
     var mergedLog = App.mergeLogs(App.loadQuickLog(), App.loadLearningLog());

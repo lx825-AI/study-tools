@@ -11,6 +11,7 @@ js/
   state.js          -- 全局状态、getDeck/getCurrentDeck
   idb-storage.js    -- IndexedDB 主存储 + localStorage 降级备份（突破 5MB 限制，精简压缩）
   models.js         -- ID 生成、难度计算、词规范化
+  day-key.js        -- 本地日历日工具（见下方「日期口径」）
   utils.js          -- HTML 转义、CSV 解析、拼写纯函数（parseWordSlots/lettersOnly/rebuildSlotLetters/firstEmptySlotIndex）、卡片分类（cardStageCategory/filterCardsByStage）、getDailyGoal
   ebbinghaus.js     -- 艾宾浩斯调度：8 阶段复习、到期检测、紧急度排序、深度模式重插位置
   ui.js             -- 牌组选择渲染、面板切换、导航徽章、renderAll
@@ -116,7 +117,7 @@ scripts/
 npm run build          # esbuild 构建到 dist/
 npm run dev            # npx serve dist/ 本地预览
 npm run gen:wordbooks  # 重新生成 wordbooks/*.js
-npm test               # vitest（19 文件 325 用例）
+npm test               # vitest（20 文件 343 用例）
 ```
 
 - `scripts/build.js` **不清空 dist**：删过文件后需 `rm -rf dist` 再构建，否则残留旧模块。
@@ -139,4 +140,4 @@ npm test               # vitest（19 文件 325 用例）
 
 - **file:// 协议 Service Worker 同步抛异常**：Chrome 下 `navigator.serviceWorker.register()` 在 file:// 会同步抛 TypeError，`.catch()` 抓不到——外层必须 try/catch（index.html 与 scripts/build.js 同步处理）
 - **`build.js` 移除内联 `<style>`**：依赖 CSS 文件里已有同名样式；新增内联样式必须先同步进对应 CSS
-- **热力图/日历按 UTC 计算日界**：与既有统计口径一致，凌晨 00:00-08:00 窗口存在已知偏差
+- **日期口径统一走 `js/day-key.js`**：所有「今天 / 到期 / 日志 key / 打卡 / 热力图」都用本地日历日（`App.dayKey()` / `App.addDays()` / `App.daysBetween()` / `App.weekStartKey()`）。v1.1.0 之前用 `new Date().toISOString().slice(0, 10)` 取 UTC 日期，UTC+8 的凌晨 00:00-08:00 会记到前一天；不要再引入这种写法。测试时区由 `vitest.config.js` 固定为 Asia/Shanghai。

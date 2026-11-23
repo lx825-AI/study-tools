@@ -50,25 +50,23 @@ var FlashcardApp = window.FlashcardApp || {};
   /** 判读卡片今日是否需要复习 */
   App.isDueToday = function (card) {
     if (!card.ebbinghausNextReview) return false;
-    var today = new Date().toISOString().slice(0, 10);
+    var today = App.dayKey();
     return card.ebbinghausNextReview <= today;
   };
 
   /** 判读卡片是否逾期未复习 */
   App.isOverdue = function (card) {
     if (!card.ebbinghausNextReview) return false;
-    var today = new Date().toISOString().slice(0, 10);
+    var today = App.dayKey();
     return card.ebbinghausNextReview < today;
   };
 
-  /** 获取逾期天数（用于排序优先级；日期统一 UTC 解析，修复本地 00:00-08:00 窗口今日到期被误判逾期） */
+  /** 获取逾期天数（用于排序优先级；本地日界，非法日期返回 0） */
   App.getOverdueDays = function (card) {
     if (!card.ebbinghausNextReview) return 0;
-    var today = new Date();
-    today.setUTCHours(0, 0, 0, 0); /* UTC 日界 */
-    var reviewDate = new Date(card.ebbinghausNextReview + 'T00:00:00Z');
-    if (isNaN(reviewDate.getTime())) return 0;
-    return Math.max(0, Math.round((today - reviewDate) / (1000 * 60 * 60 * 24)));
+    if (!App.isDayKey(card.ebbinghausNextReview)) return 0;
+    var days = App.daysBetween(card.ebbinghausNextReview, App.dayKey());
+    return isNaN(days) ? 0 : Math.max(0, days);
   };
 
   /**
@@ -171,7 +169,7 @@ var FlashcardApp = window.FlashcardApp || {};
   App.applyEbbinghaus = function (card, passed, quality) {
     quality = quality || 'correct';
     App.initEbbinghaus(card);
-    var today = new Date().toISOString().slice(0, 10);
+    var today = App.dayKey();
 
     if (passed) {
       /* 通过：根据质量决定推进幅度 */
@@ -207,9 +205,7 @@ var FlashcardApp = window.FlashcardApp || {};
         interval = Math.max(1, Math.round(interval * modifier));
       }
 
-      var nextDate = new Date();
-      nextDate.setDate(nextDate.getDate() + interval);
-      card.ebbinghausNextReview = nextDate.toISOString().slice(0, 10);
+      card.ebbinghausNextReview = App.addDays(App.dayKey(), interval);
 
       card.ebbinghausHistory.push({
         stage: card.ebbinghausStage,
@@ -248,9 +244,7 @@ var FlashcardApp = window.FlashcardApp || {};
 
       /* 计算下次复习日期 */
       var retryStage = App.EB_STAGES[card.ebbinghausStage] || App.EB_STAGES[1];
-      var retryDate = new Date();
-      retryDate.setDate(retryDate.getDate() + retryStage.interval);
-      card.ebbinghausNextReview = retryDate.toISOString().slice(0, 10);
+      card.ebbinghausNextReview = App.addDays(App.dayKey(), retryStage.interval);
 
       card.ebbinghausHistory.push({
         stage: failPrevStage,
@@ -305,7 +299,7 @@ var FlashcardApp = window.FlashcardApp || {};
    */
   App.getReviewCards = function (deck) {
     if (!deck || !deck.cards) return [];
-    var today = new Date().toISOString().slice(0, 10);
+    var today = App.dayKey();
     return deck.cards
       .filter(function (c) {
         App.initEbbinghaus(c);
@@ -371,9 +365,7 @@ var FlashcardApp = window.FlashcardApp || {};
           if (card.nextReview) {
             card.ebbinghausNextReview = card.nextReview;
           } else {
-            var d = new Date();
-            d.setDate(d.getDate() + 1);
-            card.ebbinghausNextReview = d.toISOString().slice(0, 10);
+            card.ebbinghausNextReview = App.addDays(App.dayKey(), 1);
           }
 
           card.ebbinghausHistory = [];

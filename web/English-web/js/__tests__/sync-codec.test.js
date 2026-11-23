@@ -8,8 +8,8 @@ import * as V from './data/sync-vectors.js'
 const App = window.FlashcardApp
 const SC = App.SyncCodec
 
-const today = new Date().toISOString().slice(0, 10)
-const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10)
+const today = window.dayKeyOf(new Date())
+const tomorrow = window.dayKeyOf(new Date(Date.now() + 86400000))
 
 function entry(cardsStudied, correct, wrong, duration = 300, completedGoal = true) {
   return { date: today, cardsStudied, correct, wrong, duration, completedGoal }

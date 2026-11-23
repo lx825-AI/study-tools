@@ -94,7 +94,7 @@ var FlashcardApp = window.FlashcardApp || {};
 
   /* 更新导航标签上的待复习角标 */
   App.updateNavBadges = function () {
-    var today = new Date().toISOString().slice(0, 10);
+    var today = App.dayKey();
     var dueCount = 0;
     App.state.decks.forEach(function (d) {
       d.cards.forEach(function (c) {

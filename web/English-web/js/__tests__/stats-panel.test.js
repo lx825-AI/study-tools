@@ -45,7 +45,7 @@ describe('finalizeStudyLog', () => {
     ]);
     App.finalizeStudyLog();
     const log = App.loadLearningLog();
-    const today = new Date().toISOString().slice(0, 10);
+    const today = window.dayKeyOf(new Date());
     expect(log[today]).toBeDefined();
     expect(log[today].cardsStudied).toBe(2);
     expect(log[today].correct).toBe(1);
@@ -59,7 +59,7 @@ describe('finalizeStudyLog', () => {
     App.finalizeStudyLog();
     expect(Object.keys(App.loadLearningLog()).length).toBe(0);
     const quickLog = App.loadQuickLog();
-    const today = new Date().toISOString().slice(0, 10);
+    const today = window.dayKeyOf(new Date());
     expect(quickLog[today].correct).toBe(1);
   });
 
@@ -70,7 +70,7 @@ describe('finalizeStudyLog', () => {
     ]);
     App.finalizeStudyLog();
     const log = App.loadLearningLog();
-    const today = new Date().toISOString().slice(0, 10);
+    const today = window.dayKeyOf(new Date());
     expect(log[today].cardsStudied).toBe(1);
     expect(log[today].correct).toBe(0);
   });
@@ -84,7 +84,7 @@ describe('finalizeStudyLog', () => {
     ]);
     App.finalizeStudyLog();
     const log = App.loadLearningLog();
-    const today = new Date().toISOString().slice(0, 10);
+    const today = window.dayKeyOf(new Date());
     expect(log[today].cardsStudied).toBe(2);
     expect(log[today].wrong).toBe(2);
   });
@@ -94,7 +94,7 @@ describe('finalizeStudyLog', () => {
     App.studyCompletedWords = 3; /* 3/10 早退 */
     App.finalizeStudyLog();
     const log = App.loadLearningLog();
-    const today = new Date().toISOString().slice(0, 10);
+    const today = window.dayKeyOf(new Date());
     expect(log[today].completedGoal).toBe(false);
   });
 
@@ -108,7 +108,7 @@ describe('finalizeStudyLog', () => {
     App.studyInitialQueueLength = 10;
     App.finalizeStudyLog();
     const log = App.loadLearningLog();
-    const today = new Date().toISOString().slice(0, 10);
+    const today = window.dayKeyOf(new Date());
     expect(log[today].completedGoal).toBe(true); /* 不被早退覆盖 */
     expect(log[today].cardsStudied).toBe(1);
   });
@@ -124,7 +124,7 @@ describe('finalizeStudyLog', () => {
     ];
     App.finalizeStudyLog();
     const log = App.loadLearningLog();
-    const today = new Date().toISOString().slice(0, 10);
+    const today = window.dayKeyOf(new Date());
     expect(log[today].completedGoal).toBe(false);
     expect(log[today].cardsStudied).toBe(2);
   });
@@ -283,7 +283,7 @@ describe('returnToModeSelect 早退守卫（B7）', () => {
 
     /* 模拟自然完成：completedGoal=true 已写入 */
     App.finalizeStudyLog();
-    const today = new Date().toISOString().slice(0, 10);
+    const today = window.dayKeyOf(new Date());
     expect(App.loadLearningLog()[today].completedGoal).toBe(true);
 
     /* 完成面板后再次触发返回模式选择 */

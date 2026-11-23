@@ -26,7 +26,7 @@ console.log('✓ CSS merged (' + cssContent.length + ' bytes)');
 /* ========== JS 合并 + 压缩 ========== */
 const JS_ORDER = [
   'js/idb-storage.js', 'js/state.js',
-  'js/models.js', 'js/utils.js', 'js/ebbinghaus.js',
+  'js/models.js', 'js/utils.js', 'js/day-key.js', 'js/ebbinghaus.js',
   'js/ui.js', 'js/daily-quote.js', 'js/deck-panel.js',
   'js/quick-mode.js', 'js/study-panel.js', 'js/wrong-words.js',
   'js/preview-panel.js', 'js/cards-panel.js',

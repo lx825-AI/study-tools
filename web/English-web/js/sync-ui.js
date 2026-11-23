@@ -153,7 +153,7 @@ var FlashcardApp = window.FlashcardApp || {};
   var _fileInput = null;
 
   function fileDateStr() {
-    return new Date().toISOString().slice(0, 10);
+    return App.dayKey();
   }
 
   App.openSyncModal = function () {

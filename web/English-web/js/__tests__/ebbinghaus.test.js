@@ -58,14 +58,14 @@ describe('isDueToday', () => {
   });
 
   it('今天或更早到期返回 true', () => {
-    var today = new Date().toISOString().slice(0, 10);
+    var today = window.dayKeyOf(new Date());
     expect(App.isDueToday(freshCard({ ebbinghausNextReview: today }))).toBe(true);
   });
 
   it('未来到期返回 false', () => {
     var future = new Date();
     future.setDate(future.getDate() + 30);
-    expect(App.isDueToday(freshCard({ ebbinghausNextReview: future.toISOString().slice(0, 10) }))).toBe(false);
+    expect(App.isDueToday(freshCard({ ebbinghausNextReview: window.dayKeyOf(future) }))).toBe(false);
   });
 
   it('过去日期返回 true（逾期）', () => {
@@ -79,7 +79,7 @@ describe('isOverdue', () => {
   });
 
   it('今天到期不算逾期', () => {
-    var today = new Date().toISOString().slice(0, 10);
+    var today = window.dayKeyOf(new Date());
     expect(App.isOverdue(freshCard({ ebbinghausNextReview: today }))).toBe(false);
   });
 
@@ -94,14 +94,14 @@ describe('getOverdueDays', () => {
   });
 
   it('今天到期逾期天数为 0', () => {
-    var today = new Date().toISOString().slice(0, 10);
+    var today = window.dayKeyOf(new Date());
     expect(App.getOverdueDays(freshCard({ ebbinghausNextReview: today }))).toBe(0);
   });
 
   it('过去日期返回正数', () => {
     var yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    var days = App.getOverdueDays(freshCard({ ebbinghausNextReview: yesterday.toISOString().slice(0, 10) }));
+    var days = App.getOverdueDays(freshCard({ ebbinghausNextReview: window.dayKeyOf(yesterday) }));
     expect(days).toBeGreaterThanOrEqual(1);
   });
 
@@ -120,7 +120,7 @@ describe('applyEbbinghaus - 通过', () => {
 
     var tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    expect(c.ebbinghausNextReview).toBe(tomorrow.toISOString().slice(0, 10));
+    expect(c.ebbinghausNextReview).toBe(window.dayKeyOf(tomorrow));
   });
 
   it('添加历史记录', () => {
@@ -132,7 +132,7 @@ describe('applyEbbinghaus - 通过', () => {
   });
 
   it('stage 6 → 7（已掌握，未逾期）', () => {
-    var today = new Date().toISOString().slice(0, 10);
+    var today = window.dayKeyOf(new Date());
     var c = freshCard({ ebbinghausStage: 6, ebbinghausNextReview: today });
     var result = App.applyEbbinghaus(c, true);
     expect(c.ebbinghausStage).toBe(7);
@@ -190,7 +190,7 @@ describe('applyEbbinghaus - 逾期惩罚', () => {
   function daysAgoDate(n) {
     var d = new Date();
     d.setDate(d.getDate() - n);
-    return d.toISOString().slice(0, 10);
+    return window.dayKeyOf(d);
   }
 
   it('逾期 1-3 天：无惩罚', () => {
@@ -234,7 +234,7 @@ describe('applyEbbinghaus - 通过（EF 自适应，对齐小程序）', () => {
     App.applyEbbinghaus(c, true);
     var tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    expect(c.ebbinghausNextReview).toBe(tomorrow.toISOString().slice(0, 10));
+    expect(c.ebbinghausNextReview).toBe(window.dayKeyOf(tomorrow));
   });
 
   it('历史记录含 quality', () => {
@@ -252,7 +252,7 @@ describe('applyEbbinghaus - 通过（EF 自适应，对齐小程序）', () => {
   it('逾期>7天答对且 prevStage>1：降级门控（推进后退 1 级）', () => {
     var d = new Date();
     d.setDate(d.getDate() - 10);
-    var c = freshCard({ ebbinghausStage: 3, ebbinghausNextReview: d.toISOString().slice(0, 10) });
+    var c = freshCard({ ebbinghausStage: 3, ebbinghausNextReview: window.dayKeyOf(d) });
     App.applyEbbinghaus(c, true);
     expect(c.ebbinghausStage).toBe(3); /* 推进到 4 后降 1 级回 3 */
   });
@@ -260,7 +260,7 @@ describe('applyEbbinghaus - 通过（EF 自适应，对齐小程序）', () => {
   it('逾期>7天答对但 prevStage=1：不触发降级门控', () => {
     var d = new Date();
     d.setDate(d.getDate() - 10);
-    var c = freshCard({ ebbinghausStage: 1, ebbinghausNextReview: d.toISOString().slice(0, 10) });
+    var c = freshCard({ ebbinghausStage: 1, ebbinghausNextReview: window.dayKeyOf(d) });
     App.applyEbbinghaus(c, true);
     expect(c.ebbinghausStage).toBe(2);
   });
@@ -304,13 +304,13 @@ describe('getReviewCards', () => {
   });
 
   it('只返回已到期卡片', () => {
-    var today = new Date().toISOString().slice(0, 10);
+    var today = window.dayKeyOf(new Date());
     var future = new Date();
     future.setDate(future.getDate() + 7);
     var deck = {
       cards: [
         freshCard({ id: 'a', ebbinghausNextReview: today, ebbinghausStage: 1 }),
-        freshCard({ id: 'b', ebbinghausNextReview: future.toISOString().slice(0, 10), ebbinghausStage: 1 }),
+        freshCard({ id: 'b', ebbinghausNextReview: window.dayKeyOf(future), ebbinghausStage: 1 }),
         freshCard({ id: 'c', ebbinghausNextReview: '2020-01-01', ebbinghausStage: 2 }),
       ]
     };

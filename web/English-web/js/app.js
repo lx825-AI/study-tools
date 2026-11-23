@@ -245,7 +245,6 @@ var FlashcardApp = window.FlashcardApp || {};
 
     /* 页面加载时显示待复习提示 */
     setTimeout(function () {
-      var today = new Date().toISOString().slice(0, 10);
       var dueCount = 0;
       var newCount = 0;
       App.state.decks.forEach(function (d) {

@@ -20,7 +20,7 @@ function freshCard(overrides = {}) {
 function daysAgoDate(n) {
   const d = new Date();
   d.setDate(d.getDate() - n);
-  return d.toISOString().slice(0, 10);
+  return window.dayKeyOf(d);
 }
 
 function makeDeck(cards) {
@@ -103,7 +103,7 @@ describe('buildStudyQueue - review 分支', () => {
     future.setDate(future.getDate() + 5);
     const deck = makeDeck([
       freshCard({ id: 'due', ebbinghausStage: 2, ebbinghausNextReview: daysAgoDate(1) }),
-      freshCard({ id: 'future', ebbinghausStage: 2, ebbinghausNextReview: future.toISOString().slice(0, 10) }),
+      freshCard({ id: 'future', ebbinghausStage: 2, ebbinghausNextReview: window.dayKeyOf(future) }),
       freshCard({ id: 'new', ebbinghausStage: 0 }),
     ]);
     const queue = App.buildStudyQueue(deck);

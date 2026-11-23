@@ -54,7 +54,7 @@ var FlashcardApp = window.FlashcardApp || {};
 
   /** 获取今日名言（每日随机固定，同日同句）；同步展示索引供顺序切换 */
   App.pickTodayQuote = function () {
-    var today = new Date().toISOString().slice(0, 10);
+    var today = App.dayKey();
     var storedDate = null;
     var index;
     try { storedDate = localStorage.getItem('flashcard-quote-date'); } catch (e) { /* 忽略 */ }

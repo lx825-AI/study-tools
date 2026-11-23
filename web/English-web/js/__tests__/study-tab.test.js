@@ -93,7 +93,7 @@ describe('切离学习 tab 弃置会话', () => {
     App.studyCompletedWords = 3;
     App.studyInitialQueueLength = 3;
     App.finalizeStudyLog();
-    const today = new Date().toISOString().slice(0, 10);
+    const today = window.dayKeyOf(new Date());
     const logged = App.loadLearningLog()[today];
     expect(logged.completedGoal).toBe(true);
 
@@ -109,7 +109,7 @@ describe('切离学习 tab 弃置会话', () => {
 
     App.switchTab('stats');
 
-    const today = new Date().toISOString().slice(0, 10);
+    const today = window.dayKeyOf(new Date());
     const logged = App.loadLearningLog()[today];
     expect(logged).toBeDefined();
     expect(logged.completedGoal).toBe(false);
@@ -159,7 +159,7 @@ describe('切离学习 tab 弃置会话', () => {
   });
 
   it('当日已完成会话不被后续早退切走覆盖（统计不回退）', () => {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = window.dayKeyOf(new Date());
     /* 上午完成会话落库 */
     setMidStudyState();
     App.studyQueue = [];

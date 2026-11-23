@@ -29,7 +29,7 @@ describe('applyEbbinghaus 单轨作答语义（study-panel 调用的核心路径
       App.applyEbbinghaus(card, true);
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
-      expect(card.ebbinghausNextReview).toBe(tomorrow.toISOString().slice(0, 10));
+      expect(card.ebbinghausNextReview).toBe(window.dayKeyOf(tomorrow));
     });
 
     it('不再写 nextReview 字段（单轨退役）', () => {

@@ -14,6 +14,7 @@ const files = [
   'state.js',
   'models.js',
   'utils.js',
+  'day-key.js',
   'ebbinghaus.js',
   '../data/word-schema.js',
   'ui.js',
@@ -39,6 +40,14 @@ files.forEach(f => {
   const wrapped = '(function(App) {\n' + iife + '\n})(window.FlashcardApp);';
   (0, eval)(wrapped);
 });
+
+/* 日期断言统一走本地日界（与实现同源），避免测试里再用 UTC 取日 */
+window.dayKeyOf = function (d) {
+  return window.FlashcardApp.dayKey(d);
+};
+window.dayKeyAdd = function (key, n) {
+  return window.FlashcardApp.addDays(key, n);
+};
 
 // jsdom 无 canvas 实现：mock getContext 返回 null，静默走绘制守卫（消除 "Not implemented" 噪音）
 if (typeof HTMLCanvasElement !== 'undefined' && HTMLCanvasElement.prototype.getContext) {
