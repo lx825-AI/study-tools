@@ -90,5 +90,5 @@ apps/
 - **日期口径改本地时区**：新增 `js/day-key.js`（`dayKey/isDayKey/parseDayKey/addDays/daysBetween/weekStartKey/todayKey`），替换 24 处 `toISOString().slice(0,10)`；修掉 UTC+8 凌晨 00:00-08:00 记到前一天、到期提前一天、打卡与热力图错位。测试固定 Asia/Shanghai，新增 `day-key.test.js`（18 例），English-web 343 用例。
 - **分发**：新增 `LICENSE`（MIT）；README 补「界面预览」「安装与首次运行」（SmartScreen、未知来源、数据目录、卸载）与「许可证与数据来源」；`docs/screenshots/` 五张截图；四个 `apps/*/README.md`。
 - **桌面自动更新**：electron-updater + `publish` 指向 GitHub Release；CI 产物带 `latest.yml` 与 `.blockmap`。
-- **版本一致**：`scripts/set-version.mjs`（7 个 package.json），本地与 CI 共用；当前版本 1.1.0。
+- **版本一致**：`scripts/set-version.mjs`（7 个 package.json），本地与 CI 共用；当前版本 1.1.1。
 - **壳层单测进 CI**：`apps/desktop-*/lib/protocol.js` 抽离路径解析（8 例/端）；`apps/mobile-*/scripts/version-code.mjs` 抽离版号换算（3 例/端）；`ci.yml` 新增 `apps` job。

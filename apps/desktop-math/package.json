@@ -1,7 +1,7 @@
 {
   "name": "math-reference-desktop",
   "productName": "数学公式速查",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
   "description": "数学公式速查桌面端（Electron 壳，加载 math-web 构建产物）",
   "main": "main.js",

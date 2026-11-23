@@ -1,6 +1,6 @@
 {
   "name": "flashcard-android",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
   "description": "英语闪卡 Android 端（Capacitor 壳，加载 English-web 构建产物）",
   "scripts": {
