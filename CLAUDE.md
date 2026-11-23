@@ -69,13 +69,13 @@ apps/
 - **壳层测试**：`apps/*/test/` 用 `node --test`（`npm test`）；CI 的 `apps` job 先构建两个 web 产物，再跑桌面壳 `prepare-dist` + 协议单测、移动壳版号换算单测。
 - **图标**：`apps/*/assets/icon.png`，1024×1024（由 `web/English-web/icon.svg` 与 `web/math-web/public/icon-512.png` 渲染生成）。
 - **Android 前置条件**：JDK 21 + Android SDK `platforms;android-35` 与 `build-tools;35.0.0`。
-- **签名**：`ANDROID_KEYSTORE_FILE` / `ANDROID_KEYSTORE_PASSWORD` / `ANDROID_KEY_ALIAS` / `ANDROID_KEY_PASSWORD` 四个变量齐全时 `scripts/build-android.mjs` 注入 `signingConfigs.release` 并 `assembleRelease`（`scripts/android-signing.mjs` 纯函数 + 单测），否则退回 `assembleDebug`；CI 从 4 个 Secrets 注入，未配置时沿用调试签名。只配一部分会直接报错，不静默降级。Windows 端仍未签名（需 OV/EV 证书）。
+- **签名**：`ANDROID_KEYSTORE_FILE` / `ANDROID_KEYSTORE_PASSWORD` / `ANDROID_KEY_ALIAS` / `ANDROID_KEY_PASSWORD` 四个变量齐全时 `scripts/build-android.mjs` 注入 `signingConfigs.release` 并 `assembleRelease`（`scripts/android-signing.mjs` 纯函数 + 单测），否则退回 `assembleDebug`；CI 从 4 个 Secrets 注入，未配置时沿用调试签名。只配一部分会直接报错，不静默降级。CI 的「校验 APK 签名」步骤用 `apksigner verify --print-certs` 断言证书 DN 为 `CN=Study Tools`，避免 Secrets 配错却静默产出调试签名包。Windows 端仍未签名（需 OV/EV 证书）。
 
 ## 已知限制
 
 - iOS 无安装包：用 Safari「添加到主屏幕」使用网页版。
 - 跨设备同步靠手动导出/导入 JSON 文件，没有自动云端同步。
-- Android 包为 debug 签名，安装时需允许「未知来源应用」。
+- Android 包由仓库固定密钥签名（Secrets 已配置），可覆盖安装；安装时需允许「未知来源应用」；上架应用商店未做。
 
 ## 最近更新（2026-11-23）— 下线小程序、改为 App 发布
 
@@ -92,3 +92,9 @@ apps/
 - **桌面自动更新**：electron-updater + `publish` 指向 GitHub Release；CI 产物带 `latest.yml` 与 `.blockmap`。
 - **版本一致**：`scripts/set-version.mjs`（7 个 package.json），本地与 CI 共用；当前版本 1.1.2。
 - **壳层单测进 CI**：`apps/desktop-*/lib/protocol.js` 抽离路径解析（8 例/端）；`apps/mobile-*/scripts/version-code.mjs` 抽离版号换算（3 例/端）；`ci.yml` 新增 `apps` job。
+
+## 最近更新（2026-11-23）— v1.1.1 / v1.1.2：Android 固定签名
+
+- **固定签名**：新增 `apps/mobile-*/scripts/android-signing.mjs`（纯函数 + 8 例单测），四个签名变量齐全时注入 `signingConfigs.release` 走 `assembleRelease`，否则退回 `assembleDebug`，只配一部分直接报错。keystore 放在仓库 Secrets（`ANDROID_KEYSTORE_BASE64` 等四个），本机 keystore 由 node-forge 生成（本机无 JDK），已离线备份在 `tmp/android-signing/`（gitignored）。
+- **签名断言进 CI**：`release.yml` 增加「校验 APK 签名」步骤，`apksigner verify --print-certs` 断言证书 DN 为 `CN=Study Tools`，避免 Secrets 配错时静默产出调试签名包。
+- **验证**：v1.1.1、v1.1.2 两轮 release 全绿，Android job 的签名准备与校验步骤均通过；1.1.2 起可直接覆盖安装。
