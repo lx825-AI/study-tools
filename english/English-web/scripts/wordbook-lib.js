@@ -1,8 +1,8 @@
 /**
  * wordbook-lib.js —— 词书生成库（纯函数，供 gen-wordbooks.js 与 vitest 测试使用）
  *
- * 数据源：English-mini-app/wordbooks-cloud/ 的 10 套词书 JSON（乱序版，
- * 与小程序默认导入一致；乱序由 Web 学习模式的排序选项在运行时实现）。
+ * 数据源：wordbooks-src/ 的 20 套词书 JSON（10 乱序 + 10 正序 -sorted，
+ * 两两同词仅排序不同；乱序由 Web 学习模式的排序选项在运行时实现）。
  */
 'use strict';
 

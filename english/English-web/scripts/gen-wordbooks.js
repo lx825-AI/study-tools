@@ -1,8 +1,8 @@
 /**
- * gen-wordbooks.js —— 从小程序词书 JSON 生成 Web 词书 JS 文件
+ * gen-wordbooks.js —— 从 wordbooks-src/ 的源词书 JSON 生成 Web 词书 JS 文件
  *
  * 用法：node scripts/gen-wordbooks.js
- * 可通过 WORDBOOK_SRC 环境变量覆盖源目录（默认 ../../English-mini-app/wordbooks-cloud）
+ * 可通过 WORDBOOK_SRC 环境变量覆盖源目录（默认 ../wordbooks-src）
  *
  * 自检项（任一失败 exit 1）：
  * - 源 JSON 可解析、词数非零
@@ -18,7 +18,7 @@ const { BOOK_CONFIG, buildRegistrySource } = require('./wordbook-lib.js');
 const ROOT = path.resolve(__dirname, '..');
 const SRC_DIR =
   process.env.WORDBOOK_SRC ||
-  path.resolve(__dirname, '../../English-mini-app/wordbooks-cloud');
+  path.join(ROOT, 'wordbooks-src');
 const OUT_DIR = path.join(ROOT, 'wordbooks');
 
 function fail(msg) {
