@@ -26,7 +26,7 @@
 
 - **桌面端**：v1.1.0 起内置自动更新——启动后静默检查 GitHub Releases，下载完成弹窗询问是否重启，重启即生效。v1.0.0 没有这套机制，需要手动下载一次 v1.1.0。
 - **网页版**：Service Worker 自动换新缓存，刷新即是新版本。
-- **Android**：暂无自动更新。CI 在构建机上临时生成调试签名，跨版本覆盖安装可能被系统拒绝；若提示「应用未安装 / 签名不一致」，先卸载旧版再装（会清掉应用内数据，请先用内置导出功能备份）。要支持直接覆盖升级，需在 CI 里配置固定签名密钥，见下方「打包 App」。
+- **Android**：暂无自动更新。CI 在构建机上临时生成调试签名，跨版本覆盖安装可能被系统拒绝；若提示「应用未安装 / 签名不一致」，先卸载旧版再装（会清掉应用内数据，请先用内置导出功能备份）。要支持直接覆盖升级，需在 CI 里配置固定签名密钥，见下方「Android 固定签名」。
 
 ## 界面预览
 
@@ -79,7 +79,32 @@ npm run package:android:english
 npm run package:android:math
 ```
 
-发布流程：`git tag v1.0.0 && git push origin v1.0.0` → `.github/workflows/release.yml` 在 Windows/Ubuntu runner 上构建 4 个产物并汇总成一个 Release。
+发布流程：`git tag v1.0.0 && git push origin v1.0.0` → `.github/workflows/release.yml` 在 Windows/Ubuntu runner 上构建 4 个产物并汇总成一个 Release。桌面端还会额外产出 `latest.yml` 与 `.blockmap`，供自动更新使用。
+
+### Android 固定签名（让新版本能覆盖安装）
+
+CI 默认用构建机临时生成的调试签名，两次构建的签名不同，覆盖安装会被系统拒绝。要改成固定签名，只需在本地生成一份 keystore 并把它放进仓库 Secrets：
+
+```bash
+# 1. 生成 keystore（有效期 10000 天，别名 study-tools）
+keytool -genkeypair -v -keystore release.keystore -alias study-tools \
+  -keyalg RSA -keysize 2048 -validity 10000
+
+# 2. 转成 base64 供 Secrets 使用（Windows 用 PowerShell：
+#    [Convert]::ToBase64String([IO.File]::ReadAllBytes("release.keystore"))）
+base64 -w0 release.keystore
+```
+
+在仓库 Settings → Secrets and variables → Actions 里添加 4 个 Secret：
+
+| Secret | 内容 |
+|--------|------|
+| `ANDROID_KEYSTORE_BASE64` | keystore 文件的 base64 |
+| `ANDROID_KEYSTORE_PASSWORD` | keystore 密码 |
+| `ANDROID_KEY_ALIAS` | 别名（如 `study-tools`） |
+| `ANDROID_KEY_PASSWORD` | 密钥密码 |
+
+四个 Secret 齐全时，CI 自动构建 `assembleRelease` 签名包；一个都没配则继续用调试签名。**keystore 一旦丢失就无法再发布可覆盖升级的版本，请离线备份。**
 
 ## 功能特性
 

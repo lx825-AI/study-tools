@@ -132,10 +132,28 @@ jobs:
           VERSION: ${{ steps.version.outputs.value }}
         run: node scripts/set-version.mjs
 
+      - name: 准备 Android 签名（未配置 Secrets 时退回调试签名）
+        id: signing
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            printf %s "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::未配置 ANDROID_KEYSTORE_BASE64，本次构建使用调试签名"
+          fi
+
       - name: Build APK
         working-directory: ${{ matrix.appdir }}
         env:
           VERSION: ${{ steps.version.outputs.value }}
+          ANDROID_KEYSTORE_FILE: ${{ steps.signing.outputs.configured == 'true' && format('{0}/release.keystore', runner.temp) || '' }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: npm run android
 
       - name: Upload APK

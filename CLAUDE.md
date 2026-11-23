@@ -69,7 +69,7 @@ apps/
 - **壳层测试**：`apps/*/test/` 用 `node --test`（`npm test`）；CI 的 `apps` job 先构建两个 web 产物，再跑桌面壳 `prepare-dist` + 协议单测、移动壳版号换算单测。
 - **图标**：`apps/*/assets/icon.png`，1024×1024（由 `web/English-web/icon.svg` 与 `web/math-web/public/icon-512.png` 渲染生成）。
 - **Android 前置条件**：JDK 21 + Android SDK `platforms;android-35` 与 `build-tools;35.0.0`。
-- **签名**：当前用 Gradle debug 签名，仅可侧载；正式发布需 keystore + GitHub Secrets，尚未接入。
+- **签名**：`ANDROID_KEYSTORE_FILE` / `ANDROID_KEYSTORE_PASSWORD` / `ANDROID_KEY_ALIAS` / `ANDROID_KEY_PASSWORD` 四个变量齐全时 `scripts/build-android.mjs` 注入 `signingConfigs.release` 并 `assembleRelease`（`scripts/android-signing.mjs` 纯函数 + 单测），否则退回 `assembleDebug`；CI 从 4 个 Secrets 注入，未配置时沿用调试签名。只配一部分会直接报错，不静默降级。Windows 端仍未签名（需 OV/EV 证书）。
 
 ## 已知限制
 
