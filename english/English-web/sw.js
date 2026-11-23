@@ -10,8 +10,8 @@ var STATIC_FILES = [
   './icon.svg'
 ];
 
-/* 词书文件列表 —— 仅预缓存最常用的 2 本（共 10 本约 8MB，
-   其余 8 本在首次加载时经 cache-first 分支按需缓存，避免安装期拉全量） */
+/* 词书文件列表 —— 仅预缓存最常用的 2 本（共 20 本约 17MB，
+   其余 18 本在首次加载时经 cache-first 分支按需缓存，避免安装期拉全量） */
 var WORDBOOK_FILES = [
   './wordbooks/senior-high-enriched.js',
   './wordbooks/cet4-syllabus-enriched.js'

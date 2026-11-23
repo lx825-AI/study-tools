@@ -29,7 +29,7 @@ js/
   sync-ui.js        -- 同步弹窗 UI（JSON 文件导出/导入）
 data/
   word-schema.js    -- 扩展词格式校验、definitions 数组保证、旧数据迁移
-css/                -- 10 个 CSS 文件（variables/base/components/deck/study/mode/typing/preview/stats/stats-charts）
+css/                -- 9 个 CSS 文件（variables/base/components/deck/study/mode/preview/stats/stats-charts）
 wordbooks/          -- 20 套词书 JS（注册到 window.__VOCAB_REGISTRY__，由 gen-wordbooks.js 生成）
 wordbooks-src/      -- 词书源数据 JSON（20 个，约 24MB，不入构建产物）
 scripts/
@@ -57,7 +57,7 @@ scripts/
 
 ## 词书系统
 
-20 套词书：10 乱序 + 10 正序（`-sorted`，与乱序两两同词仅排序不同），由 `gen-wordbooks.js` 读取 `wordbooks-src/` 的 20 个 JSON 生成（约 16MB，入库）。
+20 套词书：10 乱序 + 10 正序（`-sorted`，与乱序两两同词仅排序不同），由 `gen-wordbooks.js` 读取 `wordbooks-src/` 的 20 个 JSON 生成（约 17MB，入库）。
 
 **三处清单必须同步维护**：`scripts/wordbook-lib.js` 的 `BOOK_CONFIG`、`js/import.js` 的 `BUILTIN_WORDBOOKS`、`scripts/build.js` 的 `WORDBOOKS`。
 

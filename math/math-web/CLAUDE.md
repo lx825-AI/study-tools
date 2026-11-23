@@ -8,7 +8,7 @@ React + TypeScript + Vite 数学公式速查 SPA。KaTeX 渲染，PWA 离线支�
 src/
   data/
     types.ts           -- TypeScript 类型定义（Section, Formula, Subject, Level）
-    formulas.ts        -- ~140 条公式，5 学科（高等数学/线性代数/离散数学/概率统计/数值分析）
+    formulas.ts        -- 177 条公式、34 章节，5 学科（高等数学/线性代数/离散数学/概率统计/数值分析）
   components/
     App.tsx            -- 根组件，状态聚合 + 布局编排
     Sidebar.tsx        -- 左侧导航（章节树 + 工具栏；移动端开关状态由父组件控制）

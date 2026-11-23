@@ -7,7 +7,7 @@
 'use strict';
 
 /**
- * 10 本书配置：Web registry key ↔ 小程序词书 JSON 文件名
+ * 20 本书配置：Web registry key ↔ wordbooks-src/ 里的词书 JSON 文件名
  *
  * 前 5 本为替换书，沿用旧 key/旧 name（import.js 按 name 去重，
  * 已导入用户不会重复导入）；后 5 本为新增词书。
@@ -73,7 +73,7 @@ const BOOK_CONFIG = [
     description: '考研英语考试高频核心词汇',
     sourceFile: 'kaoyan-core.json',
   },
-  /* 正序版（与上述 10 本同源同词，仅按字母正序排列；对齐小程序 -sorted 系列） */
+  /* 正序版（与上述 10 本同源同词，仅按字母正序排列，key 以 -sorted 结尾） */
   {
     key: 'junior-high-sorted',
     name: '初中大纲词汇（正序）',

@@ -6,7 +6,7 @@
 
 **[lx825-ai.github.io/study-tools/english/](https://lx825-ai.github.io/study-tools/english/)**
 
-桌面与 Android 安装包见仓库 [Releases](../../../releases)。
+桌面与 Android 安装包见仓库 [Releases](../../releases)。
 
 ## 功能
 
@@ -38,7 +38,7 @@ npm run gen:wordbooks  # 从 wordbooks-src/ 重新生成 wordbooks/*.js
 
 ## 词书
 
-20 套词书由 [scripts/gen-wordbooks.js](scripts/gen-wordbooks.js) 从 `wordbooks-src/` 的 JSON 生成（数据源自 KyleBing/english-vocabulary，MIT），100% 音标覆盖。产物是紧凑单行 JS（约 16MB，入库）；SW 只预缓存 2 本最常用词书，其余按需 runtime 缓存。
+20 套词书由 [scripts/gen-wordbooks.js](scripts/gen-wordbooks.js) 从 `wordbooks-src/` 的 JSON 生成（数据源自 KyleBing/english-vocabulary，MIT），100% 音标覆盖。产物是紧凑单行 JS（约 17MB，入库）；SW 只预缓存 2 本最常用词书，其余按需 runtime 缓存。
 
 新增词书要同时改三处清单：`scripts/wordbook-lib.js` 的 `BOOK_CONFIG`、`js/import.js` 的 `BUILTIN_WORDBOOKS`、`scripts/build.js` 的 `WORDBOOKS`。
 

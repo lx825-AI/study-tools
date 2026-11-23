@@ -50,7 +50,7 @@ apps/
 - **学习算法**：艾宾浩斯单轨（SM-2 已删除）。8 阶段 0/1/2/4/7/15/30/90 天；答对 stage++、EF+0.1（≤3.5）、间隔 `round(interval×EF/2.5)`；答错智能回退 + 逾期惩罚取 min 不叠加、EF−0.2（≥1.3）。
 - **学习模式**：深度（动态队列 splice 重插）、今日复习（紧急度排序，软上限 50）、错题强化（EF≤1.8）、快速浏览（线性，答对仅 0→1）、拼写（纯练习，不推进队列/不改曲线/不写日志）。
 - **词书清单三处必须同步**：`scripts/wordbook-lib.js` 的 `BOOK_CONFIG`、`js/import.js` 的 `BUILTIN_WORDBOOKS`、`scripts/build.js` 的 `WORDBOOKS`（共 20 本：10 乱序 + 10 正序）。
-- **词书生成**：源数据在 `english/English-web/wordbooks-src/`（20 个 JSON，约 24MB）；`npm run gen:wordbooks` 读取并生成 `wordbooks/*.js`（约 16MB，入库）。
+- **词书生成**：源数据在 `english/English-web/wordbooks-src/`（20 个 JSON，约 24MB）；`npm run gen:wordbooks` 读取并生成 `wordbooks/*.js`（约 17MB，入库）。
 - **构建**：`scripts/build.js` 合并 CSS/JS、复制词书与 `manifest.json`/`sw.js`/`icon.svg`。它**不清空 dist**，删文件后需手动 `rm -rf dist` 重建，否则残留旧模块。改前端资源后要同时升 `sw.js` 的缓存版本（当前 `v19`），否则已装 PWA 拿不到更新。
 - **跨端同步（文件通道）**：`js/sync-codec.js`（纯函数：规范 schema v1、词书 key 映射、卡片按 `(deck.source, lower(word))` 锚定、日志合并 `M = max(local, snap) + max(0, remote − remotePrev)`、64KB/FNV-1a 分块）+ `js/sync-ui.js`（头部 🔄 弹窗，JSON 导出/导入）。合并状态存在 `flashcard-sync-log-state`，按发送端 `web|mini` 分槽——`mini` 槽位保留，用于兼容旧导出文件。
 - **已下线**：配对码云中转（`js/sync-cloud.js`、`vendor/cloudbase.full.js`、两个云函数）随小程序一并删除，不要再引入 WeChat 云开发依赖。

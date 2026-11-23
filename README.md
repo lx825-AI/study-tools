@@ -7,7 +7,7 @@
 
 ## 应用下载
 
-发布包由 GitHub Actions 在打 tag 时自动构建，统一放在 [Releases](../../releases)：
+发布包由 GitHub Actions 在打 tag 时自动构建，统一放在 [Releases](releases)：
 
 | 平台 | 英语闪卡 | 数学公式 |
 |------|----------|----------|
