@@ -4,8 +4,8 @@ on:
   push:
     branches: [main]
     paths:
-      - 'english/English-web/**'
-      - 'math/math-web/**'
+      - 'web/English-web/**'
+      - 'web/math-web/**'
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
@@ -33,7 +33,7 @@ jobs:
       # 测试 + 构建 English-web
       - name: Test & Build English-web
         run: |
-          cd english/English-web
+          cd web/English-web
           npm ci
           npm test
           npm run build
@@ -41,7 +41,7 @@ jobs:
       # 测试 + 构建 math-web
       - name: Test & Build math-web
         run: |
-          cd math/math-web
+          cd web/math-web
           npm ci
           npm test
           npm run build
@@ -50,8 +50,8 @@ jobs:
       - name: Merge dist
         run: |
           mkdir -p _site
-          cp -r english/English-web/dist _site/english
-          cp -r math/math-web/dist _site/math
+          cp -r web/English-web/dist _site/english
+          cp -r web/math-web/dist _site/math
 
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3

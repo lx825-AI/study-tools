@@ -51,5 +51,5 @@ npm run package:android:math   # Android APK → dist-apps/（需 JDK 21 + Andro
 
 ## 部署
 
-- 网页：推送 `main` 分支且改动 `math/math-web/**` 时，GitHub Actions 自动部署到 GitHub Pages。
+- 网页：推送 `main` 分支且改动 `web/math-web/**` 时，GitHub Actions 自动部署到 GitHub Pages。
 - 应用：打 tag `v*` 触发 `.github/workflows/release.yml`，产出安装包并汇总成一个 Release。

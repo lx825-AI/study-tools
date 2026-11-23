@@ -27,10 +27,10 @@ jobs:
       matrix:
         include:
           - app: english
-            project: english/English-web
+            project: web/English-web
             appdir: apps/desktop-english
           - app: math
-            project: math/math-web
+            project: web/math-web
             appdir: apps/desktop-math
     steps:
       - uses: actions/checkout@v4
@@ -81,10 +81,10 @@ jobs:
       matrix:
         include:
           - app: english
-            project: english/English-web
+            project: web/English-web
             appdir: apps/mobile-english
           - app: math
-            project: math/math-web
+            project: web/math-web
             appdir: apps/mobile-math
     steps:
       - uses: actions/checkout@v4

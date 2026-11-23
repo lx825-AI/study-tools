@@ -4,9 +4,11 @@
  */
 import { cp, rm, stat } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const WEB_DIST = path.resolve(process.cwd(), '../../english/English-web/dist');
-const BUNDLE = path.resolve(process.cwd(), 'bundle');
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const WEB_DIST = path.resolve(ROOT, '../../web/English-web/dist');
+const BUNDLE = path.join(ROOT, 'bundle');
 
 try {
   await stat(path.join(WEB_DIST, 'index.html'));

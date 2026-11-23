@@ -8,9 +8,10 @@
 import { execSync } from 'node:child_process';
 import { copyFile, cp, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = process.cwd();
-const WEB_DIST = path.resolve(ROOT, '../../english/English-web/dist');
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const WEB_DIST = path.resolve(ROOT, '../../web/English-web/dist');
 const WWW = path.join(ROOT, 'www');
 const ANDROID = path.join(ROOT, 'android');
 const OUT_DIR = path.resolve(ROOT, '../../dist-apps');

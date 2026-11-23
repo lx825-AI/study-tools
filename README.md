@@ -2,8 +2,8 @@
 
 两个学习工具，同一套代码同时提供 **网页（PWA）/ Windows 桌面应用 / Android 应用**：
 
-- **[English-web](english/English-web/)** — 基于艾宾浩斯遗忘曲线的英语词汇闪卡，内置 20 套词书（乱序 + 正序，约 28K 词，100% 音标）
-- **[math-web](math/math-web/)** — 大学数学公式速查（React + KaTeX），覆盖 5 学科 34 章节 177 条公式
+- **[English-web](web/English-web/)** — 基于艾宾浩斯遗忘曲线的英语词汇闪卡，内置 20 套词书（乱序 + 正序，约 28K 词，100% 音标）
+- **[math-web](web/math-web/)** — 大学数学公式速查（React + KaTeX），覆盖 5 学科 34 章节 177 条公式
 
 ## 应用下载
 
@@ -27,8 +27,8 @@ npm run test:all      # 两端测试（English-web + math-web）
 npm run build:all     # 两端构建产物
 
 # 或单独操作
-cd english/English-web && npm install && npm run build && npm test
-cd math/math-web       && npm install && npm run build && npm test
+cd web/English-web && npm install && npm run build && npm test
+cd web/math-web       && npm install && npm run build && npm test
 ```
 
 ## 打包 App
@@ -73,8 +73,8 @@ npm run package:android:math
 ## 项目结构
 
 ```
-english/English-web/   -- 英语闪卡 PWA + 词书源数据（wordbooks-src/）
-math/math-web/         -- 数学公式 PWA
+web/English-web/   -- 英语闪卡 PWA + 词书源数据（wordbooks-src/）
+web/math-web/         -- 数学公式 PWA
 apps/
   desktop-english/     -- Electron 壳（加载 English-web dist）
   desktop-math/        -- Electron 壳（加载 math-web dist）
@@ -96,5 +96,5 @@ apps/
 ## 文档
 
 - 根目录 [CLAUDE.md](CLAUDE.md)：仓库级约定、命令、架构约束
-- [english/English-web/CLAUDE.md](english/English-web/CLAUDE.md)：英语闪卡的学习算法、词书系统与同步协议
-- [math/math-web/CLAUDE.md](math/math-web/CLAUDE.md)：数学公式应用的结构与约定
+- [web/English-web/CLAUDE.md](web/English-web/CLAUDE.md)：英语闪卡的学习算法、词书系统与同步协议
+- [web/math-web/CLAUDE.md](web/math-web/CLAUDE.md)：数学公式应用的结构与约定
